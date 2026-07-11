@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "profile": "typescript",
+  "description": "TypeScript-specific architecture and language rules.",
+  "extends": [
+    "generic"
+  ],
+  "sections": [
+    "57",
+    "59"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "profile": "generic",
+  "description": "Default repository-agnostic profile.",
+  "extends": [],
+  "sections": []
+}

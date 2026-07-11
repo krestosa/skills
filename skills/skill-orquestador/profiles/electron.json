@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "profile": "electron",
+  "description": "Electron-specific architecture, baseline, IPC, and validation rules.",
+  "extends": [
+    "node"
+  ],
+  "sections": [
+    "12",
+    "15.3",
+    "15.4",
+    "17",
+    "21",
+    "22",
+    "24",
+    "62"
+  ]
+}

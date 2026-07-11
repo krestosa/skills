@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "profile": "node",
+  "description": "Node.js/npm-specific output and build rules.",
+  "extends": [
+    "typescript"
+  ],
+  "sections": [
+    "23",
+    "25"
+  ]
+}

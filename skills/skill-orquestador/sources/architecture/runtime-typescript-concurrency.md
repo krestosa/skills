@@ -636,55 +636,55 @@ Revisar:
 
 ## 64.3 Measure before optimize
 
-No optimizar por intuición.
+Usar:
 
-Agregar medición local simple cuando el riesgo lo justifique.
+- timing;
+- counters;
+- memory snapshots;
+- benchmark fixtures.
 
-## 64.4 Caching
+No optimizar por intuición cuando el cambio agrega complejidad.
 
-Un cache debe tener:
+## 64.4 Hot path
+
+Documentar hot paths:
+
+- project scan;
+- DOM snapshot;
+- selection mapping;
+- overlay updates;
+- watch refresh.
+
+## 64.5 Caching
+
+Un cache debe definir:
 
 ```text
 key
 value
-ownership
-invalidation
-size bound
+owner
 lifetime
+invalidation
+max size
+stale behavior
 ```
 
-No cachear sin invalidation.
+No crear cache sin invalidación.
 
-## 64.5 Lazy work
+## 64.6 IPC payload budget
 
-Usar para:
+No enviar:
 
-- panels ocultos;
-- expensive parsers;
-- optional docs;
-- preview-only data.
+- source completo;
+- árboles completos repetidos;
+- arrays ilimitados;
+- stacks.
 
-No retrasar validaciones de seguridad.
-
-## 64.6 Streaming
-
-Considerar para archivos grandes.
-
-No cargar todo a memoria por defecto si no es necesario.
-
-## 64.7 Backpressure
-
-Para watchers o eventos frecuentes:
-
-- debounce;
-- coalescing;
-- bounded queue;
-- drop stale;
-- cancel obsolete.
+Usar previews acotadas.
 
 ---
 
-# 65. Reliability patterns
+# 65. Reliability engineering
 
 ## 65.1 Timeouts
 
@@ -692,16 +692,22 @@ Toda operación externa o larga debe tener timeout.
 
 ## 65.2 Cancellation
 
-Operaciones obsolete deben cancelarse.
+Operaciones obsoletas deben cancelarse o descartarse.
 
-## 65.3 Bulkhead
+## 65.3 Graceful degradation
 
-Evitar que una operación pesada bloquee todo el renderer o main.
+Cuando falla una capacidad no crítica:
+
+- mantener app usable;
+- mostrar estado;
+- no simular éxito;
+- permitir retry.
 
 ## 65.4 Fail closed
 
 Para seguridad y escritura:
 
+- si provenance falta → bloquear;
 - si revision mismatch → bloquear;
 - si path inseguro → bloquear;
 - si input inválido → bloquear.

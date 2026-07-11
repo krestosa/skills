@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "profile": "rust",
+  "description": "No Rust-specific prose is currently embedded; use generic routes only.",
+  "extends": [
+    "generic"
+  ],
+  "sections": []
+}
