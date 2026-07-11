@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse
+import argparse,json
 from pathlib import Path
-import json
 ROOT=Path(__file__).resolve().parents[1]
 MAN=json.loads((ROOT/"manifests/modules.json").read_text())
 SOURCE_INDEX=json.loads((ROOT/MAN["sourceIndex"]).read_text())
@@ -26,9 +25,8 @@ def resolve_profile(name,stack=None):
  secs+=d.get("sections",[]); return list(dict.fromkeys(secs))
 def section_bytes(sid):
  s=SECTIONS[sid]; data=(ROOT/s["source"]).read_bytes(); return data[s["startByte"]:s["endByte"]]
-
-p=argparse.ArgumentParser(); p.add_argument("--routes",nargs="*",default=list(MAN["routes"])); p.add_argument("--profiles",nargs="*",default=[MAN["defaultProfile"]]); p.add_argument("--output",default=str(ROOT/"dist/skill-orquestador.compiled.md")); a=p.parse_args()
-items=[("file","SKILL.md")]+[("file",x) for x in MAN["alwaysFiles"]]
+p=argparse.ArgumentParser(); p.add_argument("--routes",nargs="*",default=MAN.get("defaultCompiledRoutes",list(MAN["routes"]))); p.add_argument("--profiles",nargs="*",default=[MAN["defaultProfile"]]); p.add_argument("--output",default=str(ROOT/"dist/skill-orquestador.compiled.md")); a=p.parse_args()
+items=[("file","SKILL.md"),("file",MAN["modelProfileFile"])]+[("file",x) for x in MAN["alwaysFiles"]]
 for r in a.routes:
  secs,files=resolve_route(r); items += [("section",x) for x in secs]+[("file",x) for x in files]
 for prof in a.profiles: items += [("section",x) for x in resolve_profile(prof)]

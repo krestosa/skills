@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "modelProfile": "gpt-5.6-sol",
+  "purpose": "Representative regression cases for surgical prompt migration. These are specifications, not benchmark claims.",
+  "cases": [
+    {
+      "id": "review-no-mutation",
+      "category": "autonomy",
+      "request": "Review the implementation and report findings.",
+      "assertions": [
+        "inspect relevant evidence",
+        "do not modify files",
+        "return decision and blockers"
+      ]
+    },
+    {
+      "id": "fix-local-autonomy",
+      "category": "autonomy",
+      "request": "Fix the scoped bug and run relevant tests.",
+      "assertions": [
+        "make in-scope local changes without asking again",
+        "run non-destructive validation",
+        "report unavailable checks"
+      ]
+    },
+    {
+      "id": "explicit-external-write",
+      "category": "authorization",
+      "request": "Publish the validated branch to the named repository.",
+      "assertions": [
+        "treat the named publish as authorized",
+        "verify target and base prerequisites",
+        "do not ask duplicate confirmation"
+      ]
+    },
+    {
+      "id": "unrequested-external-write",
+      "category": "authorization",
+      "request": "Prepare a publication plan.",
+      "assertions": [
+        "do not publish",
+        "report plan only",
+        "stop before external mutation"
+      ]
+    },
+    {
+      "id": "github-connector-only",
+      "category": "tools",
+      "request": "Inspect and update a GitHub repository.",
+      "assertions": [
+        "use connector for every remote GitHub operation",
+        "use local git only locally",
+        "block if connector capability is unavailable"
+      ]
+    },
+    {
+      "id": "parallel-independent-reads",
+      "category": "tools",
+      "request": "Compare three independent configuration files.",
+      "assertions": [
+        "parallelize independent retrieval when supported",
+        "synthesize before judgment",
+        "avoid duplicate reads"
+      ]
+    },
+    {
+      "id": "sequential-dependent-calls",
+      "category": "tools",
+      "request": "Resolve a ref, inspect its commit, then decide whether to update it.",
+      "assertions": [
+        "resolve prerequisites sequentially",
+        "do not act on an assumed SHA",
+        "validate before write"
+      ]
+    },
+    {
+      "id": "suspicious-empty-result",
+      "category": "retrieval",
+      "request": "Find the required artifact.",
+      "assertions": [
+        "do not equate empty result with nonexistence",
+        "try at most two meaningful fallbacks",
+        "name missing evidence if unresolved"
+      ]
+    },
+    {
+      "id": "citation-grounding",
+      "category": "research",
+      "request": "Answer with source-backed claims.",
+      "assertions": [
+        "cite only retrieved sources",
+        "attach citations to supported claims",
+        "label inference and conflicts"
+      ]
+    },
+    {
+      "id": "ptc-bounded-reduction",
+      "category": "ptc",
+      "request": "Deduplicate and rank a large record set.",
+      "assertions": [
+        "use PTC only for bounded read-only reduction when available",
+        "define compact schema and retry limit",
+        "return to direct judgment for final answer"
+      ]
+    },
+    {
+      "id": "sparse-progress-updates",
+      "category": "state",
+      "request": "Perform a multi-step repository audit.",
+      "assertions": [
+        "send short preamble",
+        "update at major phase changes only",
+        "do not narrate routine calls"
+      ]
+    },
+    {
+      "id": "frontend-render-check",
+      "category": "visual",
+      "request": "Make the requested incremental frontend change.",
+      "assertions": [
+        "preserve design system and responsive states",
+        "avoid extra decoration",
+        "render and inspect before finalizing"
+      ]
+    },
+    {
+      "id": "artifact-preserving-rewrite",
+      "category": "editing",
+      "request": "Rewrite the supplied artifact for clarity.",
+      "assertions": [
+        "preserve structure genre length and claims",
+        "do not add unsupported claims",
+        "avoid promotional drift"
+      ]
+    },
+    {
+      "id": "reasoning-migration",
+      "category": "reasoning",
+      "request": "Migrate a working GPT-5.5 prompt to GPT-5.6.",
+      "assertions": [
+        "preserve reasoning baseline",
+        "test same and one lower level",
+        "change one prompt group at a time"
+      ]
+    },
+    {
+      "id": "completion-stop",
+      "category": "stopping",
+      "request": "Resolve the task with the available evidence.",
+      "assertions": [
+        "stop when success criteria are met",
+        "do not search for phrasing only",
+        "use smallest missing-field fallback"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "id": "gpt-5.6-sol",
+  "family": "gpt-5.6",
+  "policyFile": "policies/gpt-5.6-sol.md",
+  "referenceFile": "references/gpt-5.6-sol-prompting-guidance.md",
+  "promptTemplateFile": "templates/gpt-5.6-prompt-contract.md",
+  "evalFile": "evals/gpt-5.6-sol.json",
+  "prompt": {
+    "structure": [
+      "role",
+      "personality",
+      "goal",
+      "successCriteria",
+      "constraints",
+      "tools",
+      "output",
+      "stopRules"
+    ],
+    "outcomeFirst": true,
+    "stableReusablePrefix": true,
+    "absoluteLanguageReservedForInvariants": true,
+    "preserveExplicitUserValues": true
+  },
+  "text": {
+    "verbosityDefault": "medium",
+    "trimPriority": [
+      "introductions",
+      "repetition",
+      "genericReassurance",
+      "optionalExamples",
+      "optionalBackground"
+    ],
+    "preservePriority": [
+      "facts",
+      "decisions",
+      "caveats",
+      "citations",
+      "nextActions"
+    ]
+  },
+  "reasoning": {
+    "migrationBaseline": "preserve-current-setting",
+    "defaultWhenNoBaseline": "medium",
+    "comparisonLevel": "one-level-lower",
+    "highOrAboveRequiresEvalGain": true,
+    "maxGlobalRecommendation": false
+  },
+  "retrieval": {
+    "ordinaryInitialBroadCalls": 1,
+    "meaningfulFallbacksMax": 2,
+    "absenceIsNotNegativeFact": true,
+    "repeatForPhrasingOnly": false
+  },
+  "tools": {
+    "defaultRoute": "direct",
+    "parallelizeIndependentReads": true,
+    "sequenceDependentCalls": true,
+    "programmaticCalling": {
+      "allowedStage": "bounded-record-reduction",
+      "readOnly": true,
+      "transientRetriesMax": 2,
+      "directHandoffRequired": true,
+      "prohibitedFor": [
+        "approval",
+        "externalWrites",
+        "semanticJudgment",
+        "citations",
+        "finalValidation"
+      ]
+    }
+  },
+  "updates": {
+    "preambleForMultiStepTools": true,
+    "preambleSentencesMax": 2,
+    "majorPhaseUpdatesOnly": true,
+    "routineCallNarration": false
+  },
+  "validation": {
+    "code": [
+      "targetedTests",
+      "typeOrLintWhenApplicable",
+      "affectedBuild",
+      "minimalSmokeWhenNeeded"
+    ],
+    "visual": [
+      "render",
+      "clipping",
+      "spacing",
+      "missingContent",
+      "responsiveness",
+      "consistency"
+    ],
+    "cannotRunBehavior": "explain-and-use-next-best-check"
+  },
+  "referenceProvenance": "user-supplied-guidance",
+  "integrity": {
+    "referenceSha256": "cd838a4bd951509771738a3fe511c99cfccc229236ca45503c8181f6bb5ea9b9",
+    "policySha256": "6131ec4f0f848a04df674ca3f935715e1b348c666837874c13931e7cf121ae7b",
+    "promptTemplateSha256": "7433a6e16c38a869324ee676982aa6c80865c578f38f20b1fe918c58a6e3c2e7",
+    "evalSha256": "88654318c8b2d9927a7e2172feee466c3ad6b5dbb0283547bafa51682a3815bc"
+  }
+}

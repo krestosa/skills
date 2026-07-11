@@ -30,6 +30,9 @@ def section_bytes(sid):
 errors=[]
 for f in MAN["alwaysFiles"]:
  if not (ROOT/f).is_file(): errors.append("missing always "+f)
+for forbidden in ["policies/github-write-safety.md","policies/connector-native-integrity.md","catalogs/github-read-verbatim.md","catalogs/github-write-verbatim.md","references/gpt-5.6-sol-prompting-guidance.md"]:
+ if forbidden in MAN["alwaysFiles"]: errors.append("non-lean always file "+forbidden)
+if not (ROOT/MAN.get("modelProfileFile","")).is_file(): errors.append("missing model profile")
 for name in MAN["routes"]:
  try: secs,files=resolve_route(name)
  except Exception as e: errors.append(str(e)); continue
@@ -57,6 +60,8 @@ for sid in SECTIONS:
  if sid in used and sid in inactive: errors.append("inactive section routed "+sid)
 r=subprocess.run([sys.executable,str(ROOT/"scripts/verify_lossless.py")],capture_output=True,text=True)
 if r.returncode: errors.append(r.stdout+r.stderr)
+r=subprocess.run([sys.executable,str(ROOT/"scripts/validate_gpt56.py")],capture_output=True,text=True)
+if r.returncode: errors.append(r.stdout+r.stderr)
 BEGIN="<!-- VERBATIM_CATALOG_BEGIN -->\n"; END="\n<!-- VERBATIM_CATALOG_END -->"
 for rel,count,digest in [("catalogs/github-read-verbatim.md",56,"610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e"),("catalogs/github-write-verbatim.md",41,"499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d")]:
  text=(ROOT/rel).read_text(); payload=text.split(BEGIN,1)[1].split(END,1)[0].encode();
@@ -71,11 +76,7 @@ for sid in used:
  text=section_bytes(sid).decode(errors="ignore")
  if remote.search(text) and sid not in {"9.3"}: errors.append("remote command in active section "+sid)
  if re.search(r"git\s+(switch|checkout)\s+main\b|working tree.*\bmain\b.*commits",text,re.I): errors.append("main branch hardcode in section "+sid)
-integ=json.loads((ROOT/"manifests/integrity.json").read_text()); expected_files=[]
-for shard in integ["shards"]:
- raw=(ROOT/shard["path"]).read_bytes()
- if hashlib.sha256(raw).hexdigest()!=shard["sha256"]: errors.append("integrity shard hash "+shard["path"])
- expected_files += json.loads(raw)["files"]
+integ=json.loads((ROOT/"manifests/integrity.json").read_text()); expected_files=integ["files"]
 actual=[]
 for p in sorted(ROOT.rglob("*")):
  if p.is_file():
@@ -102,3 +103,5 @@ print("read_routes_write_clean: yes")
 print("generic_routes_stack_clean: yes")
 print("github_workflows: absent")
 print("flat_files_max: 25")
+print("model_profile: gpt-5.6-sol")
+print("prompt_policy: outcome-first")
