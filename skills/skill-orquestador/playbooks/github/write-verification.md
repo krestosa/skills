@@ -149,7 +149,7 @@ normal CI rerun: prohibited until root cause is inspected
 
 Prohibiciones por defecto:
 
-- escribir archivos directamente sobre {{default_branch}}`;
+- escribir archivos directamente sobre `{{default_branch}}`;
 - crear múltiples commits Contents API para simular una microfase atómica;
 - usar `update_ref(force=true)`;
 - crear merge commits con `additional_parent_shas` fuera de un merge deliberado;
@@ -167,7 +167,7 @@ Fallback permitido cuando shell no puede resolver GitHub:
 ```text
 connector remote reads
 → exact source/patch preparation
-�*H local validation if complete workspace exists
+→ local validation if complete workspace exists
 → connector-native atomic commit on isolated branch
 → remote compare
 → CI discovery from exact SHA
