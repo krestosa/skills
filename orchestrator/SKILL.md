@@ -19,7 +19,7 @@ Select before loading. Use one primary skill and the minimum supporting skills. 
 
 ## Goal
 
-Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer, then attach cross-cutting execution control when the selected work contains safe parallelism.
+Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer, then attach cross-cutting workspace and execution control when applicable.
 
 ## Required context
 
@@ -35,30 +35,52 @@ Do not load all skills preemptively.
 
 1. Resolve the requested user-visible outcome.
 2. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
-3. Resolve material repository, artifact, stack, evidence, and authorization context.
+3. Resolve material repository, workspace, artifact, stack, evidence, and authorization context.
 4. Select one primary skill.
 5. Add only required dependencies and supporting skills.
-6. Evaluate the registry auto-attach policy.
-7. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
-8. Load each selected `../skills/<id>/SKILL.md`.
-9. Load only its declared shared routes and detected stack profile.
-10. Synthesize evidence before acting.
-11. Direct the selected skills and integrate their results into one conclusion.
+6. Evaluate every registry auto-attach policy.
+7. Attach `local-git-workspace` when any selected work will execute local Git.
+8. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
+9. Load each selected `../skills/<id>/SKILL.md`.
+10. Load only its declared shared routes and detected stack profile.
+11. Complete required preconditions before dependent work.
+12. Synthesize evidence before acting.
+13. Direct the selected skills and integrate their results into one conclusion.
 
 Target one to three primary and supporting skills for ordinary tasks. Cross-cutting auto-attached skills do not count toward that target.
+
+## Local Git workspace attachment
+
+`local-git-workspace` is the mandatory preflight controller for local Git.
+
+Attach it before the first local Git command when a local `.git` repository is involved. It must:
+
+- resolve the canonical repository root without invoking Git
+- confirm the runtime UID is `0`
+- acquire an exclusive repository-root metadata lock
+- normalize ownership with `sudo -n chown -R "$(id -u):$(id -g)" -- "$repo_root"` or direct `chown` when `sudo` is unavailable
+- verify ownership and local Git access
+- avoid `git config --global --add safe.directory`
+
+Run it once per repository per task, then cache the successful preflight. Repeat only if the workspace changes, ownership changes, the workspace is rematerialized, or Git reports dubious ownership again.
+
+It authorizes only ownership metadata repair on the active local repository. It does not authorize content edits, Git state mutations, commits, remote writes, or broader filesystem changes.
 
 ## Parallel attachment
 
 `parallel-execution` is a cross-cutting controller, not a replacement for the primary skill.
 
-Attach it by default when the task contains independent tasks, tool calls, skill loads, files, modules, validations, errors, or workstreams. Load it concurrently with the other selected skills when its inputs are already known.
+Attach it by default when the task contains independent tasks, tool calls, skill loads, files, modules, validations, errors, or workstreams. Load it concurrently with other selected skills when its inputs are already known.
 
-Skip it only for a single indivisible operation, a strict dependency chain, a single-resource mutation, or infrastructure that cannot execute any useful work concurrently. Its presence does not authorize side effects and does not override ordered external operations or exclusive resource locks.
+When both cross-cutting skills are attached, the local Git ownership preflight is a prerequisite for local Git commands and local workspace writes. Independent remote connector reads may proceed while that preflight runs. Do not begin competing local workspace work until the repository-root metadata lock is released.
+
+Skip parallel execution only for a single indivisible operation, a strict dependency chain, a single-resource mutation, or infrastructure that cannot execute useful work concurrently. Its presence does not authorize side effects and does not override ordered external operations or exclusive resource locks.
 
 ## Read minimization
 
 - Do not scan every skill to improve wording.
 - Do not load Write skills for read-only tasks.
+- Do not load `local-git-workspace` for remote-only work.
 - Do not load stack-specific material before detecting the stack.
 - Do not load the full GPT-5.6 reference for ordinary tasks.
 - Do not load the verbatim parallel policy unless auditing fidelity or resolving an uncovered edge case.
@@ -72,7 +94,7 @@ Skip it only for a single indivisible operation, a strict dependency chain, a si
 - A skill with remote-write capability may be loaded for planning, but mutation remains unavailable unless the request authorizes it.
 - Keep result-dependent calls sequential.
 - Parallelize independent reads and independent workstreams.
-- Treat same-file, same-index, same-branch, same-output-directory, and same-remote-resource writes as conflicts that require serialization.
+- Treat same-file, same-index, same-branch, same-output-directory, same-workspace-ownership, and same-remote-resource writes as conflicts that require serialization.
 
 ## Delegation modes
 
@@ -86,8 +108,8 @@ When the user requests multiple chats or specialists, emit one bounded prompt en
 
 ## Output
 
-Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
+Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills, ownership repair, or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
 
 ## Stop rules
 
-Stop when the selected skills cover the request, no skill exceeds authorization, relevant validation is complete, all runnable work is complete or blocked, and the result is complete or precisely blocked.
+Stop when the selected skills cover the request, no skill exceeds authorization, required workspace preconditions and validation are complete, all runnable work is complete or blocked, and the result is complete or precisely blocked.

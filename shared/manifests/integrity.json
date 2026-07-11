@@ -1,11 +1,11 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "rootSkill": "SKILL.md",
   "orchestrator": "orchestrator/SKILL.md",
   "orchestratorCount": 1,
   "readmeCount": 1,
-  "individualSkillCount": 15,
-  "crossCuttingSkillCount": 1,
+  "individualSkillCount": 16,
+  "crossCuttingSkillCount": 2,
   "sharedRoot": "shared",
   "canonicalSourceCount": 15,
   "canonicalSourceMutations": 0,
@@ -27,18 +27,30 @@
     "ordinaryReferenceLoading": false,
     "coreLogicPreserved": true
   },
+  "localGitWorkspace": {
+    "skill": "skills/local-git-workspace/SKILL.md",
+    "evals": "shared/evals/local-git-workspace.json",
+    "autoAttachBeforeLocalGit": true,
+    "requiresRootRuntime": true,
+    "onePreflightPerWorkspace": true,
+    "ownershipCommand": "sudo -n chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
+    "rootFallbackWhenSudoUnavailable": "chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
+    "prohibitsSafeDirectoryFallback": true,
+    "remoteGitHubTransport": "connector-only",
+    "repositoryHardcoding": null
+  },
   "inventory": {
     "selfExcluded": "shared/manifests/integrity.json",
-    "count": 81,
-    "sha256": "61ee91c3ee93d9ba14c832529d5bb1008d8b6b20c309fcb573a3121f62e6753d"
+    "count": 83,
+    "sha256": "9aac94c045613f8350d24a5efb4ebf7ffa2c17361216c98c97e4c3184ac2121b"
   },
   "repositoryHardcoding": null,
   "githubWorkflows": false,
   "protectedFiles": [
     {
       "path": "README.md",
-      "sha256": "bb873383d02dc805e8d332a506ee3306953ee03ea946622a4f0a32af106b0573",
-      "bytes": 1871
+      "sha256": "0eb78ada29d26925f5b019ece764f3e7200f45324a836e1997dc6a95b772ed26",
+      "bytes": 2395
     },
     {
       "path": "SKILL.md",
@@ -47,8 +59,8 @@
     },
     {
       "path": "orchestrator/SKILL.md",
-      "sha256": "5b651a2b81ec6f6d5dc92adcbe7140bc086c0b5807291ed5c5061ed51c759420",
-      "bytes": 4688
+      "sha256": "4db0a47055da9909dc772632b55415d97ec755c82a59c171038ec73d9907a9b4",
+      "bytes": 6253
     },
     {
       "path": "orchestrator/delegation-envelope.schema.json",
@@ -57,23 +69,23 @@
     },
     {
       "path": "orchestrator/registry.json",
-      "sha256": "9ff414bbe6d7b56de9a1e12e6c90de58b5b1eb12d1e30a209d2b88f89ba997da",
-      "bytes": 6963
+      "sha256": "837dbefc6b38bc417374020b9504337ba09d0ff0589a3db293bc827a55ebf7df",
+      "bytes": 8324
     },
     {
       "path": "scripts/build_chatgpt_flat.py",
-      "sha256": "ad0b114a1f4a0df9b446ad8a3828cb8ccee2b838d590a3022e083a19daafe2a1",
-      "bytes": 2433
+      "sha256": "3524377e63f02f64b217898e333434b8db2e5fe6df300342dfe2b1cc2911fb2e",
+      "bytes": 2604
     },
     {
       "path": "scripts/build_compiled.py",
-      "sha256": "f07b2c80e3bd0942fe0615507ead866993f1cac8326aed08488e3dead15d9542",
-      "bytes": 2760
+      "sha256": "4361105d7a88d002a835d38a77b4e1207deaf114a626889d91e859f938af84f7",
+      "bytes": 2942
     },
     {
       "path": "scripts/validate.py",
-      "sha256": "b140f04216879359e700ff06fd89a654d0610127ebb7c018bb1e93719d11a09b",
-      "bytes": 15850
+      "sha256": "6b5e5d5b8951c1074c5bcd98f4a5e1bca95c5d73f0e5d838621227b8c9358b7a",
+      "bytes": 11797
     },
     {
       "path": "scripts/validate_gpt56.py",
@@ -84,6 +96,11 @@
       "path": "scripts/verify_lossless.py",
       "sha256": "5755832aec392dfe0b200a31314e41610ffe0a7fce37b0092cafc49c1b6731be",
       "bytes": 1142
+    },
+    {
+      "path": "shared/evals/local-git-workspace.json",
+      "sha256": "ebc324b66d7c83fa68475cb553f1fe1e2331018ed05a87b6fb96bd11ebfe93c2",
+      "bytes": 4381
     },
     {
       "path": "shared/evals/parallel-execution.json",
@@ -127,13 +144,18 @@
     },
     {
       "path": "skills/github-write/SKILL.md",
-      "sha256": "b0054dbdf7f18fc9ff1ea5f3dd46e16d0735753cf096ea4d3ad687992d766a9a",
+      "shaa256": "b0054dbdf7f18fc9ff1ea5f3dd46e16d0735753cf096ea4d3ad687992d766a9a",
       "bytes": 1914
     },
     {
       "path": "skills/implementation/SKILL.md",
       "sha256": "941cb6667d379cb8a0767a4d04ab6355f98a386a7c729601d0a296b53fbe7d8f",
       "bytes": 1803
+    },
+    {
+      "path": "skills/local-git-workspace/SKILL.md",
+      "sha256": "21ccce160422a5312a88405395ee99c62bb2f12b3212278a615f5ee8adbdaea9",
+      "bytes": 6032
     },
     {
       "path": "skills/management-delegation/SKILL.md",

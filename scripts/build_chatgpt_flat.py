@@ -71,8 +71,10 @@ next_index += 1
 
 (out / f"{next_index:02d}-PROJECT-INSTRUCTIONS.txt").write_text(
     "Load 00-MAIN.md, then 01-ORCHESTRATOR.md. "
-    "The orchestrator selects only the required individual skill files and auto-attaches "
-    "PARALLEL-EXECUTION when safe independent work exists. "
+    "The orchestrator selects only the required individual skill files, "
+    "auto-attaches LOCAL-GIT-WORKSPACE before any local Git command, "
+    "and auto-attaches PARALLEL-EXECUTION when safe independent work exists. "
+    "The local Git ownership preflight must normalize only the canonical active repository root. "
     "Remote GitHub operations use the connector; local git is local-only.\n",
     encoding="utf-8",
 )

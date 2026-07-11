@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "skill": "local-git-workspace",
+  "purpose": "Regression specifications for root-runtime ownership normalization before local Git. These are not benchmark claims.",
+  "cases": [
+    {
+      "id": "root-mismatched-owner",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "owner": "1000:1000",
+        "localGitRequired": true
+      },
+      "expected": "attach-and-repair",
+      "required": [
+        "resolve canonical repository root without Git",
+        "acquire exclusive workspace metadata lock",
+        "run recursive chown to current UID:GID",
+        "verify ownership",
+        "run local Git preflight"
+      ]
+    },
+    {
+      "id": "root-already-owner",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "owner": "0:0",
+        "localGitRequired": true
+      },
+      "expected": "attach-and-run-idempotent-preflight",
+      "required": [
+        "run once before first local Git command",
+        "verify ownership",
+        "cache success for current task"
+      ]
+    },
+    {
+      "id": "remote-only",
+      "context": {
+        "runtimeUid": 0,
+        "localWorkspace": false,
+        "githubConnectorOnly": true,
+        "localGitRequired": false
+      },
+      "expected": "skip"
+    },
+    {
+      "id": "no-git-repository",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/source",
+        "gitRepository": false,
+        "localGitRequired": false
+      },
+      "expected": "skip"
+    },
+    {
+      "id": "unsafe-root-path",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/",
+        "gitRepository": false,
+        "localGitRequired": true
+      },
+      "expected": "block",
+      "code": "LOCAL_GIT_REPOSITORY_ROOT_UNRESOLVED"
+    },
+    {
+      "id": "non-root-runtime",
+      "context": {
+        "runtimeUid": 1000,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "localGitRequired": true
+      },
+      "expected": "block",
+      "code": "ROOT_RUNTIME_REQUIRED"
+    },
+    {
+      "id": "sudo-unavailable",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "sudoAvailable": false,
+        "localGitRequired": true
+      },
+      "expected": "attach-and-use-direct-chown",
+      "required": [
+        "chown -R current UID:GID",
+        "no safe.directory mutation"
+      ]
+    },
+    {
+      "id": "dubious-ownership-error",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "gitError": "fatal: detected dubious ownership",
+        "localGitRequired": true
+      },
+      "expected": "attach-repair-and-retry-once",
+      "forbidden": [
+        "git config --global --add safe.directory"
+      ]
+    },
+    {
+      "id": "persistent-dubious-ownership",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "gitErrorPersistsAfterRepair": true
+      },
+      "expected": "block",
+      "code": "LOCAL_GIT_OWNERSHIP_REPAIR_FAILED"
+    },
+    {
+      "id": "parallel-local-work",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "localGitRequired": true,
+        "parallelFileTasks": true
+      },
+      "expected": "serialize-workspace-preflight-then-parallelize",
+      "required": [
+        "exclusive repository-root metadata lock",
+        "remote connector reads may continue",
+        "local workspace tasks wait for preflight"
+      ]
+    },
+    {
+      "id": "multiple-repositories",
+      "context": {
+        "runtimeUid": 0,
+        "repositories": [
+          "/workspace/a",
+          "/workspace/b"
+        ],
+        "localGitRequired": true
+      },
+      "expected": "one-preflight-per-repository",
+      "required": [
+        "separate canonical roots",
+        "no parent-directory chown"
+      ]
+    },
+    {
+      "id": "workspace-rematerialized",
+      "context": {
+        "runtimeUid": 0,
+        "workspace": "/workspace/repo",
+        "gitRepository": true,
+        "rematerialized": true,
+        "localGitRequired": true
+      },
+      "expected": "repeat-preflight"
+    }
+  ]
+}

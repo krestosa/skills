@@ -35,10 +35,13 @@ def expand(route_name: str, seen: set[str] | None = None) -> tuple[list[str], li
 parser = argparse.ArgumentParser()
 parser.add_argument("--skills", nargs="*")
 parser.add_argument("--without-parallel", action="store_true")
+parser.add_argument("--without-local-git", action="store_true")
 parser.add_argument("--output", default=str(ROOT / "dist/skills.compiled.md"))
 args = parser.parse_args()
 
 skill_ids = args.skills or [item["id"] for item in REGISTRY["skills"]]
+if not args.without_local_git and "local-git-workspace" not in skill_ids:
+    skill_ids.append("local-git-workspace")
 if not args.without_parallel and "parallel-execution" not in skill_ids:
     skill_ids.append("parallel-execution")
 
