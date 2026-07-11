@@ -19,13 +19,14 @@ for path in [ROOT/'README.md',ROOT/'SKILL.md',ROOT/'orchestrator/SKILL.md',ROOT/
 readmes=list(ROOT.rglob('README.md'))
 if readmes != [ROOT/'README.md']: errors.append('repository must contain exactly one README.md at root')
 legacy_name='skill'+'-orquestador'
+legacy_label='skill'+' '+'orquestador'
 for forbidden in ['skills/main','skills/orchestrator','skills/individual','skills/'+legacy_name]:
  if (ROOT/forbidden).exists(): errors.append('duplicate legacy layer exists: '+forbidden)
 for candidate in ROOT.rglob('*'):
  if legacy_name in candidate.as_posix(): errors.append('legacy orchestrator path exists: '+candidate.relative_to(ROOT).as_posix())
  if candidate.is_file() and candidate != ROOT/'scripts/validate.py' and candidate.suffix in {'.md','.json','.py','.txt'}:
   text=candidate.read_text(encoding='utf-8',errors='ignore')
-  if legacy_name in text: errors.append('legacy orchestrator name in '+candidate.relative_to(ROOT).as_posix())
+  if legacy_name in text.lower() or legacy_label in text.lower(): errors.append('legacy orchestrator name in '+candidate.relative_to(ROOT).as_posix())
 if (ROOT/'.github/workflows').exists(): errors.append('GitHub workflows are prohibited')
 
 main=(ROOT/'SKILL.md').read_text(encoding='utf-8') if (ROOT/'SKILL.md').is_file() else ''
