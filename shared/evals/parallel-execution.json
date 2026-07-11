@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Routing and concurrency specifications for the parallel-execution cross-cutting skill. They are not benchmark claims.",
+  "cases": [
+    {
+      "id": "independent-reads",
+      "request": "Inspect five unrelated files and summarize each.",
+      "expected": "attach",
+      "reason": "independent reads"
+    },
+    {
+      "id": "multi-file-independent-edits",
+      "request": "Update two unrelated modules and their separate tests.",
+      "expected": "attach",
+      "reason": "different canonical file paths"
+    },
+    {
+      "id": "same-file-edits",
+      "request": "Apply two changes to one source file.",
+      "expected": "attach-with-local-serialization",
+      "reason": "combine or serialize one writer"
+    },
+    {
+      "id": "strict-chain",
+      "request": "Read generated ID, then use it in the only next operation.",
+      "expected": "skip",
+      "reason": "strict dependency chain"
+    },
+    {
+      "id": "independent-validations",
+      "request": "Run lint, typecheck, and independent test suites.",
+      "expected": "attach",
+      "reason": "independent validation nodes"
+    },
+    {
+      "id": "same-output-builds",
+      "request": "Run two builds that both write dist/.",
+      "expected": "attach-with-shared-resource-serialization",
+      "reason": "shared output directory"
+    },
+    {
+      "id": "github-write-same-ref",
+      "request": "Perform two updates to the same remote branch.",
+      "expected": "attach-with-external-serialization",
+      "reason": "same external resource"
+    },
+    {
+      "id": "single-operation",
+      "request": "Rename one local variable in one file.",
+      "expected": "skip",
+      "reason": "single indivisible operation"
+    },
+    {
+      "id": "parallel-skills",
+      "request": "Analyze architecture and documentation independently.",
+      "expected": "attach",
+      "reason": "independent skill workstreams"
+    },
+    {
+      "id": "stale-base",
+      "request": "Two tasks derive patches from one file version.",
+      "expected": "attach-with-exclusive-writer-and-revalidation",
+      "reason": "stale patch prevention"
+    }
+  ]
+}

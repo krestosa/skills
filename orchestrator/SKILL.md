@@ -19,7 +19,7 @@ Select before loading. Use one primary skill and the minimum supporting skills. 
 
 ## Goal
 
-Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer.
+Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer, then attach cross-cutting execution control when the selected work contains safe parallelism.
 
 ## Required context
 
@@ -37,13 +37,23 @@ Do not load all skills preemptively.
 2. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
 3. Resolve material repository, artifact, stack, evidence, and authorization context.
 4. Select one primary skill.
-5. Add only required dependencies and cross-cutting skills.
-6. Load each selected `../skills/<id>/SKILL.md`.
-7. Load only its declared shared routes and detected stack profile.
-8. Synthesize evidence before acting.
-9. Direct the selected skills and integrate their results into one conclusion.
+5. Add only required dependencies and supporting skills.
+6. Evaluate the registry auto-attach policy.
+7. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
+8. Load each selected `../skills/<id>/SKILL.md`.
+9. Load only its declared shared routes and detected stack profile.
+10. Synthesize evidence before acting.
+11. Direct the selected skills and integrate their results into one conclusion.
 
-Target one to three active skills for ordinary tasks. Exceed that target only when the request is materially cross-cutting.
+Target one to three primary and supporting skills for ordinary tasks. Cross-cutting auto-attached skills do not count toward that target.
+
+## Parallel attachment
+
+`parallel-execution` is a cross-cutting controller, not a replacement for the primary skill.
+
+Attach it by default when the task contains independent tasks, tool calls, skill loads, files, modules, validations, errors, or workstreams. Load it concurrently with the other selected skills when its inputs are already known.
+
+Skip it only for a single indivisible operation, a strict dependency chain, a single-resource mutation, or infrastructure that cannot execute any useful work concurrently. Its presence does not authorize side effects and does not override ordered external operations or exclusive resource locks.
 
 ## Read minimization
 
@@ -51,6 +61,7 @@ Target one to three active skills for ordinary tasks. Exceed that target only wh
 - Do not load Write skills for read-only tasks.
 - Do not load stack-specific material before detecting the stack.
 - Do not load the full GPT-5.6 reference for ordinary tasks.
+- Do not load the verbatim parallel policy unless auditing fidelity or resolving an uncovered edge case.
 - Do not duplicate shared sources inside this file or individual skills.
 - Do not repeat retrieval completed by another active skill.
 
@@ -60,7 +71,8 @@ Target one to three active skills for ordinary tasks. Exceed that target only wh
 - Dependencies constrain loading; they do not authorize side effects.
 - A skill with remote-write capability may be loaded for planning, but mutation remains unavailable unless the request authorizes it.
 - Keep result-dependent calls sequential.
-- Parallelize only independent reads or independent workstreams.
+- Parallelize independent reads and independent workstreams.
+- Treat same-file, same-index, same-branch, same-output-directory, and same-remote-resource writes as conflicts that require serialization.
 
 ## Delegation modes
 
@@ -74,8 +86,8 @@ When the user requests multiple chats or specialists, emit one bounded prompt en
 
 ## Output
 
-Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills only when it aids traceability or the user asks.
+Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
 
 ## Stop rules
 
-Stop when the selected skills cover the request, no skill exceeds authorization, relevant validation is complete, and the result is complete or precisely blocked.
+Stop when the selected skills cover the request, no skill exceeds authorization, relevant validation is complete, all runnable work is complete or blocked, and the result is complete or precisely blocked.
