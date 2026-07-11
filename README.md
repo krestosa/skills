@@ -1,34 +1,42 @@
 # Skills
 
-A hierarchical, repository-agnostic skill system for software delivery.
+A repository-agnostic hierarchical skill system.
 
 ```text
-SKILL.md
-└── skills/main
-    └── skills/orchestrator
-        └── skills/individual/*
+SKILL.md                 main global directives
+orchestrator/SKILL.md    the single orchestrator
+skills/<name>/SKILL.md   individual skills selected on demand
+shared/                  canonical sources, policies, catalogs, profiles, and manifests
 ```
 
-## Layers
+## Execution model
 
-- `skills/main/`: global prompt and directives. It defines outcome, personality, collaboration style, authorization, tool boundaries, output priorities, and stop rules.
-- `skills/orchestrator/`: selects and coordinates only the individual skills required by the current request. It can operate in the current chat or emit bounded prompts for separate chats.
-- `skills/individual/`: specialized skills. Each `SKILL.md` includes its role, personality, collaboration style, success criteria, tools, output, and stop rules.
-- `skills/skill-orquestador/`: lossless canonical engineering source library and verbatim GitHub connector catalogs used by the hierarchy.
+1. Load `SKILL.md`.
+2. Load `orchestrator/SKILL.md`.
+3. The orchestrator selects one primary skill and only the supporting skills needed for correctness.
+4. Selected skills read their declared routes from `shared/manifests/routes.json`.
+5. Canonical texts are referenced once from `shared/sources/`; they are not copied into the orchestrator or skill wrappers.
 
 ## Invariants
 
-- No repository, owner, branch, framework, product, or organization is a built-in default.
+- Exactly one main prompt and one orchestrator.
+- Exactly one repository `README.md`.
+- Individual skills live only under `skills/<name>/`.
+- No repository, branch, framework, product, or organization is hardcoded.
 - Remote GitHub reads and writes use the GitHub connector.
-- Local `git` is limited to local workspace operations.
-- GitHub Read and Write connector catalogs remain verbatim.
+- Local `git` is local-only.
+- GitHub Read and Write catalogs remain verbatim.
 - No GitHub workflows are included.
-- The orchestrator loads only the skills required by the current task.
-- Canonical source texts are referenced, not duplicated or rewritten.
 
 ## Validate
 
 ```bash
-python skills/main/scripts/validate_hierarchy.py
-python skills/skill-orquestador/scripts/validate_skill.py
+python scripts/validate.py
+```
+
+## Build
+
+```bash
+python scripts/build_compiled.py
+python scripts/build_chatgpt_flat.py
 ```
