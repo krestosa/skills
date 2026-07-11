@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "root": "main",
+  "orchestrator": "orchestrator",
+  "individualSkillCount": 14,
+  "selfExcluded": "skills/main/manifests/integrity.json",
+  "canonicalEngine": "skills/skill-orquestador",
+  "canonicalEngineMutations": 0,
+  "githubWorkflows": false,
+  "repositoryHardcoding": null,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "3588847d2ddf6894d97b07ff159417638d31b8cb0721a24602b0f8bff6ff5b3b",
+      "bytes": 1461
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "8cda78cb131d81775edd777c087f82e1867caa145e81c9f3172a236ce015703c",
+      "bytes": 428
+    },
+    {
+      "path": "skills/individual/README.md",
+      "sha256": "e7eaa11f4abd1ec6dc50112f8784fdb775d4879dcccd4cebb68945b53d0b1593",
+      "bytes": 438
+    },
+    {
+      "path": "skills/individual/architecture/SKILL.md",
+      "sha256": "1c53abd78c48eb132ed032009eb26b2c57662a48abfc90cc43d246ad3469031e",
+      "bytes": 2030
+    },
+    {
+      "path": "skills/individual/ci-diagnostics/SKILL.md",
+      "sha256": "c2cc3fcf3603be12fe42741c2360fd8ea7cff52f84903e7ad477a3cbda4072cb",
+      "bytes": 1916
+    },
+    {
+      "path": "skills/individual/documentation-roadmap/SKILL.md",
+      "sha256": "4e43739ed467557ae7702ccd55835e1978dd0bcd3ea2cfc9fef234133797afa3",
+      "bytes": 1921
+    },
+    {
+      "path": "skills/individual/frontend-visual/SKILL.md",
+      "sha256": "427d99632ac9e80b891638e96a40704ec671eefd7e1146aeb34e5f322b4238de",
+      "bytes": 1908
+    },
+    {
+      "path": "skills/individual/github-read/SKILL.md",
+      "sha256": "6dbb79458b124fb1c6e0165570f3a57036e688f1d72341dcf962242533348537",
+      "bytes": 1826
+    },
+    {
+      "path": "skills/individual/github-write/SKILL.md",
+      "sha256": "b13c5ae5b987bee49f2115258d8759413ff5f9bf184b19defec4531aebdcf525",
+      "bytes": 1941
+    },
+    {
+      "path": "skills/individual/implementation/SKILL.md",
+      "sha256": "8d224f58eaace10548f4e9091d9de84e84cedd8e523f1ee827eadb8836c64e3a",
+      "bytes": 1828
+    },
+    {
+      "path": "skills/individual/management-delegation/SKILL.md",
+      "sha256": "79f5459ea9ca2a733325091f477c922c88c98fc50e3bf4ac311a5d1167c36f69",
+      "bytes": 1926
+    },
+    {
+      "path": "skills/individual/pr-review-merge/SKILL.md",
+      "sha256": "5717684e4a235012edd7da8c427641a2068a9bf2dcc583505cd512465da281ea",
+      "bytes": 1851
+    },
+    {
+      "path": "skills/individual/prompt-engineering/SKILL.md",
+      "sha256": "440a15ec2c276facaf7ff9d5e72f84284af7903c7aef993953868020bc2e2a22",
+      "bytes": 1984
+    },
+    {
+      "path": "skills/individual/recovery/SKILL.md",
+      "sha256": "50d8c3eb9e6eb5f8b1fa0214b560d2a1326a04a0d9dc37d82c20741cb88b2711",
+      "bytes": 1930
+    },
+    {
+      "path": "skills/individual/release/SKILL.md",
+      "sha256": "e40e36e7e613439f2a88d65246cd5807cb13393f6369fa64eb7474191f037e03",
+      "bytes": 1846
+    },
+    {
+      "path": "skills/individual/repository-analysis/SKILL.md",
+      "sha256": "3510dd52f855c2be5b81de5792bed921b0ad7e320a01deebc23c6b27b7d7470c",
+      "bytes": 2130
+    },
+    {
+      "path": "skills/individual/validation-quality/SKILL.md",
+      "sha256": "ba5818dd920745caa98509fba20bbf74fe6ce80057f5f0885665a1adc4227b1c",
+      "bytes": 1878
+    },
+    {
+      "path": "skills/main/SKILL.md",
+      "sha256": "8dc9782ca6e355ade73ed3f7cc1aca46fbbaf87681308e85b01788efdfe07b41",
+      "bytes": 4283
+    },
+    {
+      "path": "skills/main/evals/routing.json",
+      "sha256": "8ff6b03e24ec4edaba1a770d1dc17e6f430513becd03319e24ba4fce18dd1fee",
+      "bytes": 2943
+    },
+    {
+      "path": "skills/main/manifests/skill-graph.json",
+      "sha256": "d380a245dba46ecef750c2e092a12c94b4b2d2573c5fd0149ae7e3f014a6764d",
+      "bytes": 1701
+    },
+    {
+      "path": "skills/main/scripts/validate_hierarchy.py",
+      "sha256": "ad718385a2df34699121831f982b1ae5f2aaf208d47da3368539d9722a0e154d",
+      "bytes": 6436
+    },
+    {
+      "path": "skills/orchestrator/SKILL.md",
+      "sha256": "158368dbb1a3336cfe404aff3205ae92bf028195d26bf5c45c6cd10232d87403",
+      "bytes": 3797
+    },
+    {
+      "path": "skills/orchestrator/manifests/delegation-envelope.schema.json",
+      "sha256": "423fedd852ca9f141555cf3518090752b86292e09c0065249e4e7c98f09673f8",
+      "bytes": 1638
+    },
+    {
+      "path": "skills/orchestrator/manifests/registry.json",
+      "sha256": "6c7668549fdce2141a1068049e10859611101891ce5e8170d784f0f5645f400f",
+      "bytes": 14018
+    }
+  ]
+}

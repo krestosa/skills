@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skills://orchestrator/delegation-envelope.schema.json",
+  "title": "Delegation Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workstream_id",
+    "objective",
+    "selected_skills",
+    "scope",
+    "allowed_actions",
+    "forbidden_actions",
+    "deliverable",
+    "validation",
+    "stop_rules"
+  ],
+  "properties": {
+    "workstream_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "repository_context": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deliverable": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "handoff_to": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
