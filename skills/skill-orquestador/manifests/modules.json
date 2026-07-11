@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "skill": "skill-orquestador",
+  "entrypoint": "SKILL.md",
+  "always": [
+    "policies/repository-context-and-authorization.md",
+    "policies/network-and-transport.md",
+    "core/identity.md",
+    "core/project-authority-and-roles.md",
+    "core/states-and-approval.md"
+  ],
+  "routes": {
+    "plan": [
+      "playbooks/research-architecture-security.md",
+      "templates/prompts.md"
+    ],
+    "architecture": [
+      "playbooks/research-architecture-security.md",
+      "playbooks/runtime-typescript-concurrency.md"
+    ],
+    "implement": [
+      "playbooks/implementation-validation.md",
+      "playbooks/runtime-typescript-concurrency.md",
+      "playbooks/qa-security-release.md"
+    ],
+    "validate": [
+      "playbooks/implementation-validation.md",
+      "playbooks/qa-security-release.md"
+    ],
+    "github-read": [
+      "catalogs/github-read-verbatim.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md",
+      "contracts/connector-contracts.md"
+    ],
+    "github-write": [
+      "catalogs/github-read-verbatim.md",
+      "catalogs/github-write-verbatim.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md",
+      "policies/github-write-safety.md",
+      "policies/connector-native-integrity.md",
+      "contracts/connector-contracts.md"
+    ],
+    "ci": [
+      "catalogs/github-read-verbatim.md",
+      "playbooks/git-publication-ci.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md"
+    ],
+    "review": [
+      "catalogs/github-read-verbatim.md",
+      "catalogs/github-write-verbatim.md",
+      "playbooks/pr-review-merge-recovery.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md"
+    ],
+    "publish": [
+      "catalogs/github-read-verbatim.md",
+      "catalogs/github-write-verbatim.md",
+      "playbooks/implementation-validation.md",
+      "playbooks/git-publication-ci.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md",
+      "policies/github-write-safety.md",
+      "policies/connector-native-integrity.md"
+    ],
+    "recovery": [
+      "playbooks/implementation-validation.md",
+      "playbooks/git-publication-ci.md",
+      "playbooks/pr-review-merge-recovery.md",
+      "playbooks/github/index.md",
+      "playbooks/github/read-capabilities.md",
+      "playbooks/github/write-governance.md",
+      "playbooks/github/write-git-data-and-ci.md",
+      "playbooks/github/write-verification.md",
+      "playbooks/github/operations.md",
+      "playbooks/workspace-delegation.md"
+    ],
+    "delegation": [
+      "playbooks/management-communication-integrity.md",
+      "playbooks/workspace-delegation.md",
+      "playbooks/automation-orchestration.md"
+    ]
+  }
+}

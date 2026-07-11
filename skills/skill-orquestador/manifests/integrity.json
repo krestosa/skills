@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "skill": "skill-orquestador",
+  "repositoryHardcoding": null,
+  "githubWorkflows": false,
+  "githubReadCatalog": {
+    "entries": 56,
+    "sha256": "610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e"
+  },
+  "githubWriteCatalog": {
+    "entries": 41,
+    "sha256": "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d"
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "db822a92f8387c59155105958cc1bd1fb830aefce97c33c9464fade54167d2c7",
+      "bytes": 621
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "4414a17025e79046904fe0f9ef26dbdd9aee6627aedb893e95339551e97565bf",
+      "bytes": 2026
+    },
+    {
+      "path": "catalogs/github-read-verbatim.md",
+      "sha256": "e6e1f0fbe2b63bc024bb7f9ef2ac5bfbe968c32f0ecf6816f0c2969aee53d1c6",
+      "bytes": 9647
+    },
+    {
+      "path": "catalogs/github-write-verbatim.md",
+      "sha256": "213820f69ebd5410c260bf0e5e887aa842696a191ba58cf88f68899136ead281",
+      "bytes": 6902
+    },
+    {
+      "path": "contracts/authorization-envelope.schema.json",
+      "sha256": "ac51182b95df39b0db9fc372c8a712125f306caeb01658e0a8e3ad95b9422915",
+      "bytes": 4664
+    },
+    {
+      "path": "contracts/connector-contracts.md",
+      "sha256": "adbf69e59d2df0d5f59a1b8c46c3e6be2a37eca8b6fce09ca46487936f14fde3",
+      "bytes": 695
+    },
+    {
+      "path": "core/identity.md",
+      "sha256": "ae14563a7a57afb3843305ff45601a64dccca7e8dfd77475cf327dc6b557cd37",
+      "bytes": 1945
+    },
+    {
+      "path": "core/project-authority-and-roles.md",
+      "sha256": "b8f679efcc1a7c093945d23e8395bffe1180065c3511e64b3c81fe2a99b13802",
+      "bytes": 10249
+    },
+    {
+      "path": "core/states-and-approval.md",
+      "sha256": "15057a7cdc8fa106e319b9daa78827c4162c4d7cdac74dad31cfb7052df37b8c",
+      "bytes": 6882
+    },
+    {
+      "path": "manifests/modules.json",
+      "sha256": "10e129bedfcb443b526a0fb4d98d6f07425ea86a32dda3baa9a30bccd7298566",
+      "bytes": 3713
+    },
+    {
+      "path": "playbooks/automation-orchestration.md",
+      "sha256": "f0007eb1ff95e709752b738a39576324d79e478b7450eb185dc7e9b5620b8508",
+      "bytes": 8832
+    },
+    {
+      "path": "playbooks/git-publication-ci.md",
+      "sha256": "08e746ce135059c7b1fc56922c3954aebf8b1cd2c4cc26b7e3d31fc33852a768",
+      "bytes": 16491
+    },
+    {
+      "path": "playbooks/github/index.md",
+      "sha256": "54f4a85e1b1555a1397d7c7fbeaeae05132a066794ee09c3eb9fab3247441648",
+      "bytes": 8604
+    },
+    {
+      "path": "playbooks/github/operations.md",
+      "sha256": "15a8ece191d7b6704618fd8d2ba332b01c33438417cc2489b313799adb5609b4",
+      "bytes": 3942
+    },
+    {
+      "path": "playbooks/github/read-capabilities.md",
+      "sha256": "dd01f35cb5500f89b7c81942781730b569cddc2955472767d3cc041c14c965ac",
+      "bytes": 16837
+    },
+    {
+      "path": "playbooks/github/write-git-data-and-ci.md",
+      "sha256": "e3c42495d47499552784dfbc63bdd4674b79b113cb68a8f0ba87ec3a3c03f996",
+      "bytes": 9256
+    },
+    {
+      "path": "playbooks/github/write-governance.md",
+      "sha256": "b7689ceab494a5bba1df4debe5a8530affcb49636401f27e1620edd719333485",
+      "bytes": 11161
+    },
+    {
+      "path": "playbooks/github/write-verification.md",
+      "sha256": "8e603ce3a3de4c5ce00ea4dcaf90a9ddfde7501d6432f4f58c5b36df736982c1",
+      "bytes": 9139
+    },
+    {
+      "path": "playbooks/implementation-validation.md",
+      "sha256": "ea617e3568115d771bc1c291da05b705c2b9ad92e27d695c2539117242713893",
+      "bytes": 8194
+    },
+    {
+      "path": "playbooks/management-communication-integrity.md",
+      "sha256": "1332c7d74bd5473ada184571452660952b99f2bb2cf82f6ef99376b4f5b57095",
+      "bytes": 11849
+    },
+    {
+      "path": "playbooks/pr-review-merge-recovery.md",
+      "sha256": "194a4bf666f6ed5ac6cf5079d603168eebd2e2542add057a0d4902ad13484136",
+      "bytes": 6543
+    },
+    {
+      "path": "playbooks/qa-security-release.md",
+      "sha256": "e23d6302d0eedd50448aae4e0b7bf080b6c2e3d1cec1f15be398980bdcacbcc9",
+      "bytes": 9447
+    },
+    {
+      "path": "playbooks/research-architecture-security.md",
+      "sha256": "9b717767f67467fed8f285155b48b1f872e67f5f897c7cfa105a7e70e145d143",
+      "bytes": 8756
+    },
+    {
+      "path": "playbooks/runtime-typescript-concurrency.md",
+      "sha256": "53bfb3065ae88ea9f9e5cf71c6fd2999bea5701cdad94a92cd4fed8ef61a9b29",
+      "bytes": 10644
+    },
+    {
+      "path": "playbooks/workspace-delegation.md",
+      "sha256": "da4aeb85ff878d1f0293100e4bb3d87c08a74f8783d276d0516e0a23f615c6e6",
+      "bytes": 9114
+    },
+    {
+      "path": "policies/connector-native-integrity.md",
+      "sha256": "0f65f094b43d8e44afb204a41baa853cc9dad2e1f7b64ba3427553ef9a6278cb",
+      "bytes": 3359
+    },
+    {
+      "path": "policies/github-write-safety.md",
+      "sha256": "361b88cc093e6b2562b1269b49f2df5ed09632730558e0cfe7a5a3acf3085c17",
+      "bytes": 1055
+    },
+    {
+      "path": "policies/network-and-transport.md",
+      "sha256": "a3e8b83731007134f65cf32e60b62b77ef834f488d3d3d52c12d69e9c4e708a8",
+      "bytes": 1742
+    },
+    {
+      "path": "policies/repository-context-and-authorization.md",
+      "sha256": "f4f9b460f160ab98352afbe0544ec325cce9d239ef477357187bc76aebfb5d82",
+      "bytes": 1213
+    },
+    {
+      "path": "scripts/build_chatgpt_flat.py",
+      "sha256": "5f3527680742bfbd060b1cad3e3db1fb6aa2297d2bdaf89ddf08e9c479b7bb0e",
+      "bytes": 670
+    },
+    {
+      "path": "scripts/build_compiled.py",
+      "sha256": "be81faa4fdb797ef467d46262d8744771c31261bdd635d81216d9eb44b21bbbe",
+      "bytes": 751
+    },
+    {
+      "path": "scripts/validate_skill.py",
+      "sha256": "e95832dd93332f4a40a54ef92bbd880b335d75d4342001d45c8cba19e5a29e81",
+      "bytes": 3466
+    },
+    {
+      "path": "templates/prompts.md",
+      "sha256": "0263822e50839751ee7b49a02d19a838e1a7bd0279892ed334471903d5b47156",
+      "bytes": 4456
+    }
+  ]
+}
