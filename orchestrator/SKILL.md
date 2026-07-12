@@ -34,18 +34,20 @@ Do not load all skills preemptively.
 ## Selection procedure
 
 1. Resolve the requested user-visible outcome.
-2. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
-3. Resolve material repository, workspace, artifact, stack, evidence, and authorization context.
-4. Select one primary skill.
-5. Add only required dependencies and supporting skills.
-6. Evaluate every registry auto-attach policy.
-7. Attach `local-git-workspace` when any selected work will execute local Git.
-8. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
-9. Load each selected `../skills/<id>/SKILL.md`.
-10. Load only its declared shared routes and detected stack profile.
-11. Complete required preconditions before dependent work.
-12. Synthesize evidence before acting.
-13. Direct the selected skills and integrate their results into one conclusion.
+2. Detect whether the current user message is the returned output of a chat previously directed by this orchestrator.
+3. If it is a delegated result, enter delegated-result continuation mode before ordinary response generation.
+4. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
+5. Resolve material repository, workspace, artifact, stack, evidence, and authorization context.
+6. Select one primary skill.
+7. Add only required dependencies and supporting skills.
+8. Evaluate every registry auto-attach policy.
+9. Attach `local-git-workspace` when any selected work will execute local Git.
+10. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
+11. Load each selected `../skills/<id>/SKILL.md`.
+12. Load only its declared shared routes and detected stack profile.
+13. Complete required preconditions before dependent work.
+14. Synthesize evidence before acting.
+15. Direct the selected skills and integrate their results into one conclusion or one continuation prompt.
 
 Target one to three primary and supporting skills for ordinary tasks. Cross-cutting auto-attached skills do not count toward that target.
 
@@ -106,10 +108,38 @@ Direct selected skills in the current chat and return one integrated result.
 
 When the user requests multiple chats or specialists, emit one bounded prompt envelope per workstream using `delegation-envelope.schema.json`. Do not claim that a separate chat was created unless a tool created it.
 
+### Delegated-result continuation
+
+Enter this mode when the user supplies the output, report, status, error, implementation summary, or blocker returned by a chat previously directed by the orchestrator.
+
+Treat the returned content as execution evidence and current state. Compare it with the original objective, authorization, completion bar, and prior prompt. Determine whether the next prompt must continue implementation, correct an error, request missing evidence, validate a claimed result, recover partial state, publish an authorized change, or close the remaining work.
+
+Preserve completed work and verified facts. Do not make the target chat restart completed discovery, repeat successful validation, or reopen settled architecture unless the returned evidence invalidates it.
+
+The response contract is absolute:
+
+- emit exactly one self-contained prompt inside one code block
+- emit no text before or after that code block
+- do not provide a separate explanation, summary, diagnosis, status report, checklist, citation block, or recommendation
+- place every required clarification, expansion, rationale, constraint, correction, evidence reference, and next step inside the prompt
+- include the returned result or the exact material evidence needed to continue without this chat history
+- state which work is already complete, what remains unresolved, what must not be repeated, and the precise completion bar
+- preserve all previously granted permissions and prohibitions without expanding them
+- instruct the target chat to use the required skills, tools, validation, and stop rules
+- if a critical fact is missing, instruct the target chat inside the prompt to obtain or report only that smallest missing fact
+- if the returned result claims completion, generate a verification or closure prompt when verification or final evidence remains
+- do not implement the next step in the orchestrator chat
+
+This prompt-only contract overrides the ordinary output rules of main and every selected skill for that response.
+
 ## Output
 
 Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills, ownership repair, or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
 
+In delegated-result continuation mode, output only the single prompt code block defined above. Any additional specificity must be written inside the prompt.
+
 ## Stop rules
 
 Stop when the selected skills cover the request, no skill exceeds authorization, required workspace preconditions and validation are complete, all runnable work is complete or blocked, and the result is complete or precisely blocked.
+
+In delegated-result continuation mode, stop immediately after the closing fence of the single generated prompt.

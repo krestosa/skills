@@ -35,8 +35,10 @@ main=(ROOT/"SKILL.md").read_text(encoding="utf-8")
 orch=(ROOT/"orchestrator/SKILL.md").read_text(encoding="utf-8")
 if "orchestrator/SKILL.md" not in main:errors.append("main does not load orchestrator")
 if re.search(r"skills/[a-z0-9-]+/SKILL\.md",main):errors.append("main loads individual skill")
-for marker in ["Select one primary skill","Do not load all skills preemptively","Attach `local-git-workspace`","Attach `parallel-execution`","Cross-cutting auto-attached skills do not count"]:
+for marker in ["Select one primary skill","Do not load all skills preemptively","Attach `local-git-workspace`","Attach `parallel-execution`","Cross-cutting auto-attached skills do not count","### Delegated-result continuation","emit exactly one self-contained prompt inside one code block","no text before or after that code block"]:
     if marker not in orch:errors.append("orchestrator missing "+marker)
+for marker in ["delegated-result continuation mode applies","exactly one self-contained continuation","nothing outside it","Delegated-result continuation mode overrides"]:
+    if marker not in main:errors.append("main delegated-return contract missing "+marker)
 
 routes=load(SHARED/"manifests/routes.json").get("routes",{})
 registry=load(ROOT/"orchestrator/registry.json")
@@ -83,6 +85,10 @@ if la.get("rootFallbackWhenSudoUnavailable")!='chown -R "$(id -u):$(id -g)" -- "
 local_text=(ROOT/"skills/local-git-workspace/SKILL.md").read_text(encoding="utf-8")
 for marker in ["realpath -e",'sudo -n chown -R "$(id -u):$(id -g)" -- "$repo_root"',"ROOT_RUNTIME_REQUIRED","LOCAL_GIT_OWNERSHIP_REPAIR_FAILED","git config --global --add safe.directory","exclusive metadata lock","Remote GitHub access remains connector-only"]:
     if marker not in local_text:errors.append("local Git skill missing "+marker)
+
+management_text=(ROOT/"skills/management-delegation/SKILL.md").read_text(encoding="utf-8")
+for marker in ["## Returned-result procedure","return exactly one prompt inside one code block and nothing else","Keep every explanation and additional detail inside the prompt","stop immediately after the closing fence"]:
+    if marker not in management_text:errors.append("delegated-return skill contract missing "+marker)
 
 parallel_cases=load(SHARED/"evals/parallel-execution.json").get("cases",[])
 local_cases=load(SHARED/"evals/local-git-workspace.json").get("cases",[])
@@ -134,6 +140,9 @@ if integrity.get("individualSkillCount")!=16 or integrity.get("crossCuttingSkill
 lg=integrity.get("localGitWorkspace",{})
 for key in ["autoAttachBeforeLocalGit","requiresRootRuntime","prohibitsSafeDirectoryFallback"]:
     if not lg.get(key):errors.append("integrity local Git "+key)
+dr=integrity.get("delegatedResultContinuation",{})
+for key in ["promptOnly","singleCodeBlock","noTextOutsidePrompt","additionalDetailInsidePrompt","preserveCompletedWork"]:
+    if not dr.get(key):errors.append("integrity delegated-return "+key)
 for item in integrity.get("protectedFiles",[]):
     p=ROOT/item["path"];require(p)
     if p.is_file() and (digest(p)!=item["sha256"] or len(p.read_bytes())!=item["bytes"]):errors.append("protected file mismatch "+item["path"])
@@ -155,6 +164,7 @@ if errors:
 print("VALIDATION: PASS")
 print("individual_skills:",len(ids))
 print("cross_cutting_skills: 2")
+print("delegated_result_continuation: prompt-only")
 print("local_git_workspace: preflight-before-local-git")
 print("parallel_execution: auto-attach-when-applicable")
 print("canonical_sources: 15 lossless")

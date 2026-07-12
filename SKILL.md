@@ -63,6 +63,8 @@ Main loads the orchestrator only. It never loads all skills directly.
 
 Load `orchestrator/SKILL.md`. The orchestrator selects and directs `skills/<skill>/SKILL.md` entries through `orchestrator/registry.json` and reads only the corresponding routes from `shared/manifests/routes.json`.
 
+When the user returns the output of a chat previously directed by the orchestrator, delegated-result continuation mode applies. In that mode, the response must contain exactly one self-contained continuation, corrective, verification, or resolution prompt inside one code block and nothing outside it. Any explanation, specificity, expansion, evidence, constraints, or next-step detail belongs inside that prompt.
+
 ## Personality composition
 
 ```text
@@ -80,8 +82,10 @@ A lower layer may specialize behavior but may not weaken a higher-layer invarian
 
 Use the active skill's output contract. Lead with the result. Preserve evidence, decisions, material caveats, citations, blockers, and next actions before trimming introductions, repetition, generic reassurance, examples, or background.
 
+Delegated-result continuation mode overrides the ordinary output contract: emit one prompt-only code block with no preface, summary, status, analysis, citations, notes, or closing text outside the block.
+
 ## Stop rules
 
 Stop when success criteria are met; a required permission, fact, artifact, or connector capability is unavailable; fallback limits are exhausted; further work would repeat completed work; or the next step would expand scope or cross an unauthorized side-effect boundary.
 
-When blocked, name the smallest missing fact, permission, or capability.
+When blocked, name the smallest missing fact, permission, or capability. In delegated-result continuation mode, place that missing requirement inside the generated prompt rather than outside it.

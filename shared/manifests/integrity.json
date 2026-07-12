@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "rootSkill": "SKILL.md",
   "orchestrator": "orchestrator/SKILL.md",
   "orchestratorCount": 1,
@@ -39,6 +39,18 @@
     "remoteGitHubTransport": "connector-only",
     "repositoryHardcoding": null
   },
+  "delegatedResultContinuation": {
+    "skill": "skills/management-delegation/SKILL.md",
+    "orchestratorSection": "Delegated-result continuation",
+    "trigger": "user returns output from a chat previously directed by the orchestrator",
+    "promptOnly": true,
+    "singleCodeBlock": true,
+    "noTextOutsidePrompt": true,
+    "additionalDetailInsidePrompt": true,
+    "preserveCompletedWork": true,
+    "avoidRepeatingCompletedWork": true,
+    "ordinaryOutputContractOverridden": true
+  },
   "inventory": {
     "selfExcluded": "shared/manifests/integrity.json",
     "count": 83,
@@ -54,13 +66,13 @@
     },
     {
       "path": "SKILL.md",
-      "sha256": "f5cc8ed85ba4bec94f9b55e0423e5752b262ef26fcedcb86549664f3ef02a570",
-      "bytes": 4191
+      "sha256": "a8ad035185b50929ed3145ca20cef30cac5b1bf39fce39dce5a6b445365df8a9",
+      "bytes": 4933
     },
     {
       "path": "orchestrator/SKILL.md",
-      "sha256": "4db0a47055da9909dc772632b55415d97ec755c82a59c171038ec73d9907a9b4",
-      "bytes": 6253
+      "sha256": "14fdac814670d6b5cce239f74592e7ac90cdbb41d07bda7e1556560a5d793854",
+      "bytes": 8808
     },
     {
       "path": "orchestrator/delegation-envelope.schema.json",
@@ -84,8 +96,8 @@
     },
     {
       "path": "scripts/validate.py",
-      "sha256": "6b5e5d5b8951c1074c5bcd98f4a5e1bca95c5d73f0e5d838621227b8c9358b7a",
-      "bytes": 11797
+      "sha256": "20e9004eee8ce2ef4f3deec45187320d92508f90bac307885c1f0312781e8ba0",
+      "bytes": 12914
     },
     {
       "path": "scripts/validate_gpt56.py",
@@ -159,8 +171,8 @@
     },
     {
       "path": "skills/management-delegation/SKILL.md",
-      "sha256": "c8c148c1777ae59295eec2f39ffa652183c74b805d9767ac8d634fda22f364b3",
-      "bytes": 1893
+      "sha256": "b8d3342c963cbfcc2f21d8a9e90e952ea76233834aaf36078693fc3332fbb8e3",
+      "bytes": 4020
     },
     {
       "path": "skills/parallel-execution/SKILL.md",
