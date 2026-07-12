@@ -1,11 +1,11 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "rootSkill": "SKILL.md",
   "orchestrator": "orchestrator/SKILL.md",
   "orchestratorCount": 1,
   "readmeCount": 1,
-  "individualSkillCount": 16,
-  "crossCuttingSkillCount": 2,
+  "individualSkillCount": 17,
+  "crossCuttingSkillCount": 3,
   "sharedRoot": "shared",
   "canonicalSourceCount": 15,
   "canonicalSourceMutations": 0,
@@ -39,6 +39,26 @@
     "remoteGitHubTransport": "connector-only",
     "repositoryHardcoding": null
   },
+  "chatRecovery": {
+    "skill": "skills/chat-recovery/SKILL.md",
+    "evals": "shared/evals/chat-recovery.json",
+    "evalCaseCount": 12,
+    "trigger": "interrupted, stalled, cancelled, disconnected, truncated, or untrusted delegated chat execution",
+    "autoAttachOnInterruptedDelegatedChat": true,
+    "fullWorkspaceInventoryBeforeMutation": true,
+    "inventoryBoundary": "active-workspace-only",
+    "includesAllWorkspaceFiles": true,
+    "includesTrackedUntrackedIgnoredGeneratedHiddenTemporaryBinaryAndOutputs": true,
+    "metadataFirstHashLazily": true,
+    "reuseExistingValidFiles": true,
+    "prohibitsUnnecessaryRegeneration": true,
+    "preserveUnrelatedUserChanges": true,
+    "unknownStateIsNotNotStarted": true,
+    "lastVerifiedCheckpointRequired": true,
+    "idempotentContinuationPrompt": true,
+    "promptOnlyResponse": true,
+    "doesNotAuthorizeSideEffects": true
+  },
   "delegatedResultContinuation": {
     "skill": "skills/management-delegation/SKILL.md",
     "orchestratorSection": "Delegated-result continuation",
@@ -53,16 +73,16 @@
   },
   "inventory": {
     "selfExcluded": "shared/manifests/integrity.json",
-    "count": 83,
-    "sha256": "9aac94c045613f8350d24a5efb4ebf7ffa2c17361216c98c97e4c3184ac2121b"
+    "count": 85,
+    "sha256": "c9437f0b38d967ccdc5bcb7c28f3152a0ed566122d5106389585bc939dccd6d4"
   },
   "repositoryHardcoding": null,
   "githubWorkflows": false,
   "protectedFiles": [
     {
       "path": "README.md",
-      "sha256": "0eb78ada29d26925f5b019ece764f3e7200f45324a836e1997dc6a95b772ed26",
-      "bytes": 2395
+      "sha256": "3cf900ed646268cb9591d3837e00d5184b0a18e5c436fd61beab59b0a7ab8cdf",
+      "bytes": 2377
     },
     {
       "path": "SKILL.md",
@@ -70,34 +90,19 @@
       "bytes": 4933
     },
     {
-      "path": "orchestrator/SKILL.md",
-      "sha256": "14fdac814670d6b5cce239f74592e7ac90cdbb41d07bda7e1556560a5d793854",
-      "bytes": 8808
-    },
-    {
       "path": "orchestrator/delegation-envelope.schema.json",
       "sha256": "423fedd852ca9f141555cf3518090752b86292e09c0065249e4e7c98f09673f8",
       "bytes": 1638
     },
     {
-      "path": "orchestrator/registry.json",
-      "sha256": "837dbefc6b38bc417374020b9504337ba09d0ff0589a3db293bc827a55ebf7df",
-      "bytes": 8324
-    },
-    {
       "path": "scripts/build_chatgpt_flat.py",
-      "sha256": "3524377e63f02f64b217898e333434b8db2e5fe6df300342dfe2b1cc2911fb2e",
-      "bytes": 2604
+      "sha256": "44327f089b151720ec5b5de8ccf7225af5fce8c1eeb26dcc51392271edb87b09",
+      "bytes": 2772
     },
     {
       "path": "scripts/build_compiled.py",
-      "sha256": "4361105d7a88d002a835d38a77b4e1207deaf114a626889d91e859f938af84f7",
-      "bytes": 2942
-    },
-    {
-      "path": "scripts/validate.py",
-      "sha256": "20e9004eee8ce2ef4f3deec45187320d92508f90bac307885c1f0312781e8ba0",
-      "bytes": 12914
+      "sha256": "ccca66a01fa9c277f2d838fcdf7bbb8e0c0a3dd75d7a719b330de8daa8e1b875",
+      "bytes": 3906
     },
     {
       "path": "scripts/validate_gpt56.py",
@@ -108,6 +113,11 @@
       "path": "scripts/verify_lossless.py",
       "sha256": "5755832aec392dfe0b200a31314e41610ffe0a7fce37b0092cafc49c1b6731be",
       "bytes": 1142
+    },
+    {
+      "path": "shared/evals/chat-recovery.json",
+      "sha256": "06de2bc675deea3356513879e0edce69af70d2ea0c491884050be252015b9862",
+      "bytes": 2941
     },
     {
       "path": "shared/evals/local-git-workspace.json",
@@ -168,11 +178,6 @@
       "path": "skills/local-git-workspace/SKILL.md",
       "sha256": "21ccce160422a5312a88405395ee99c62bb2f12b3212278a615f5ee8adbdaea9",
       "bytes": 6032
-    },
-    {
-      "path": "skills/management-delegation/SKILL.md",
-      "sha256": "b8d3342c963cbfcc2f21d8a9e90e952ea76233834aaf36078693fc3332fbb8e3",
-      "bytes": 4020
     },
     {
       "path": "skills/parallel-execution/SKILL.md",

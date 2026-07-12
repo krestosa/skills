@@ -7,7 +7,7 @@ description: The single routing and delegation layer. It selects, loads, and dir
 
 ## Role
 
-Act as the routing, dependency, delegation, and integration controller for the complete skill system.
+Act as the routing, dependency, delegation, recovery, and integration controller for the complete skill system.
 
 ## Personality
 
@@ -19,7 +19,7 @@ Select before loading. Use one primary skill and the minimum supporting skills. 
 
 ## Goal
 
-Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer, then attach cross-cutting workspace and execution control when applicable.
+Select and direct the smallest complete set of skills that can satisfy the request at the authorized layer, then attach cross-cutting workspace, recovery, and execution control when applicable.
 
 ## Required context
 
@@ -35,21 +35,46 @@ Do not load all skills preemptively.
 
 1. Resolve the requested user-visible outcome.
 2. Detect whether the current user message is the returned output of a chat previously directed by this orchestrator.
-3. If it is a delegated result, enter delegated-result continuation mode before ordinary response generation.
-4. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
-5. Resolve material repository, workspace, artifact, stack, evidence, and authorization context.
-6. Select one primary skill.
-7. Add only required dependencies and supporting skills.
-8. Evaluate every registry auto-attach policy.
-9. Attach `local-git-workspace` when any selected work will execute local Git.
-10. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
-11. Load each selected `../skills/<id>/SKILL.md`.
-12. Load only its declared shared routes and detected stack profile.
-13. Complete required preconditions before dependent work.
-14. Synthesize evidence before acting.
-15. Direct the selected skills and integrate their results into one conclusion or one continuation prompt.
+3. Detect whether the delegated chat was stalled, frozen, manually stopped, cancelled, disconnected, truncated, or ended without a trustworthy completion report.
+4. If it is an interrupted delegated execution, enter chat-recovery mode before ordinary continuation.
+5. Otherwise, if it is a delegated result, enter delegated-result continuation mode before ordinary response generation.
+6. Identify the active work layer: answer, research, review, diagnosis, plan, local change, validation, remote read, remote write, release, recovery, or delegation.
+7. Resolve material repository, workspace, artifact, stack, evidence, and authorization context.
+8. Select one primary skill.
+9. Add only required dependencies and supporting skills.
+10. Evaluate every registry auto-attach policy.
+11. Attach `chat-recovery` for interrupted or untrusted delegated execution state.
+12. Attach `local-git-workspace` when any selected work will execute local Git.
+13. Attach `parallel-execution` when two or more independent work units can run concurrently without shared-resource conflict.
+14. Load each selected `../skills/<id>/SKILL.md`.
+15. Load only its declared shared routes and detected stack profile.
+16. Complete required preconditions before dependent work.
+17. Synthesize evidence before acting.
+18. Direct the selected skills and integrate their results into one conclusion or one continuation prompt.
 
 Target one to three primary and supporting skills for ordinary tasks. Cross-cutting auto-attached skills do not count toward that target.
+
+## Chat recovery attachment
+
+`chat-recovery` is the cross-cutting controller for stalled, cancelled, interrupted, or truncated delegated chats.
+
+Attach it when the user reports that a directed chat became stuck, had to be stopped, did not finish, returned a truncated response, or left uncertain execution state.
+
+Before generating a continuation prompt, it must:
+
+- recover the original prompt, objective, scope, permissions, prohibitions, and completion bar
+- recursively inventory every file and directory inside the active workspace boundary before any regeneration or mutation
+- inspect existing files, artifacts, metadata, hashes when needed, Git state, remote state, processes, locks, outputs, and validation evidence
+- classify work as confirmed complete, confirmed incomplete, or unknown
+- preserve valid files and prohibit unnecessary regeneration, rewriting, editing, deletion, or repetition
+- identify the last reliable checkpoint
+- generate an idempotent prompt for only the unresolved work
+
+The workspace scan must include tracked, untracked, ignored, hidden, generated, temporary, binary, backup, patch, lock, manifest, and output files. It may optimize by collecting metadata first and hashing or reading content lazily, but it may not omit paths merely because Git ignores them or the interrupted chat did not mention them.
+
+Do not scan outside the resolved active workspace. Do not delete or overwrite unfamiliar files until provenance is established.
+
+`chat-recovery` does not authorize side effects. It reconstructs state and produces the next prompt under delegated-result prompt-only mode.
 
 ## Local Git workspace attachment
 
@@ -74,7 +99,9 @@ It authorizes only ownership metadata repair on the active local repository. It 
 
 Attach it by default when the task contains independent tasks, tool calls, skill loads, files, modules, validations, errors, or workstreams. Load it concurrently with other selected skills when its inputs are already known.
 
-When both cross-cutting skills are attached, the local Git ownership preflight is a prerequisite for local Git commands and local workspace writes. Independent remote connector reads may proceed while that preflight runs. Do not begin competing local workspace work until the repository-root metadata lock is released.
+For chat recovery, parallelize independent workspace enumeration, metadata collection, repository inspection, process inspection, artifact inspection, and remote reads. Serialize any operation that mutates or may invalidate the same workspace, file, output directory, Git index, branch, or remote resource.
+
+When both cross-cutting skills are attached, the local Git ownership preflight is a prerequisite for local Git commands and local workspace writes. Independent filesystem metadata reads and remote connector reads may proceed when they do not compete with ownership normalization. Do not begin competing local workspace work until the repository-root metadata lock is released.
 
 Skip parallel execution only for a single indivisible operation, a strict dependency chain, a single-resource mutation, or infrastructure that cannot execute useful work concurrently. Its presence does not authorize side effects and does not override ordered external operations or exclusive resource locks.
 
@@ -83,6 +110,7 @@ Skip parallel execution only for a single indivisible operation, a strict depend
 - Do not scan every skill to improve wording.
 - Do not load Write skills for read-only tasks.
 - Do not load `local-git-workspace` for remote-only work.
+- Do not load `chat-recovery` for a complete, trustworthy delegated result.
 - Do not load stack-specific material before detecting the stack.
 - Do not load the full GPT-5.6 reference for ordinary tasks.
 - Do not load the verbatim parallel policy unless auditing fidelity or resolving an uncovered edge case.
@@ -116,17 +144,27 @@ Treat the returned content as execution evidence and current state. Compare it w
 
 Preserve completed work and verified facts. Do not make the target chat restart completed discovery, repeat successful validation, or reopen settled architecture unless the returned evidence invalidates it.
 
-The response contract is absolute:
+### Chat recovery
+
+Enter this mode when the delegated chat did not return a trustworthy terminal result because it stalled, was stopped, was interrupted, or produced a truncated response.
+
+Treat silence or missing summary as unknown state, not as evidence that no work happened. Require the next chat to inspect the complete active workspace before creating, regenerating, rewriting, editing, deleting, or replacing files. Existing workspace contents take precedence over assumptions derived from the missing response.
+
+Reconstruct the last verified checkpoint from direct evidence, then generate an idempotent recovery prompt that continues only unresolved work and reuses all valid files and artifacts already present.
+
+The response contract for delegated-result continuation and chat recovery is absolute:
 
 - emit exactly one self-contained prompt inside one code block
 - emit no text before or after that code block
 - do not provide a separate explanation, summary, diagnosis, status report, checklist, citation block, or recommendation
-- place every required clarification, expansion, rationale, constraint, correction, evidence reference, and next step inside the prompt
-- include the returned result or the exact material evidence needed to continue without this chat history
-- state which work is already complete, what remains unresolved, what must not be repeated, and the precise completion bar
+- place every required clarification, expansion, rationale, constraint, correction, evidence reference, workspace-inventory requirement, and next step inside the prompt
+- include the returned result, interruption description, or exact material evidence needed to continue without this chat history
+- state which work is verified complete, verified incomplete, unknown, and still required
 - preserve all previously granted permissions and prohibitions without expanding them
 - instruct the target chat to use the required skills, tools, validation, and stop rules
-- if a critical fact is missing, instruct the target chat inside the prompt to obtain or report only that smallest missing fact
+- require full workspace inventory before mutation when execution state is uncertain
+- prohibit regeneration or rewriting of existing valid files
+- if a critical fact is missing, instruct the target chat inside the prompt to recover or report only that smallest missing fact
 - if the returned result claims completion, generate a verification or closure prompt when verification or final evidence remains
 - do not implement the next step in the orchestrator chat
 
@@ -134,12 +172,12 @@ This prompt-only contract overrides the ordinary output rules of main and every 
 
 ## Output
 
-Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills, ownership repair, or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
+Use the primary skill's output contract and integrate supporting evidence without producing fragmented reports. Report selected skills, ownership repair, recovery classification, or concurrency decisions only when they aid traceability, explain serialization, or the user asks.
 
-In delegated-result continuation mode, output only the single prompt code block defined above. Any additional specificity must be written inside the prompt.
+In delegated-result continuation or chat-recovery mode, output only the single prompt code block defined above. Any additional specificity must be written inside the prompt.
 
 ## Stop rules
 
 Stop when the selected skills cover the request, no skill exceeds authorization, required workspace preconditions and validation are complete, all runnable work is complete or blocked, and the result is complete or precisely blocked.
 
-In delegated-result continuation mode, stop immediately after the closing fence of the single generated prompt.
+In delegated-result continuation or chat-recovery mode, stop immediately after the closing fence of the single generated prompt.

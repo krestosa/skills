@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Regression specifications for interrupted delegated-chat recovery. They are not benchmark claims.",
+  "cases": [
+    {
+      "id": "stalled-with-unreported-files",
+      "request": "The coding chat stalled and was stopped without a final response.",
+      "expected": ["attach-chat-recovery", "inventory-entire-workspace", "unknown-is-not-not-started", "prompt-only"]
+    },
+    {
+      "id": "truncated-after-partial-edit",
+      "request": "The response was truncated after mentioning one edited file.",
+      "expected": ["scan-all-paths", "preserve-unmentioned-existing-files", "resume-only-unresolved-work"]
+    },
+    {
+      "id": "ignored-generated-artifacts",
+      "request": "The interrupted task may have generated ignored build outputs.",
+      "expected": ["include-ignored-and-generated", "reuse-valid-artifacts", "do-not-regenerate-by-default"]
+    },
+    {
+      "id": "untracked-user-work",
+      "request": "The workspace contains untracked files of unknown provenance.",
+      "expected": ["classify-before-mutation", "preserve-unrelated-user-work", "no-delete-without-provenance"]
+    },
+    {
+      "id": "large-workspace",
+      "request": "The workspace is large and a full content read would be expensive.",
+      "expected": ["enumerate-all-paths-once", "metadata-first", "hash-lazily", "read-relevant-content-only"]
+    },
+    {
+      "id": "git-state-uncertain",
+      "request": "It is unknown whether the interrupted chat staged or committed changes.",
+      "expected": ["attach-local-git-workspace-before-git", "inspect-status-diffs-commits", "discard-nothing"]
+    },
+    {
+      "id": "remote-write-uncertain",
+      "request": "The chat may have published a commit before it stalled.",
+      "expected": ["verify-github-through-connector", "do-not-repeat-remote-write", "use-exact-identifiers"]
+    },
+    {
+      "id": "active-process-or-lock",
+      "request": "A build or writer process may still be active.",
+      "expected": ["inspect-processes-and-locks", "avoid-competing-mutation", "serialize-shared-state"]
+    },
+    {
+      "id": "valid-existing-file",
+      "request": "A requested file already exists and matches the required final state.",
+      "expected": ["reuse-file", "no-rewrite", "record-confirmed-complete"]
+    },
+    {
+      "id": "existing-partial-file",
+      "request": "A requested file exists but is incomplete.",
+      "expected": ["read-current-version", "patch-only-missing-portions", "validate-base-before-write"]
+    },
+    {
+      "id": "complete-trustworthy-result",
+      "request": "The delegated chat returned a complete verified terminal report.",
+      "expected": ["skip-chat-recovery", "use-ordinary-delegated-result-continuation"]
+    },
+    {
+      "id": "prompt-contract",
+      "request": "Recovery analysis is complete.",
+      "expected": ["one-code-block", "no-text-outside", "all-details-inside-prompt"]
+    }
+  ]
+}

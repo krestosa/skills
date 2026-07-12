@@ -1,1 +1,307 @@
-{"schemaVersion":5,"orchestrator":"orchestrator/SKILL.md","shared":{"root":"shared","routesManifest":"shared/manifests/routes.json","modelPolicy":"shared/policies/gpt-5.6-sol.md","readCatalog":"shared/catalogs/github-read-verbatim.md","writeCatalog":"shared/catalogs/github-write-verbatim.md"},"selectionPolicy":{"primarySkillRequired":true,"ordinaryActiveSkillTarget":{"min":1,"max":3,"hardLimit":false,"excludesCrossCutting":true},"loadDependenciesOnly":true,"readOnlyRoutesExcludeWriteSkills":true,"remoteWritesRequireMatchingAuthorization":true,"separateChatDelegationIsPromptOnlyUnlessToolExists":true,"crossCuttingSkillIds":["parallel-execution","local-git-workspace"],"autoAttach":{"parallel-execution":{"default":"attach-when-applicable","attachWhenAny":["two or more independent tasks, tool calls, skills, modules, files, resources, errors, validations, or workstreams exist","a multi-file or multi-module task contains independent work","independent reads or checks can run concurrently"],"skipWhenAny":["single indivisible operation","strict dependency chain","single-resource mutation with no concurrent reads or checks","infrastructure cannot execute useful work concurrently"],"doesNotAuthorizeSideEffects":true,"doesNotCountTowardOrdinaryActiveSkillTarget":true},"local-git-workspace":{"default":"attach-before-local-git","attachWhenAny":["the selected work will execute any local git command","the task inspects or changes a local Git repository","Git reports detected dubious ownership for the active workspace"],"skipWhenAny":["the task is remote-only and uses no local Git repository","no local workspace exists","the active workspace does not contain a .git file or directory and no local Git command will run"],"requiresRootRuntime":true,"runBeforeFirstLocalGitCommand":true,"onePreflightPerWorkspace":true,"ownershipCommand":"sudo -n chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"","rootFallbackWhenSudoUnavailable":"chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"","prohibitsSafeDirectoryFallback":true,"authorizedLocalMetadataRepairOnly":true,"doesNotAuthorizeRemoteWrites":true,"doesNotCountTowardOrdinaryActiveSkillTarget":true}}},"skills":[{"id":"repository-analysis","skillFile":"skills/repository-analysis/SKILL.md","requiredRoutes":["plan","audit"],"optionalRoutes":["architecture","documentation","roadmap"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"architecture","skillFile":"skills/architecture/SKILL.md","requiredRoutes":["architecture"],"optionalRoutes":["security","runtime","plan"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"implementation","skillFile":"skills/implementation/SKILL.md","requiredRoutes":["implement"],"optionalRoutes":["runtime","validate"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"validation-quality","skillFile":"skills/validation-quality/SKILL.md","requiredRoutes":["validate"],"optionalRoutes":["security","release"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"github-read","skillFile":"skills/github-read/SKILL.md","requiredRoutes":["github-read"],"optionalRoutes":["issue-read","review-read","ci-inspect"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"github-write","skillFile":"skills/github-write/SKILL.md","requiredRoutes":["github-write"],"optionalRoutes":["issue-write","branch-management","publish"],"dependencies":["github-read"],"capabilities":{"remoteReads":true,"remoteWrites":true,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"ci-diagnostics","skillFile":"skills/ci-diagnostics/SKILL.md","requiredRoutes":["ci-inspect"],"optionalRoutes":["ci-rerun"],"dependencies":["github-read"],"capabilities":{"remoteReads":true,"remoteWrites":true,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"pr-review-merge","skillFile":"skills/pr-review-merge/SKILL.md","requiredRoutes":["pr-create","review-read"],"optionalRoutes":["review-write","merge"],"dependencies":["github-read"],"capabilities":{"remoteReads":true,"remoteWrites":true,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"recovery","skillFile":"skills/recovery/SKILL.md","requiredRoutes":["recovery"],"optionalRoutes":["github-read","github-write","ci-inspect"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":true,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"frontend-visual","skillFile":"skills/frontend-visual/SKILL.md","requiredRoutes":["implement","validate"],"optionalRoutes":["architecture"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"prompt-engineering","skillFile":"skills/prompt-engineering/SKILL.md","requiredRoutes":["prompt-authoring"],"optionalRoutes":["prompt-migration"],"dependencies":[],"capabilities":{"remoteReads":false,"remoteWrites":false,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"management-delegation","skillFile":"skills/management-delegation/SKILL.md","requiredRoutes":["delegation","management"],"optionalRoutes":[],"dependencies":[],"capabilities":{"remoteReads":false,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"documentation-roadmap","skillFile":"skills/documentation-roadmap/SKILL.md","requiredRoutes":["documentation"],"optionalRoutes":["roadmap"],"dependencies":[],"capabilities":{"remoteReads":true,"remoteWrites":false,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"release","skillFile":"skills/release/SKILL.md","requiredRoutes":["release"],"optionalRoutes":["validate","github-write","ci-inspect"],"dependencies":["validation-quality"],"capabilities":{"remoteReads":true,"remoteWrites":true,"localWrites":true},"personality":"embedded","collaboration":"embedded","loadPolicy":{"onDemand":true,"loadOnlyReferencedSharedRoutes":true}},{"id":"parallel-execution","skillFile":"skills/parallel-execution/SKILL.md","requiredRoutes":[],"optionalRoutes":[],"dependencies":[],"referenceFiles":["shared/references/parallel-execution-policy-verbatim.md"],"capabilities":{"remoteReads":false,"remoteWrites":false,"localWrites":false},"personality":"embedded","collaboration":"embedded","role":"cross-cutting","loadPolicy":{"onDemand":true,"autoAttachWhenApplicable":true,"loadOnlyReferencedSharedRoutes":true,"loadFullReferenceOnlyForAuditOrUncoveredEdgeCase":true}},{"id":"local-git-workspace","skillFile":"skills/local-git-workspace/SKILL.md","requiredRoutes":[],"optionalRoutes":[],"dependencies":[],"capabilities":{"remoteReads":false,"remoteWrites":false,"localWrites":true},"personality":"embedded","collaboration":"embedded","role":"cross-cutting","loadPolicy":{"onDemand":true,"autoAttachWhenApplicable":true,"runBeforeFirstLocalGitCommand":true,"onePreflightPerWorkspace":true,"loadOnlyReferencedSharedRoutes":true}}]}
+{
+  "schemaVersion": 6,
+  "orchestrator": "orchestrator/SKILL.md",
+  "shared": {
+    "root": "shared",
+    "routesManifest": "shared/manifests/routes.json",
+    "modelPolicy": "shared/policies/gpt-5.6-sol.md",
+    "readCatalog": "shared/catalogs/github-read-verbatim.md",
+    "writeCatalog": "shared/catalogs/github-write-verbatim.md"
+  },
+  "selectionPolicy": {
+    "primarySkillRequired": true,
+    "ordinaryActiveSkillTarget": {
+      "min": 1,
+      "max": 3,
+      "hardLimit": false,
+      "excludesCrossCutting": true
+    },
+    "loadDependenciesOnly": true,
+    "readOnlyRoutesExcludeWriteSkills": true,
+    "remoteWritesRequireMatchingAuthorization": true,
+    "separateChatDelegationIsPromptOnlyUnlessToolExists": true,
+    "crossCuttingSkillIds": [
+      "parallel-execution",
+      "local-git-workspace",
+      "chat-recovery"
+    ],
+    "autoAttach": {
+      "parallel-execution": {
+        "default": "attach-when-applicable",
+        "attachWhenAny": [
+          "two or more independent tasks, tool calls, skills, modules, files, resources, errors, validations, or workstreams exist",
+          "a multi-file or multi-module task contains independent work",
+          "independent reads or checks can run concurrently",
+          "chat recovery contains independent workspace, process, artifact, repository, or remote inspections"
+        ],
+        "skipWhenAny": [
+          "single indivisible operation",
+          "strict dependency chain",
+          "single-resource mutation with no concurrent reads or checks",
+          "infrastructure cannot execute useful work concurrently"
+        ],
+        "doesNotAuthorizeSideEffects": true,
+        "doesNotCountTowardOrdinaryActiveSkillTarget": true
+      },
+      "local-git-workspace": {
+        "default": "attach-before-local-git",
+        "attachWhenAny": [
+          "the selected work will execute any local git command",
+          "the task inspects or changes a local Git repository",
+          "Git reports detected dubious ownership for the active workspace",
+          "chat recovery needs local Git evidence"
+        ],
+        "skipWhenAny": [
+          "the task is remote-only and uses no local Git repository",
+          "no local workspace exists",
+          "the active workspace does not contain a .git file or directory and no local Git command will run"
+        ],
+        "requiresRootRuntime": true,
+        "runBeforeFirstLocalGitCommand": true,
+        "onePreflightPerWorkspace": true,
+        "ownershipCommand": "sudo -n chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
+        "rootFallbackWhenSudoUnavailable": "chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
+        "prohibitsSafeDirectoryFallback": true,
+        "authorizedLocalMetadataRepairOnly": true,
+        "doesNotAuthorizeRemoteWrites": true,
+        "doesNotCountTowardOrdinaryActiveSkillTarget": true
+      },
+      "chat-recovery": {
+        "default": "attach-on-interrupted-delegated-chat",
+        "attachWhenAny": [
+          "a chat previously directed by the orchestrator is stalled or frozen",
+          "the user manually stopped or cancelled a delegated chat",
+          "a delegated chat disconnected, timed out, or returned a truncated response",
+          "the delegated chat produced no trustworthy terminal report",
+          "it is unknown which local or remote actions completed"
+        ],
+        "skipWhenAny": [
+          "the delegated chat returned a complete and trustworthy terminal result",
+          "no prior delegated work exists",
+          "the request concerns repository recovery unrelated to an interrupted chat"
+        ],
+        "requiresFullWorkspaceInventoryBeforeMutation": true,
+        "inventoryBoundary": "active-workspace-only",
+        "inventoryIncludesIgnoredGeneratedHiddenTemporaryAndBinary": true,
+        "reuseExistingValidFiles": true,
+        "prohibitsUnnecessaryRegeneration": true,
+        "unknownStateIsNotNotStarted": true,
+        "requiresIdempotentContinuationPrompt": true,
+        "promptOnlyResponse": true,
+        "doesNotAuthorizeSideEffects": true,
+        "doesNotCountTowardOrdinaryActiveSkillTarget": true
+      }
+    }
+  },
+  "skills": [
+    {
+      "id": "repository-analysis",
+      "skillFile": "skills/repository-analysis/SKILL.md",
+      "requiredRoutes": ["plan", "audit"],
+      "optionalRoutes": ["architecture", "documentation", "roadmap"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "architecture",
+      "skillFile": "skills/architecture/SKILL.md",
+      "requiredRoutes": ["architecture"],
+      "optionalRoutes": ["security", "runtime", "plan"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "implementation",
+      "skillFile": "skills/implementation/SKILL.md",
+      "requiredRoutes": ["implement"],
+      "optionalRoutes": ["runtime", "validate"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "validation-quality",
+      "skillFile": "skills/validation-quality/SKILL.md",
+      "requiredRoutes": ["validate"],
+      "optionalRoutes": ["security", "release"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "github-read",
+      "skillFile": "skills/github-read/SKILL.md",
+      "requiredRoutes": ["github-read"],
+      "optionalRoutes": ["issue-read", "review-read", "ci-inspect"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "github-write",
+      "skillFile": "skills/github-write/SKILL.md",
+      "requiredRoutes": ["github-write"],
+      "optionalRoutes": ["issue-write", "branch-management", "publish"],
+      "dependencies": ["github-read"],
+      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "ci-diagnostics",
+      "skillFile": "skills/ci-diagnostics/SKILL.md",
+      "requiredRoutes": ["ci-inspect"],
+      "optionalRoutes": ["ci-rerun"],
+      "dependencies": ["github-read"],
+      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "pr-review-merge",
+      "skillFile": "skills/pr-review-merge/SKILL.md",
+      "requiredRoutes": ["pr-create", "review-read"],
+      "optionalRoutes": ["review-write", "merge"],
+      "dependencies": ["github-read"],
+      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "recovery",
+      "skillFile": "skills/recovery/SKILL.md",
+      "requiredRoutes": ["recovery"],
+      "optionalRoutes": ["github-read", "github-write", "ci-inspect"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "frontend-visual",
+      "skillFile": "skills/frontend-visual/SKILL.md",
+      "requiredRoutes": ["implement", "validate"],
+      "optionalRoutes": ["architecture"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "prompt-engineering",
+      "skillFile": "skills/prompt-engineering/SKILL.md",
+      "requiredRoutes": ["prompt-authoring"],
+      "optionalRoutes": ["prompt-migration"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "management-delegation",
+      "skillFile": "skills/management-delegation/SKILL.md",
+      "requiredRoutes": ["delegation", "management"],
+      "optionalRoutes": [],
+      "dependencies": [],
+      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "documentation-roadmap",
+      "skillFile": "skills/documentation-roadmap/SKILL.md",
+      "requiredRoutes": ["documentation"],
+      "optionalRoutes": ["roadmap"],
+      "dependencies": [],
+      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "release",
+      "skillFile": "skills/release/SKILL.md",
+      "requiredRoutes": ["release"],
+      "optionalRoutes": ["validate", "github-write", "ci-inspect"],
+      "dependencies": ["validation-quality"],
+      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+    },
+    {
+      "id": "parallel-execution",
+      "skillFile": "skills/parallel-execution/SKILL.md",
+      "requiredRoutes": [],
+      "optionalRoutes": [],
+      "dependencies": [],
+      "referenceFiles": ["shared/references/parallel-execution-policy-verbatim.md"],
+      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "role": "cross-cutting",
+      "loadPolicy": {
+        "onDemand": true,
+        "autoAttachWhenApplicable": true,
+        "loadOnlyReferencedSharedRoutes": true,
+        "loadFullReferenceOnlyForAuditOrUncoveredEdgeCase": true
+      }
+    },
+    {
+      "id": "local-git-workspace",
+      "skillFile": "skills/local-git-workspace/SKILL.md",
+      "requiredRoutes": [],
+      "optionalRoutes": [],
+      "dependencies": [],
+      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": true},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "role": "cross-cutting",
+      "loadPolicy": {
+        "onDemand": true,
+        "autoAttachWhenApplicable": true,
+        "runBeforeFirstLocalGitCommand": true,
+        "onePreflightPerWorkspace": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
+    },
+    {
+      "id": "chat-recovery",
+      "skillFile": "skills/chat-recovery/SKILL.md",
+      "requiredRoutes": ["recovery", "delegation"],
+      "optionalRoutes": ["github-read", "ci-inspect", "validate", "audit"],
+      "dependencies": ["management-delegation"],
+      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "role": "cross-cutting",
+      "loadPolicy": {
+        "onDemand": true,
+        "autoAttachWhenApplicable": true,
+        "requiresFullWorkspaceInventoryBeforeMutation": true,
+        "requiresIdempotentContinuationPrompt": true,
+        "promptOnlyResponse": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
+    }
+  ]
+}

@@ -5,8 +5,8 @@ A repository-agnostic hierarchical skill system.
 ```text
 SKILL.md                 main global directives
 orchestrator/SKILL.md    the single orchestrator
-skills/<name>/SKILL.md   individual skills selected on demand
-shared/                  canonical sources, policies, catalogs, profiles, references, and manifests
+skills/<name>/SKILL.md   individual and cross-cutting skills selected on demand
+shared/                  canonical sources, policies, catalogs, profiles, and manifests
 ```
 
 ## Execution model
@@ -14,29 +14,30 @@ shared/                  canonical sources, policies, catalogs, profiles, refere
 1. Load `SKILL.md`.
 2. Load `orchestrator/SKILL.md`.
 3. The orchestrator selects one primary skill and only the supporting skills needed for correctness.
-4. Before any local Git command, it auto-attaches `skills/local-git-workspace/SKILL.md` and normalizes ownership for the root runtime.
-5. When useful independent work exists, it auto-attaches `skills/parallel-execution/SKILL.md` as a cross-cutting controller.
-6. Selected skills read only their declared routes from `shared/manifests/routes.json`.
-7. Canonical texts are referenced once from `shared/`; they are not duplicated inside the orchestrator or skill wrappers.
+4. Cross-cutting skills attach automatically when applicable:
+   - `parallel-execution` for safe concurrent work;
+   - `local-git-workspace` before local Git;
+   - `chat-recovery` when a delegated chat stalls, is stopped, disconnects, truncates its response, or leaves uncertain execution state.
+5. Selected skills read their declared routes from `shared/manifests/routes.json`.
+6. Canonical texts are referenced once from `shared/sources/`; they are not copied into the orchestrator or skill wrappers.
 
-`local-git-workspace` resolves the active repository root without Git, runs recursive ownership normalization once per workspace, verifies local Git access, and never uses `safe.directory` as the default bypass.
+## Interrupted-chat recovery
 
-`parallel-execution` does not replace the primary skill and does not authorize side effects. It constructs the dependency and resource graph, parallelizes independent work, and serializes real dependencies, shared-resource conflicts, tool restrictions, ordered external effects, and the local Git ownership preflight.
+Before a resumed chat generates or changes files, `chat-recovery` requires a recursive inventory of every file and directory inside the active workspace. Existing tracked, untracked, ignored, hidden, generated, temporary, binary, backup, patch, manifest, lock, and output files are inspected and reused when valid. Missing output from the interrupted chat is not treated as proof that work was not written to disk.
+
+The recovery prompt must be idempotent: preserve verified work, prohibit unnecessary regeneration or rewriting, validate current bases, and continue only unresolved work from the last reliable checkpoint.
 
 ## Invariants
 
 - Exactly one main prompt and one orchestrator.
 - Exactly one repository `README.md`.
-- Individual skills live only under `skills/<name>/`.
-- Cross-cutting skills are still individual skills and are directed by the orchestrator.
+- Individual and cross-cutting skills live only under `skills/<name>/`.
 - No repository, branch, framework, product, or organization is hardcoded.
-- The local execution environment is expected to run as root.
-- Local Git ownership repair is restricted to the canonical active repository root.
 - Remote GitHub reads and writes use the GitHub connector.
-- Local `git` is local-only.
+- Local `git` is local-only and runs after ownership preflight.
 - GitHub Read and Write catalogs remain verbatim.
-- The user-provided parallel-execution policy remains preserved verbatim under `shared/references/`.
 - No GitHub workflows are included.
+- Returned or interrupted delegated work produces one prompt-only code block with no external commentary.
 
 ## Validate
 
