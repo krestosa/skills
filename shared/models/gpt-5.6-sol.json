@@ -77,21 +77,16 @@
     "routineCallNarration": false
   },
   "validation": {
-    "code": [
-      "targetedTests",
-      "typeOrLintWhenApplicable",
-      "affectedBuild",
-      "minimalSmokeWhenNeeded"
+    "minimumEvalCases": 12,
+    "evalRequiredFields": [
+      "id",
+      "category",
+      "request",
+      "assertions"
     ],
-    "visual": [
-      "render",
-      "clipping",
-      "spacing",
-      "missingContent",
-      "responsiveness",
-      "consistency"
-    ],
-    "cannotRunBehavior": "explain-and-use-next-best-check"
+    "evalNonEmptyArrayFields": [
+      "assertions"
+    ]
   },
   "referenceProvenance": "user-supplied-guidance",
   "integrity": {
