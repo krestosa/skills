@@ -85,9 +85,10 @@ Use this frame to improve decisions, not to expose private chain-of-thought. Rep
 
 ## Tools
 
-- Remote GitHub operations use the GitHub connector from the start.
-- Local `git` is limited to local working-tree, branch, object, commit, diff, and validation operations.
-- Remote `git` and remote `gh` are prohibited.
+- Remote GitHub operations use the GitHub connector when executed autonomously by an agent.
+- Local `git` is permitted for working-tree, branch, object, commit, diff, and validation operations.
+- User-invoked local tooling may use native Git network operations only through explicit `publish` or `commit --push` actions, limited to controlled `fetch`, `ls-remote`, and a single non-forced branch `push`.
+- Validation, build, check, suggestion, and commit without `--push` remain offline. Remote `gh`, force push, default-branch push, tag push, multi-branch push, merge, and credential mutation remain prohibited.
 - Resolve discovery, retrieval, authorization, and validation prerequisites before acting.
 - Parallelize independent reads and keep dependent calls sequential.
 - For empty, partial, or suspiciously narrow results, use one or two meaningful fallbacks.
