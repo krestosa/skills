@@ -8,6 +8,8 @@
     "dist"
   ],
   "declaredFiles": [
+    ".gitattributes",
+    ".gitignore",
     "orchestrator/delegation-envelope.schema.json"
   ],
   "inventoryCollections": [

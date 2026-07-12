@@ -27,9 +27,19 @@
     "flatOutputs": 25
   },
   "inventory": {
-    "count": 91,
-    "sha256": "93960fea3ac8e72a93e788966beef5dbdefba7d9d2c9dc4363397e42b5fc4784",
+    "count": 93,
+    "sha256": "1f08c01fa3b87d1d39aab7a5c3d20a33912bf46247ceec96a60b4a566cea7b15",
     "files": [
+      {
+        "path": ".gitattributes",
+        "sha256": "d711b6ba64c7208f3059111e2a74a2453348584bef1fec237198ad08befe28b9",
+        "bytes": 20
+      },
+      {
+        "path": ".gitignore",
+        "sha256": "2ed705321569bed53afe8d2c5d6c5d7bf8226f7f6d36c0e7dee48c845830e78a",
+        "bytes": 385
+      },
       {
         "path": "README.md",
         "sha256": "11d96c5619b533df2406eafffae88b2ed387371ffd6e04b3f6e570923b266cf8",
@@ -237,8 +247,8 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "4f64f49f1694bfce9d94d907548ab15991139c8ba198a882a4e14b5a9b7db5e0",
-        "bytes": 3377
+        "sha256": "dfcac96a2cff916ac86c8af628de663b71528cd57c0b7fd43045e28d6bc83bda",
+        "bytes": 3533
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
