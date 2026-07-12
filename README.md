@@ -13,13 +13,46 @@ shared/                  canonical sources, policies, catalogs, profiles, and ma
 
 1. Load `SKILL.md`.
 2. Load `orchestrator/SKILL.md`.
-3. The orchestrator selects one primary skill and only the supporting skills needed for correctness.
-4. Cross-cutting skills attach automatically when applicable:
+3. Resolve the user-centered human good and concrete end purpose.
+4. The orchestrator selects one primary skill and only the supporting skills needed for correctness.
+5. Cross-cutting skills attach automatically when applicable:
+   - `practical-reasoning` for Eudaimonia, Telos, Ergon, Phronesis, and Arete;
    - `parallel-execution` for safe concurrent work;
    - `local-git-workspace` before local Git;
    - `chat-recovery` when a delegated chat stalls, is stopped, disconnects, truncates its response, or leaves uncertain execution state.
-5. Selected skills read their declared routes from `shared/manifests/routes.json`.
-6. Canonical texts are referenced once from `shared/sources/`; they are not copied into the orchestrator or skill wrappers.
+6. Selected skills read their declared routes from `shared/manifests/routes.json`.
+7. Canonical texts are referenced once from `shared/sources/`; they are not copied into the orchestrator or skill wrappers.
+
+## Practical reasoning
+
+The system preserves its existing strengths in function and execution quality:
+
+```text
+Ergon  → what the system must do
+Arete  → how well it must do it
+```
+
+The cross-cutting reasoning layer adds:
+
+```text
+Eudaimonia → the legitimate human good ultimately served
+Telos      → the concrete end state and why it matters
+Phronesis  → when and how to adapt under real circumstances
+```
+
+Operationally:
+
+```text
+Eudaimonia frames the user benefit.
+Telos directs the work.
+Ergon defines the required functions.
+Phronesis adapts tactics when evidence changes.
+Arete establishes and verifies the quality bar.
+```
+
+The framework is behavioral, not decorative. It prevents literal completion that misses the real purpose, rigid plans contradicted by evidence, technically excellent work that wastes or harms the user, good intentions without functional delivery, and overengineering beyond the required end.
+
+It does not authorize paternalistic replacement of the user's goals. Explicit user values, authorization, safety, preservation, truthfulness, and prohibitions remain invariants.
 
 ## Interrupted-chat recovery
 
@@ -40,6 +73,7 @@ The recovery prompt must be idempotent: preserve verified work, reuse every vali
 - GitHub Read and Write catalogs remain verbatim.
 - No GitHub workflows are included.
 - Returned or interrupted delegated work produces one prompt-only code block with no external commentary.
+- Practical reasoning never grants side effects or weakens authorization, safety, evidence, or quality requirements.
 
 ## Validate
 

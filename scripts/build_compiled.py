@@ -41,6 +41,7 @@ default_ids = [item["id"] for item in REGISTRY["skills"]]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--skills", nargs="*", default=default_ids)
+parser.add_argument("--without-practical-reasoning", action="store_true")
 parser.add_argument("--without-parallel", action="store_true")
 parser.add_argument("--without-local-git", action="store_true")
 parser.add_argument("--without-chat-recovery", action="store_true")
@@ -49,6 +50,7 @@ args = parser.parse_args()
 
 selected = list(dict.fromkeys(args.skills))
 for cross_cutting, disabled in [
+    ("practical-reasoning", args.without_practical_reasoning),
     ("parallel-execution", args.without_parallel),
     ("local-git-workspace", args.without_local_git),
     ("chat-recovery", args.without_chat_recovery),

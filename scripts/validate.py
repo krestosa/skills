@@ -33,14 +33,24 @@ def digest(path: Path) -> str:
 
 
 required = [
-    ROOT / "README.md", ROOT / "SKILL.md", ROOT / "orchestrator/SKILL.md",
-    ROOT / "orchestrator/registry.json", ROOT / "orchestrator/delegation-envelope.schema.json",
-    ROOT / "scripts/build_chatgpt_flat.py", ROOT / "scripts/build_compiled.py",
-    ROOT / "scripts/validate_gpt56.py", ROOT / "scripts/verify_lossless.py",
-    SHARED / "manifests/routes.json", SHARED / "manifests/source-index.json",
-    SHARED / "evals/parallel-execution.json", SHARED / "evals/local-git-workspace.json",
-    SHARED / "evals/chat-recovery.json", SHARED / "references/parallel-execution-policy-verbatim.md",
+    ROOT / "README.md",
+    ROOT / "SKILL.md",
+    ROOT / "orchestrator/SKILL.md",
+    ROOT / "orchestrator/registry.json",
+    ROOT / "orchestrator/delegation-envelope.schema.json",
+    ROOT / "scripts/build_chatgpt_flat.py",
+    ROOT / "scripts/build_compiled.py",
+    ROOT / "scripts/validate_gpt56.py",
+    ROOT / "scripts/verify_lossless.py",
+    SHARED / "manifests/routes.json",
+    SHARED / "manifests/source-index.json",
+    SHARED / "evals/parallel-execution.json",
+    SHARED / "evals/local-git-workspace.json",
+    SHARED / "evals/chat-recovery.json",
+    SHARED / "evals/practical-reasoning.json",
+    SHARED / "references/parallel-execution-policy-verbatim.md",
     ROOT / "skills/chat-recovery/SKILL.md",
+    ROOT / "skills/practical-reasoning/SKILL.md",
 ]
 for path in required:
     require(path)
@@ -59,12 +69,38 @@ if "orchestrator/SKILL.md" not in main:
     errors.append("main does not load orchestrator")
 if re.search(r"skills/[a-z0-9-]+/SKILL\.md", main):
     errors.append("main loads individual skill")
+
 for marker in [
-    "Select one primary skill", "Do not load all skills preemptively",
-    "Attach `chat-recovery`", "Attach `local-git-workspace`", "Attach `parallel-execution`",
-    "inventory every accessible filesystem entry", "begin from `/`",
-    "no date, Git, repository, workspace, owner, extension, or task-origin filter",
+    "## Practical reasoning",
+    "Eudaimonia",
+    "Telos",
+    "Ergon",
+    "Phronesis",
+    "Arete",
+    "Do not moralize, paternalistically replace the user's goals",
+    "Do not expose private chain-of-thought",
+]:
+    if marker not in main:
+        errors.append("main practical reasoning missing " + marker)
+
+for marker in [
+    "Select one primary skill",
+    "Do not load all skills preemptively",
+    "Attach `practical-reasoning`",
+    "## Practical reasoning attachment",
+    "## Pre-action gate",
+    "Eudaimonia:",
+    "Telos:",
+    "Ergon:",
+    "Phronesis:",
+    "Arete:",
+    "Do not expose private chain-of-thought",
+    "Attach `chat-recovery`",
+    "Attach `local-git-workspace`",
+    "Attach `parallel-execution`",
+    "Cross-cutting auto-attached skills do not count",
     "emit exactly one self-contained prompt inside one code block",
+    "no text before or after that code block",
 ]:
     if marker not in orch:
         errors.append("orchestrator missing " + marker)
@@ -73,20 +109,31 @@ routes = load(SHARED / "manifests/routes.json").get("routes", {})
 registry = load(ROOT / "orchestrator/registry.json")
 skills = registry.get("skills", [])
 ids = [item.get("id") for item in skills]
-if len(ids) != 17 or len(ids) != len(set(ids)):
-    errors.append("expected 17 unique skills")
+
+if registry.get("schemaVersion") != 8:
+    errors.append("registry schema version mismatch")
+if len(ids) != 18 or len(ids) != len(set(ids)):
+    errors.append("expected 18 unique skills")
 
 headings = [
-    "## Role", "## Personality", "## Collaboration style", "## Goal",
-    "## Success criteria", "## Select when", "## Exclude when",
-    "## Shared routes", "## Output", "## Stop rules",
+    "## Role",
+    "## Personality",
+    "## Collaboration style",
+    "## Goal",
+    "## Success criteria",
+    "## Select when",
+    "## Exclude when",
+    "## Shared routes",
+    "## Output",
+    "## Stop rules",
 ]
 for item in skills:
     skill_id = item.get("id")
-    path = ROOT / f"skills/{skill_id}/SKILL.md"
-    require(path)
-    if item.get("skillFile") != f"skills/{skill_id}/SKILL.md":
+    expected_path = f"skills/{skill_id}/SKILL.md"
+    path = ROOT / expected_path
+    if item.get("skillFile") != expected_path:
         errors.append(f"{skill_id} path mismatch")
+    require(path)
     text = path.read_text(encoding="utf-8", errors="ignore") if path.is_file() else ""
     for heading in headings:
         if heading not in text:
@@ -101,10 +148,157 @@ for item in skills:
         errors.append(f"{skill_id} not on-demand")
 
 selection = registry.get("selectionPolicy", {})
-if selection.get("crossCuttingSkillIds") != ["parallel-execution", "local-git-workspace", "chat-recovery"]:
+expected_cross_cutting = [
+    "parallel-execution",
+    "local-git-workspace",
+    "chat-recovery",
+    "practical-reasoning",
+]
+if selection.get("crossCuttingSkillIds") != expected_cross_cutting:
     errors.append("cross-cutting registry mismatch")
 if not selection.get("ordinaryActiveSkillTarget", {}).get("excludesCrossCutting"):
     errors.append("cross-cutting target mismatch")
+
+reasoning_contract = registry.get("practicalReasoningContract", {})
+if reasoning_contract.get("operationalOrder") != [
+    "eudaimonia", "telos", "ergon", "phronesis", "arete"
+]:
+    errors.append("practical reasoning order mismatch")
+for key in [
+    "appliesToAllSkills",
+    "phronesisIsContinuousFeedback",
+    "noPaternalisticGoalSubstitution",
+    "doesNotAuthorizeSideEffects",
+    "doesNotWeakenInvariants",
+    "doesNotRequireChainOfThoughtDisclosure",
+]:
+    if not reasoning_contract.get(key):
+        errors.append("practical reasoning contract " + key)
+mapping = reasoning_contract.get("deriveWithoutDuplicatingSkillText", {})
+if set(mapping) != {"eudaimonia", "telos", "ergon", "phronesis", "arete"}:
+    errors.append("practical reasoning derivation mapping mismatch")
+
+practical = next((item for item in skills if item.get("id") == "practical-reasoning"), {})
+practical_auto = selection.get("autoAttach", {}).get("practical-reasoning", {})
+if practical.get("role") != "cross-cutting":
+    errors.append("practical reasoning role mismatch")
+if any(practical.get("capabilities", {}).values()):
+    errors.append("practical reasoning must not grant capabilities")
+if practical.get("requiredRoutes") or practical.get("optionalRoutes"):
+    errors.append("practical reasoning routes must be empty")
+for key in [
+    "autoAttachWhenApplicable",
+    "lightweightGlobalFrameAlwaysActive",
+    "loadFullSkillForNonTrivialTasks",
+]:
+    if not practical.get("loadPolicy", {}).get(key):
+        errors.append("practical reasoning load policy " + key)
+if practical_auto.get("default") != "attach-unless-trivial":
+    errors.append("practical reasoning attach default")
+for key in [
+    "lightweightGlobalFrameAlwaysActive",
+    "preservesErgonAndArete",
+    "addsEudaimoniaTelosAndPhronesis",
+    "doesNotAuthorizeSideEffects",
+    "doesNotCountTowardOrdinaryActiveSkillTarget",
+]:
+    if not practical_auto.get(key):
+        errors.append("practical reasoning auto-attach " + key)
+
+practical_text = (ROOT / "skills/practical-reasoning/SKILL.md").read_text(encoding="utf-8")
+for marker in [
+    "## Five-part frame",
+    "Eudaimonia — the human good ultimately served",
+    "Telos — the end purpose and why",
+    "Ergon — the function and required work",
+    "Phronesis — practical judgment and adaptation",
+    "Arete — excellence and quality of performance",
+    "## Pre-action gate",
+    "## Failure modes to prevent",
+    "Ergon without Telos",
+    "Arete without Eudaimonia",
+    "Do not moralize, manipulate, or broaden the objective",
+]:
+    if marker not in practical_text:
+        errors.append("practical reasoning skill missing " + marker)
+
+management_text = (ROOT / "skills/management-delegation/SKILL.md").read_text(encoding="utf-8")
+for marker in [
+    "## Workstream reasoning contract",
+    "Eudaimonia:",
+    "Telos:",
+    "Ergon:",
+    "Phronesis:",
+    "Arete:",
+    "## Returned-result procedure",
+    "## Interrupted-chat procedure",
+    "return exactly one prompt inside one code block and nothing else",
+]:
+    if marker not in management_text:
+        errors.append("delegation reasoning contract missing " + marker)
+
+# Existing cross-cutting invariants.
+parallel = next((item for item in skills if item.get("id") == "parallel-execution"), {})
+parallel_auto = selection.get("autoAttach", {}).get("parallel-execution", {})
+if parallel.get("role") != "cross-cutting" or any(parallel.get("capabilities", {}).values()):
+    errors.append("parallel capability boundary")
+if parallel.get("requiredRoutes") or parallel.get("optionalRoutes"):
+    errors.append("parallel routes must be empty")
+if not parallel.get("loadPolicy", {}).get("autoAttachWhenApplicable"):
+    errors.append("parallel load policy")
+if parallel_auto.get("default") != "attach-when-applicable":
+    errors.append("parallel attach default")
+parallel_ref = SHARED / "references/parallel-execution-policy-verbatim.md"
+if (
+    digest(parallel_ref)
+    != "804cc93be433bf159a7ac57d0778fbb72806c8306940343657079e8aa5db8126"
+    or len(parallel_ref.read_bytes()) != 12903
+):
+    errors.append("parallel reference mismatch")
+
+local_git = next((item for item in skills if item.get("id") == "local-git-workspace"), {})
+local_auto = selection.get("autoAttach", {}).get("local-git-workspace", {})
+if local_git.get("role") != "cross-cutting":
+    errors.append("local Git role mismatch")
+if local_git.get("capabilities") != {
+    "remoteReads": False, "remoteWrites": False, "localWrites": True
+}:
+    errors.append("local Git capability boundary")
+if local_git.get("requiredRoutes") or local_git.get("optionalRoutes"):
+    errors.append("local Git routes must be empty")
+for key in ["autoAttachWhenApplicable", "runBeforeFirstLocalGitCommand", "onePreflightPerWorkspace"]:
+    if not local_git.get("loadPolicy", {}).get(key):
+        errors.append("local Git load policy " + key)
+for key in [
+    "requiresRootRuntime",
+    "runBeforeFirstLocalGitCommand",
+    "onePreflightPerWorkspace",
+    "prohibitsSafeDirectoryFallback",
+    "authorizedLocalMetadataRepairOnly",
+    "doesNotAuthorizeRemoteWrites",
+    "doesNotCountTowardOrdinaryActiveSkillTarget",
+]:
+    if not local_auto.get(key):
+        errors.append("local Git auto-attach " + key)
+if local_auto.get("default") != "attach-before-local-git":
+    errors.append("local Git attach default")
+if local_auto.get("ownershipCommand") != 'sudo -n chown -R "$(id -u):$(id -g)" -- "$repo_root"':
+    errors.append("ownership command mismatch")
+if local_auto.get("rootFallbackWhenSudoUnavailable") != 'chown -R "$(id -u):$(id -g)" -- "$repo_root"':
+    errors.append("ownership fallback mismatch")
+
+local_text = (ROOT / "skills/local-git-workspace/SKILL.md").read_text(encoding="utf-8")
+for marker in [
+    "realpath -e",
+    'sudo -n chown -R "$(id -u):$(id -g)" -- "$repo_root"',
+    "ROOT_RUNTIME_REQUIRED",
+    "LOCAL_GIT_OWNERSHIP_REPAIR_FAILED",
+    "git config --global --add safe.directory",
+    "exclusive metadata lock",
+    "Remote GitHub access remains connector-only",
+]:
+    if marker not in local_text:
+        errors.append("local Git skill missing " + marker)
 
 chat = next((item for item in skills if item.get("id") == "chat-recovery"), {})
 chat_auto = selection.get("autoAttach", {}).get("chat-recovery", {})
@@ -113,21 +307,29 @@ if chat.get("role") != "cross-cutting" or any(chat.get("capabilities", {}).value
 if chat.get("dependencies") != ["management-delegation"]:
     errors.append("chat recovery dependency mismatch")
 for key in [
-    "autoAttachWhenApplicable", "requiresFullEnvironmentInventoryBeforeMutation",
-    "requiresIdempotentContinuationPrompt", "promptOnlyResponse",
+    "autoAttachWhenApplicable",
+    "requiresFullEnvironmentInventoryBeforeMutation",
+    "requiresIdempotentContinuationPrompt",
+    "promptOnlyResponse",
 ]:
     if not chat.get("loadPolicy", {}).get(key):
         errors.append("chat recovery load policy " + key)
 for key in [
-    "requiresFullEnvironmentInventoryBeforeMutation", "discoversAllMountedFilesystems",
-    "noDateFilter", "noGitRepositoryOrWorkspaceFilter",
+    "requiresFullEnvironmentInventoryBeforeMutation",
+    "discoversAllMountedFilesystems",
+    "noDateFilter",
+    "noGitRepositoryOrWorkspaceFilter",
     "inventoryIncludesAllAccessibleFilesystemEntries",
-    "inventoryIncludesSystemUserWorkspaceTemporaryCacheGeneratedHiddenBinarySymlinkAndOutsideRepositoryFiles",
-    "recordsExcludedVirtualFilesystems", "recordsInaccessiblePaths",
-    "doesNotFollowSymlinksRecursively", "reuseExistingValidFiles",
-    "prohibitsUnnecessaryGenerationAndRegeneration", "unknownStateIsNotNotStarted",
-    "requiresIdempotentContinuationPrompt", "promptOnlyResponse",
-    "doesNotAuthorizeSideEffects", "doesNotCountTowardOrdinaryActiveSkillTarget",
+    "recordsExcludedVirtualFilesystems",
+    "recordsInaccessiblePaths",
+    "doesNotFollowSymlinksRecursively",
+    "reuseExistingValidFiles",
+    "prohibitsUnnecessaryGenerationAndRegeneration",
+    "unknownStateIsNotNotStarted",
+    "requiresIdempotentContinuationPrompt",
+    "promptOnlyResponse",
+    "doesNotAuthorizeSideEffects",
+    "doesNotCountTowardOrdinaryActiveSkillTarget",
 ]:
     if not chat_auto.get(key):
         errors.append("chat recovery auto-attach " + key)
@@ -136,39 +338,31 @@ if chat_auto.get("inventoryBoundary") != "accessible-runtime-filesystem":
 if chat_auto.get("inventoryStartsAt") != "/":
     errors.append("chat recovery inventory start")
 
-chat_text = (ROOT / "skills/chat-recovery/SKILL.md").read_text(encoding="utf-8")
-for marker in [
-    "every accessible filesystem entry", "execution environment root `/`",
-    "Apply no date filter", "Apply no Git filter", "outside-repository",
-    "Do not follow symlinks recursively", "Record inaccessible paths",
-    "procfs, sysfs, devtmpfs", "complete accessible runtime filesystem",
-    "Existing files are evidence", "hash lazily",
-    "exactly one self-contained recovery or continuation prompt",
-]:
-    if marker not in chat_text:
-        errors.append("chat recovery skill missing " + marker)
-
-management = (ROOT / "skills/management-delegation/SKILL.md").read_text(encoding="utf-8")
-for marker in [
-    "## Interrupted-chat procedure", "Attach `chat-recovery`",
-    "inventory every accessible filesystem entry",
-    "Apply no date, Git, repository, workspace, owner, extension, or task-origin filter",
-    "return exactly one prompt inside one code block and nothing else",
-]:
-    if marker not in management:
-        errors.append("delegation recovery contract missing " + marker)
-
+parallel_cases = load(SHARED / "evals/parallel-execution.json").get("cases", [])
+local_cases = load(SHARED / "evals/local-git-workspace.json").get("cases", [])
 chat_cases = load(SHARED / "evals/chat-recovery.json").get("cases", [])
-case_ids = {item.get("id") for item in chat_cases}
-for required_case in [
-    "outside-workspace-artifact", "old-artifact-no-date-filter",
-    "git-independent-coverage", "virtual-filesystems",
-    "symlink-loop", "inaccessible-path",
-]:
-    if required_case not in case_ids:
-        errors.append("missing chat recovery case " + required_case)
-if len(case_ids) < 18:
+practical_cases = load(SHARED / "evals/practical-reasoning.json").get("cases", [])
+if len({item.get("id") for item in parallel_cases}) < 10:
+    errors.append("parallel eval coverage")
+if len({item.get("id") for item in local_cases}) < 10:
+    errors.append("local Git eval coverage")
+if len({item.get("id") for item in chat_cases}) < 18:
     errors.append("chat recovery eval coverage")
+if len({item.get("id") for item in practical_cases}) < 20:
+    errors.append("practical reasoning eval coverage")
+for required_case in [
+    "literal-output-misses-purpose",
+    "strong-function-wrong-end",
+    "excellent-artifact-user-cost",
+    "new-evidence-invalidates-plan",
+    "invariant-versus-tactic",
+    "paternalistic-overreach",
+    "delegated-prompt",
+    "no-chain-of-thought",
+]:
+    if required_case not in {item.get("id") for item in practical_cases}:
+        errors.append("missing practical reasoning case " + required_case)
+
 
 def catalog_payload(path: Path) -> bytes:
     data = path.read_bytes()
@@ -176,9 +370,18 @@ def catalog_payload(path: Path) -> bytes:
     end = b"<!-- VERBATIM_CATALOG_END -->\n"
     return data[data.index(begin) + len(begin):data.index(end)].rstrip(b"\n")
 
+
 for rel, count, expected_hash in [
-    ("catalogs/github-read-verbatim.md", 56, "610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e"),
-    ("catalogs/github-write-verbatim.md", 41, "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d"),
+    (
+        "catalogs/github-read-verbatim.md",
+        56,
+        "610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e",
+    ),
+    (
+        "catalogs/github-write-verbatim.md",
+        41,
+        "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d",
+    ),
 ]:
     path = SHARED / rel
     require(path)
@@ -193,37 +396,67 @@ for script, label in [
     (ROOT / "scripts/verify_lossless.py", "lossless"),
     (ROOT / "scripts/validate_gpt56.py", "GPT-5.6"),
 ]:
-    result = subprocess.run([sys.executable, str(script)], cwd=ROOT, text=True, capture_output=True)
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
     if result.returncode:
         errors.append(label + " validation failed:\n" + result.stdout + result.stderr)
 
-active = "\n".join([main, orch] + [(ROOT / item["skillFile"]).read_text(encoding="utf-8") for item in skills])
+active = "\n".join(
+    [main, orch]
+    + [(ROOT / item["skillFile"]).read_text(encoding="utf-8") for item in skills]
+)
 if "Remote GitHub operations use the GitHub connector" not in active:
     errors.append("connector boundary missing")
-if re.search(r"(?m)^\s*(git\s+(clone|fetch|pull|push|ls-remote)|gh\s+(api|repo|pr|issue|run|workflow|release|search))\b", active):
+if re.search(
+    r"(?m)^\s*(git\s+(clone|fetch|pull|push|ls-remote)|gh\s+(api|repo|pr|issue|run|workflow|release|search))\b",
+    active,
+):
     errors.append("remote git/gh command in active hierarchy")
 
 static = {
-    "README.md", "SKILL.md", "orchestrator/SKILL.md", "orchestrator/registry.json",
-    "orchestrator/delegation-envelope.schema.json", "scripts/build_chatgpt_flat.py",
-    "scripts/build_compiled.py", "scripts/validate.py", "scripts/validate_gpt56.py",
-    "scripts/verify_lossless.py", "shared/catalogs/github-read-verbatim.md",
-    "shared/catalogs/github-write-verbatim.md", "shared/contracts/authorization-envelope.schema.json",
-    "shared/contracts/connector-contracts.md", "shared/core/identity.md",
-    "shared/core/project-authority-and-roles.md", "shared/core/states-and-approval.md",
-    "shared/evals/gpt-5.6-sol.json", "shared/evals/parallel-execution.json",
-    "shared/evals/local-git-workspace.json", "shared/evals/chat-recovery.json",
-    "shared/manifests/routes.json", "shared/manifests/source-index.json",
-    "shared/models/gpt-5.6-sol.json", "shared/policies/connector-native-integrity.md",
-    "shared/policies/github-write-safety.md", "shared/policies/gpt-5.6-sol.md",
+    "README.md",
+    "SKILL.md",
+    "orchestrator/SKILL.md",
+    "orchestrator/registry.json",
+    "orchestrator/delegation-envelope.schema.json",
+    "scripts/build_chatgpt_flat.py",
+    "scripts/build_compiled.py",
+    "scripts/validate.py",
+    "scripts/validate_gpt56.py",
+    "scripts/verify_lossless.py",
+    "shared/catalogs/github-read-verbatim.md",
+    "shared/catalogs/github-write-verbatim.md",
+    "shared/contracts/authorization-envelope.schema.json",
+    "shared/contracts/connector-contracts.md",
+    "shared/core/identity.md",
+    "shared/core/project-authority-and-roles.md",
+    "shared/core/states-and-approval.md",
+    "shared/evals/gpt-5.6-sol.json",
+    "shared/evals/parallel-execution.json",
+    "shared/evals/local-git-workspace.json",
+    "shared/evals/chat-recovery.json",
+    "shared/evals/practical-reasoning.json",
+    "shared/manifests/routes.json",
+    "shared/manifests/source-index.json",
+    "shared/models/gpt-5.6-sol.json",
+    "shared/policies/connector-native-integrity.md",
+    "shared/policies/github-write-safety.md",
+    "shared/policies/gpt-5.6-sol.md",
     "shared/policies/network-and-transport.md",
     "shared/policies/repository-context-and-authorization.md",
-    "shared/profiles/electron.json", "shared/profiles/generic.json",
-    "shared/profiles/node.json", "shared/profiles/rust.json",
+    "shared/profiles/electron.json",
+    "shared/profiles/generic.json",
+    "shared/profiles/node.json",
+    "shared/profiles/rust.json",
     "shared/profiles/typescript.json",
     "shared/references/gpt-5.6-sol-prompting-guidance.md",
     "shared/references/parallel-execution-policy-verbatim.md",
-    "shared/templates/gpt-5.6-prompt-contract.md", "shared/templates/prompts.md",
+    "shared/templates/gpt-5.6-prompt-contract.md",
+    "shared/templates/prompts.md",
 }
 expected = static | {item["skillFile"] for item in skills}
 for item in load(SHARED / "manifests/source-index.json").get("sources", []):
@@ -236,8 +469,10 @@ for item in load(SHARED / "manifests/source-index.json").get("sources", []):
 actual = {
     path.relative_to(ROOT).as_posix()
     for path in ROOT.rglob("*")
-    if path.is_file() and path != INTEGRITY
-    and "dist" not in path.parts and "__pycache__" not in path.parts
+    if path.is_file()
+    and path != INTEGRITY
+    and "dist" not in path.parts
+    and "__pycache__" not in path.parts
     and ".git" not in path.parts
 }
 if actual != expected:
@@ -250,55 +485,108 @@ integrity = load(INTEGRITY)
 inventory_text = "\n".join(sorted(expected)) + "\n"
 if integrity.get("inventory", {}).get("count") != len(expected):
     errors.append("integrity inventory count")
-if integrity.get("inventory", {}).get("sha256") != hashlib.sha256(inventory_text.encode()).hexdigest():
+if integrity.get("inventory", {}).get("sha256") != hashlib.sha256(
+    inventory_text.encode()
+).hexdigest():
     errors.append("integrity inventory hash")
-if integrity.get("individualSkillCount") != 17 or integrity.get("crossCuttingSkillCount") != 3:
-    errors.append("integrity skill counts")
+if integrity.get("individualSkillCount") != 18:
+    errors.append("integrity individual skill count")
+if integrity.get("crossCuttingSkillCount") != 4:
+    errors.append("integrity cross-cutting skill count")
+
+reasoning_integrity = integrity.get("practicalReasoning", {})
+for key in [
+    "autoAttachUnlessTrivial",
+    "lightweightGlobalFrameAlwaysActive",
+    "preservesErgonAndArete",
+    "addsEudaimoniaTelosAndPhronesis",
+    "phronesisContinuousFeedback",
+    "noPaternalisticGoalSubstitution",
+    "doesNotAuthorizeSideEffects",
+    "doesNotWeakenInvariants",
+    "doesNotRequireChainOfThoughtDisclosure",
+]:
+    if not reasoning_integrity.get(key):
+        errors.append("integrity practical reasoning " + key)
+if reasoning_integrity.get("evalCaseCount") != len(practical_cases):
+    errors.append("integrity practical reasoning eval count")
+if reasoning_integrity.get("operationalOrder") != [
+    "eudaimonia", "telos", "ergon", "phronesis", "arete"
+]:
+    errors.append("integrity practical reasoning order")
 
 chat_integrity = integrity.get("chatRecovery", {})
 for key in [
-    "autoAttachOnInterruptedDelegatedChat", "fullEnvironmentInventoryBeforeMutation",
-    "discoversAllMountedFilesystems", "noDateFilter",
-    "noGitRepositoryOrWorkspaceFilter", "includesAllAccessibleFilesystemEntries",
-    "recordsExcludedVirtualFilesystems", "recordsInaccessiblePaths",
-    "reuseExistingValidFiles", "prohibitsUnnecessaryGenerationAndRegeneration",
-    "unknownStateIsNotNotStarted", "idempotentContinuationPrompt", "promptOnlyResponse",
+    "autoAttachOnInterruptedDelegatedChat",
+    "fullEnvironmentInventoryBeforeMutation",
+    "discoversAllMountedFilesystems",
+    "noDateFilter",
+    "noGitRepositoryOrWorkspaceFilter",
+    "includesAllAccessibleFilesystemEntries",
+    "reuseExistingValidFiles",
+    "prohibitsUnnecessaryGenerationAndRegeneration",
+    "unknownStateIsNotNotStarted",
+    "idempotentContinuationPrompt",
+    "promptOnlyResponse",
 ]:
     if not chat_integrity.get(key):
         errors.append("integrity chat recovery " + key)
-if chat_integrity.get("inventoryBoundary") != "accessible-runtime-filesystem":
-    errors.append("integrity chat recovery boundary")
-if chat_integrity.get("inventoryStartsAt") != "/":
-    errors.append("integrity chat recovery start")
-if chat_integrity.get("evalCaseCount") != len(chat_cases):
-    errors.append("integrity chat recovery eval count")
 
 for item in integrity.get("protectedFiles", []):
     path = ROOT / item["path"]
     require(path)
-    if path.is_file() and (digest(path) != item["sha256"] or len(path.read_bytes()) != item["bytes"]):
+    if path.is_file() and (
+        digest(path) != item["sha256"]
+        or len(path.read_bytes()) != item["bytes"]
+    ):
         errors.append("protected file mismatch " + item["path"])
 
 with tempfile.TemporaryDirectory() as directory:
-    a, b = Path(directory) / "a.md", Path(directory) / "b.md"
-    for output in [a, b]:
+    compiled_a = Path(directory) / "a.md"
+    compiled_b = Path(directory) / "b.md"
+    for output in [compiled_a, compiled_b]:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts/build_compiled.py"), "--output", str(output)],
-            cwd=ROOT, text=True, capture_output=True,
+            [
+                sys.executable,
+                str(ROOT / "scripts/build_compiled.py"),
+                "--output",
+                str(output),
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
         )
         if result.returncode:
             errors.append("compiled build failed: " + result.stdout + result.stderr)
-    if a.exists() and b.exists() and a.read_bytes() != b.read_bytes():
+    if (
+        compiled_a.exists()
+        and compiled_b.exists()
+        and compiled_a.read_bytes() != compiled_b.read_bytes()
+    ):
         errors.append("compiled build nondeterministic")
+
     flat = Path(directory) / "flat"
     result = subprocess.run(
-        [sys.executable, str(ROOT / "scripts/build_chatgpt_flat.py"), "--output", str(flat)],
-        cwd=ROOT, text=True, capture_output=True,
+        [
+            sys.executable,
+            str(ROOT / "scripts/build_chatgpt_flat.py"),
+            "--output",
+            str(flat),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
     )
     if result.returncode:
         errors.append("flat build failed: " + result.stdout + result.stderr)
-    elif len(list(flat.iterdir())) > 25:
-        errors.append("flat build exceeds 25 files")
+    else:
+        flat_files = list(flat.iterdir())
+        if len(flat_files) > 25:
+            errors.append("flat build exceeds 25 files")
+        if not any(path.name.endswith("SKILLS-CROSS-CUTTING.md") for path in flat_files):
+            errors.append("flat build missing cross-cutting bundle")
+        if any("PRACTICAL-REASONING" in path.name for path in flat_files):
+            errors.append("practical reasoning must be inside cross-cutting bundle")
 
 if errors:
     print("VALIDATION: FAIL")
@@ -308,9 +596,13 @@ if errors:
 
 print("VALIDATION: PASS")
 print("individual_skills:", len(ids))
-print("cross_cutting_skills: 3")
+print("cross_cutting_skills: 4")
+print("practical_reasoning: eudaimonia-telos-ergon-phronesis-arete")
+print("practical_reasoning_evals:", len(practical_cases))
 print("chat_recovery: system-wide-inventory-before-mutation")
-print("chat_recovery_evals:", len(chat_cases))
+print("delegated_result_continuation: prompt-only")
+print("local_git_workspace: preflight-before-local-git")
+print("parallel_execution: auto-attach-when-applicable")
 print("canonical_sources: 15 lossless")
 print("github_read_entries: 56")
 print("github_write_entries: 41")

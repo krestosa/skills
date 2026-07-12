@@ -1,11 +1,11 @@
 {
-  "schemaVersion": 11,
+  "schemaVersion": 12,
   "rootSkill": "SKILL.md",
   "orchestrator": "orchestrator/SKILL.md",
   "orchestratorCount": 1,
   "readmeCount": 1,
-  "individualSkillCount": 17,
-  "crossCuttingSkillCount": 3,
+  "individualSkillCount": 18,
+  "crossCuttingSkillCount": 4,
   "sharedRoot": "shared",
   "canonicalSourceCount": 15,
   "canonicalSourceMutations": 0,
@@ -16,6 +16,28 @@
   "githubWriteCatalog": {
     "entries": 41,
     "payloadSha256": "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d"
+  },
+  "practicalReasoning": {
+    "skill": "skills/practical-reasoning/SKILL.md",
+    "evals": "shared/evals/practical-reasoning.json",
+    "evalCaseCount": 20,
+    "autoAttachUnlessTrivial": true,
+    "lightweightGlobalFrameAlwaysActive": true,
+    "operationalOrder": [
+      "eudaimonia",
+      "telos",
+      "ergon",
+      "phronesis",
+      "arete"
+    ],
+    "phronesisContinuousFeedback": true,
+    "preservesErgonAndArete": true,
+    "addsEudaimoniaTelosAndPhronesis": true,
+    "derivesPerSkillFrameWithoutDuplicatingSkillText": true,
+    "noPaternalisticGoalSubstitution": true,
+    "doesNotAuthorizeSideEffects": true,
+    "doesNotWeakenInvariants": true,
+    "doesNotRequireChainOfThoughtDisclosure": true
   },
   "parallelExecution": {
     "skill": "skills/parallel-execution/SKILL.md",
@@ -76,25 +98,36 @@
     "additionalDetailInsidePrompt": true,
     "preserveCompletedWork": true,
     "avoidRepeatingCompletedWork": true,
-    "ordinaryOutputContractOverridden": true
+    "ordinaryOutputContractOverridden": true,
+    "practicalReasoningPreserved": true
+  },
+  "flatBuild": {
+    "crossCuttingSkillsBundled": true,
+    "maxFiles": 25,
+    "expectedFiles": 23
   },
   "inventory": {
     "selfExcluded": "shared/manifests/integrity.json",
-    "count": 85,
-    "sha256": "c9437f0b38d967ccdc5bcb7c28f3152a0ed566122d5106389585bc939dccd6d4"
+    "count": 87,
+    "sha256": "ffa619679eb9afef84bf73746846624140133b87e172f35ac7adbb3b76bb2bd6"
   },
   "repositoryHardcoding": null,
   "githubWorkflows": false,
   "protectedFiles": [
     {
       "path": "README.md",
-      "sha256": "247b472563588d273395ffc268653d9b33a81072a66b347a6debf36985179db9",
-      "bytes": 2745
+      "sha256": "d26951871bea17906fa9ebaa32926650c33cfea3ab00d21e78110b21289ba84a",
+      "bytes": 4120
     },
     {
       "path": "SKILL.md",
-      "sha256": "a8ad035185b50929ed3145ca20cef30cac5b1bf39fce39dce5a6b445365df8a9",
-      "bytes": 4933
+      "sha256": "7ae671c155e9ce24a765898b1cd3161b6e30f82b2b92334b51e676edf8995c5f",
+      "bytes": 8072
+    },
+    {
+      "path": "orchestrator/SKILL.md",
+      "sha256": "1aa22b3e0c1712d6777aa11c9d4493e4fc20343616199a5dd690e0986c69e826",
+      "bytes": 17982
     },
     {
       "path": "orchestrator/delegation-envelope.schema.json",
@@ -102,14 +135,24 @@
       "bytes": 1638
     },
     {
+      "path": "orchestrator/registry.json",
+      "sha256": "ed94278df30069a4611e25e3b9007be4a44529d7983b1fb2af5cee13a3c9d109",
+      "bytes": 17789
+    },
+    {
       "path": "scripts/build_chatgpt_flat.py",
-      "sha256": "44327f089b151720ec5b5de8ccf7225af5fce8c1eeb26dcc51392271edb87b09",
-      "bytes": 2772
+      "sha256": "f6bb11bce8ecd72c205d20ade1b1f1d70f4ac37915838421b2e2efa5f0311e32",
+      "bytes": 3441
     },
     {
       "path": "scripts/build_compiled.py",
-      "sha256": "ccca66a01fa9c277f2d838fcdf7bbb8e0c0a3dd75d7a719b330de8daa8e1b875",
-      "bytes": 3906
+      "sha256": "449fe2042620fbc6a4af57ceb76406afeeb982a91b7151874f0a9b36ae5088cf",
+      "bytes": 4043
+    },
+    {
+      "path": "scripts/validate.py",
+      "sha256": "b9840f29cdea04fe674faddf765bcfe6c69cf4d71619670489ab8cd804198b5c",
+      "bytes": 22993
     },
     {
       "path": "scripts/validate_gpt56.py",
@@ -135,6 +178,11 @@
       "path": "shared/evals/parallel-execution.json",
       "sha256": "e71678fe0c5bd7860b0d86b002cad5fb9ec0996d5da97245288997c05f014c29",
       "bytes": 2164
+    },
+    {
+      "path": "shared/evals/practical-reasoning.json",
+      "sha256": "82865a71639e9d6fa04f1f7b6654f9e3a3ce39e170bf2162b4a740433696d1d2",
+      "bytes": 6014
     },
     {
       "path": "shared/manifests/routes.json",
@@ -187,6 +235,11 @@
       "bytes": 6032
     },
     {
+      "path": "skills/management-delegation/SKILL.md",
+      "sha256": "f18a8571ee11835ee17b5428871367cea3290de33bad5a3df0cb3db2280f29cd",
+      "bytes": 7492
+    },
+    {
       "path": "skills/parallel-execution/SKILL.md",
       "sha256": "1dd94a3369326ef48b9c2839cae80326c2d16056d2204420b0412be4b61824fa",
       "bytes": 8016
@@ -195,6 +248,11 @@
       "path": "skills/pr-review-merge/SKILL.md",
       "sha256": "4c68ba0a099f8a057652b3b33f730d3d480b43ef9885468ecad2863f521df1e1",
       "bytes": 1818
+    },
+    {
+      "path": "skills/practical-reasoning/SKILL.md",
+      "sha256": "f36bb68848f150340b143dac4fee9d1dcd3f44515fbd4590139563be5b04b13b",
+      "bytes": 10684
     },
     {
       "path": "skills/prompt-engineering/SKILL.md",

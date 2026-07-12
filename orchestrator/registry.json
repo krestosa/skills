@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "orchestrator": "orchestrator/SKILL.md",
   "shared": {
     "root": "shared",
@@ -7,6 +7,59 @@
     "modelPolicy": "shared/policies/gpt-5.6-sol.md",
     "readCatalog": "shared/catalogs/github-read-verbatim.md",
     "writeCatalog": "shared/catalogs/github-write-verbatim.md"
+  },
+  "practicalReasoningContract": {
+    "appliesToAllSkills": true,
+    "purpose": "preserve strong Ergon and Arete while adding Eudaimonia, Telos, and Phronesis as governing layers",
+    "operationalOrder": [
+      "eudaimonia",
+      "telos",
+      "ergon",
+      "phronesis",
+      "arete"
+    ],
+    "phronesisIsContinuousFeedback": true,
+    "deriveWithoutDuplicatingSkillText": {
+      "eudaimonia": [
+        "explicit user values",
+        "protected interests from main"
+      ],
+      "telos": [
+        "current request outcome",
+        "primary skill Goal"
+      ],
+      "ergon": [
+        "skill Role",
+        "requested deliverable",
+        "required routes"
+      ],
+      "phronesis": [
+        "Select when",
+        "Exclude when",
+        "current evidence",
+        "constraints",
+        "stop rules"
+      ],
+      "arete": [
+        "Success criteria",
+        "validation requirements"
+      ]
+    },
+    "protectedHumanInterestsWhenMaterial": [
+      "autonomy",
+      "time",
+      "work",
+      "privacy",
+      "safety",
+      "resources",
+      "accessibility",
+      "maintainability",
+      "future agency"
+    ],
+    "noPaternalisticGoalSubstitution": true,
+    "doesNotAuthorizeSideEffects": true,
+    "doesNotWeakenInvariants": true,
+    "doesNotRequireChainOfThoughtDisclosure": true
   },
   "selectionPolicy": {
     "primarySkillRequired": true,
@@ -23,9 +76,28 @@
     "crossCuttingSkillIds": [
       "parallel-execution",
       "local-git-workspace",
-      "chat-recovery"
+      "chat-recovery",
+      "practical-reasoning"
     ],
     "autoAttach": {
+      "practical-reasoning": {
+        "default": "attach-unless-trivial",
+        "attachWhenAny": [
+          "the task requires planning, implementation, diagnosis, review, delegation, recovery, tradeoffs, adaptation, validation, or external effects",
+          "multiple technically valid approaches differ in user benefit, risk, cost, reversibility, or time",
+          "new evidence may require changing tactics",
+          "a delegated prompt must communicate purpose, adaptation rules, and quality"
+        ],
+        "skipWhenAll": [
+          "the operation is exact, trivial, reversible, and mechanically specified",
+          "there is no meaningful ambiguity, tradeoff, adaptation, risk, or quality decision"
+        ],
+        "lightweightGlobalFrameAlwaysActive": true,
+        "preservesErgonAndArete": true,
+        "addsEudaimoniaTelosAndPhronesis": true,
+        "doesNotAuthorizeSideEffects": true,
+        "doesNotCountTowardOrdinaryActiveSkillTarget": true
+      },
       "parallel-execution": {
         "default": "attach-when-applicable",
         "attachWhenAny": [
@@ -105,156 +177,335 @@
     {
       "id": "repository-analysis",
       "skillFile": "skills/repository-analysis/SKILL.md",
-      "requiredRoutes": ["plan", "audit"],
-      "optionalRoutes": ["architecture", "documentation", "roadmap"],
+      "requiredRoutes": [
+        "plan",
+        "audit"
+      ],
+      "optionalRoutes": [
+        "architecture",
+        "documentation",
+        "roadmap"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "architecture",
       "skillFile": "skills/architecture/SKILL.md",
-      "requiredRoutes": ["architecture"],
-      "optionalRoutes": ["security", "runtime", "plan"],
+      "requiredRoutes": [
+        "architecture"
+      ],
+      "optionalRoutes": [
+        "security",
+        "runtime",
+        "plan"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "implementation",
       "skillFile": "skills/implementation/SKILL.md",
-      "requiredRoutes": ["implement"],
-      "optionalRoutes": ["runtime", "validate"],
+      "requiredRoutes": [
+        "implement"
+      ],
+      "optionalRoutes": [
+        "runtime",
+        "validate"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "validation-quality",
       "skillFile": "skills/validation-quality/SKILL.md",
-      "requiredRoutes": ["validate"],
-      "optionalRoutes": ["security", "release"],
+      "requiredRoutes": [
+        "validate"
+      ],
+      "optionalRoutes": [
+        "security",
+        "release"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "github-read",
       "skillFile": "skills/github-read/SKILL.md",
-      "requiredRoutes": ["github-read"],
-      "optionalRoutes": ["issue-read", "review-read", "ci-inspect"],
+      "requiredRoutes": [
+        "github-read"
+      ],
+      "optionalRoutes": [
+        "issue-read",
+        "review-read",
+        "ci-inspect"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": false},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "github-write",
       "skillFile": "skills/github-write/SKILL.md",
-      "requiredRoutes": ["github-write"],
-      "optionalRoutes": ["issue-write", "branch-management", "publish"],
-      "dependencies": ["github-read"],
-      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "requiredRoutes": [
+        "github-write"
+      ],
+      "optionalRoutes": [
+        "issue-write",
+        "branch-management",
+        "publish"
+      ],
+      "dependencies": [
+        "github-read"
+      ],
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": true,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "ci-diagnostics",
       "skillFile": "skills/ci-diagnostics/SKILL.md",
-      "requiredRoutes": ["ci-inspect"],
-      "optionalRoutes": ["ci-rerun"],
-      "dependencies": ["github-read"],
-      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "requiredRoutes": [
+        "ci-inspect"
+      ],
+      "optionalRoutes": [
+        "ci-rerun"
+      ],
+      "dependencies": [
+        "github-read"
+      ],
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": true,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "pr-review-merge",
       "skillFile": "skills/pr-review-merge/SKILL.md",
-      "requiredRoutes": ["pr-create", "review-read"],
-      "optionalRoutes": ["review-write", "merge"],
-      "dependencies": ["github-read"],
-      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": false},
+      "requiredRoutes": [
+        "pr-create",
+        "review-read"
+      ],
+      "optionalRoutes": [
+        "review-write",
+        "merge"
+      ],
+      "dependencies": [
+        "github-read"
+      ],
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": true,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "recovery",
       "skillFile": "skills/recovery/SKILL.md",
-      "requiredRoutes": ["recovery"],
-      "optionalRoutes": ["github-read", "github-write", "ci-inspect"],
+      "requiredRoutes": [
+        "recovery"
+      ],
+      "optionalRoutes": [
+        "github-read",
+        "github-write",
+        "ci-inspect"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": true},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": true,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "frontend-visual",
       "skillFile": "skills/frontend-visual/SKILL.md",
-      "requiredRoutes": ["implement", "validate"],
-      "optionalRoutes": ["architecture"],
+      "requiredRoutes": [
+        "implement",
+        "validate"
+      ],
+      "optionalRoutes": [
+        "architecture"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "prompt-engineering",
       "skillFile": "skills/prompt-engineering/SKILL.md",
-      "requiredRoutes": ["prompt-authoring"],
-      "optionalRoutes": ["prompt-migration"],
+      "requiredRoutes": [
+        "prompt-authoring"
+      ],
+      "optionalRoutes": [
+        "prompt-migration"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": true},
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "management-delegation",
       "skillFile": "skills/management-delegation/SKILL.md",
-      "requiredRoutes": ["delegation", "management"],
+      "requiredRoutes": [
+        "delegation",
+        "management"
+      ],
       "optionalRoutes": [],
       "dependencies": [],
-      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "documentation-roadmap",
       "skillFile": "skills/documentation-roadmap/SKILL.md",
-      "requiredRoutes": ["documentation"],
-      "optionalRoutes": ["roadmap"],
+      "requiredRoutes": [
+        "documentation"
+      ],
+      "optionalRoutes": [
+        "roadmap"
+      ],
       "dependencies": [],
-      "capabilities": {"remoteReads": true, "remoteWrites": false, "localWrites": true},
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": false,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "release",
       "skillFile": "skills/release/SKILL.md",
-      "requiredRoutes": ["release"],
-      "optionalRoutes": ["validate", "github-write", "ci-inspect"],
-      "dependencies": ["validation-quality"],
-      "capabilities": {"remoteReads": true, "remoteWrites": true, "localWrites": true},
+      "requiredRoutes": [
+        "release"
+      ],
+      "optionalRoutes": [
+        "validate",
+        "github-write",
+        "ci-inspect"
+      ],
+      "dependencies": [
+        "validation-quality"
+      ],
+      "capabilities": {
+        "remoteReads": true,
+        "remoteWrites": true,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
-      "loadPolicy": {"onDemand": true, "loadOnlyReferencedSharedRoutes": true}
+      "loadPolicy": {
+        "onDemand": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
     },
     {
       "id": "parallel-execution",
@@ -262,8 +513,14 @@
       "requiredRoutes": [],
       "optionalRoutes": [],
       "dependencies": [],
-      "referenceFiles": ["shared/references/parallel-execution-policy-verbatim.md"],
-      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "referenceFiles": [
+        "shared/references/parallel-execution-policy-verbatim.md"
+      ],
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
       "role": "cross-cutting",
@@ -280,7 +537,11 @@
       "requiredRoutes": [],
       "optionalRoutes": [],
       "dependencies": [],
-      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": true},
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": true
+      },
       "personality": "embedded",
       "collaboration": "embedded",
       "role": "cross-cutting",
@@ -295,10 +556,24 @@
     {
       "id": "chat-recovery",
       "skillFile": "skills/chat-recovery/SKILL.md",
-      "requiredRoutes": ["recovery", "delegation"],
-      "optionalRoutes": ["github-read", "ci-inspect", "validate", "audit"],
-      "dependencies": ["management-delegation"],
-      "capabilities": {"remoteReads": false, "remoteWrites": false, "localWrites": false},
+      "requiredRoutes": [
+        "recovery",
+        "delegation"
+      ],
+      "optionalRoutes": [
+        "github-read",
+        "ci-inspect",
+        "validate",
+        "audit"
+      ],
+      "dependencies": [
+        "management-delegation"
+      ],
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": false
+      },
       "personality": "embedded",
       "collaboration": "embedded",
       "role": "cross-cutting",
@@ -308,6 +583,28 @@
         "requiresFullEnvironmentInventoryBeforeMutation": true,
         "requiresIdempotentContinuationPrompt": true,
         "promptOnlyResponse": true,
+        "loadOnlyReferencedSharedRoutes": true
+      }
+    },
+    {
+      "id": "practical-reasoning",
+      "skillFile": "skills/practical-reasoning/SKILL.md",
+      "requiredRoutes": [],
+      "optionalRoutes": [],
+      "dependencies": [],
+      "capabilities": {
+        "remoteReads": false,
+        "remoteWrites": false,
+        "localWrites": false
+      },
+      "personality": "embedded",
+      "collaboration": "embedded",
+      "role": "cross-cutting",
+      "loadPolicy": {
+        "onDemand": true,
+        "autoAttachWhenApplicable": true,
+        "lightweightGlobalFrameAlwaysActive": true,
+        "loadFullSkillForNonTrivialTasks": true,
         "loadOnlyReferencedSharedRoutes": true
       }
     }
