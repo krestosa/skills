@@ -19,6 +19,37 @@ shared/                  canonical sources, policies, catalogs, profiles, and ma
 6. Selected skills read only their declared routes from `shared/manifests/routes.json`.
 7. Autonomous remote GitHub operations use the GitHub connector. Explicit user-invoked `publish` or `commit --push` may use guarded native Git transport.
 
+## Model and reasoning routing
+
+The ChatGPT Web chat acting as the orchestrator is configured by the user with the latest available model and `High` reasoning. The system cannot change the visual model or reasoning selectors itself.
+
+For every prompt generated for another chat, the orchestrator keeps the latest available model as an internal policy and independently selects one visible reasoning level:
+
+```text
+Instant
+Medium
+High
+```
+
+The level is recalculated for every new prompt, continuation, correction, validation, recovery, publication, derived action, independent workstream, or material change in evidence. It is not inherited from the previous iteration and the user is not asked to choose it.
+
+The classifier summarizes seven factors: Telos clarity, Ergon complexity, Phronesis adaptation burden, Arete validation burden, risk and reversibility, state uncertainty, and how completely the prompt closes the remaining decisions.
+
+- `Instant` is reserved for closed, mechanical, linear, known-state, low-risk work with exact validation and no strategic choice.
+- `Medium` is the default result for bounded professional work with several dependent steps, limited local decisions, known validation, and no critical trigger.
+- `High` is required for architecture, cross-system work, complex migration or compatibility, unknown or interrupted state, contradictory evidence, multi-cause debugging, security or permissions, destructive action, critical release or production work, global policy or orchestrator changes, dynamic replanning, extensive validation, high risk of lost work, or an open objective.
+
+A prompt that genuinely removes ambiguity, strategy choice, branching, undefined fallbacks, implicit success criteria, and reinterpretation may reduce the initial result by one level only: `High → Medium` or `Medium → Instant`. Hard triggers prevent a downgrade. This closes prompts before spending more reasoning and optimizes total user time, latency, quota, and corrective work.
+
+Generated-prompt delivery uses this exact visible structure:
+
+```text
+[Prompt generado]
+```
+Razonamiento: Medium
+
+The reasoning line is outside the prompt block, immediately follows it, contains no model recommendation or explanation, and is the final element of that prompt delivery. Multiple workstreams repeat the same pair independently. Direct answers that do not generate prompts do not require the line.
+
 ## How to request a skill
 
 You may use the exact ID or describe the capability in natural language. The orchestrator remains responsible for validating the selection, resolving dependencies, and adding supporting utilities.
@@ -182,7 +213,8 @@ The recovery prompt must be idempotent: preserve verified work, reuse every vali
 - Publication never targets the remote default branch, never uses force, and never publishes tags or multiple branches.
 - GitHub Read and Write catalogs remain verbatim.
 - No GitHub workflows are included.
-- Returned or interrupted delegated work produces one prompt-only code block with no external commentary.
+- Generated delegated work uses one prompt code block followed by one reasoning-only directive per prompt, with no other external commentary.
+- The latest available target model remains internal and is absent from the visible directive.
 - Practical reasoning never grants side effects or weakens authorization, safety, evidence, or quality requirements.
 
 ## Validate
