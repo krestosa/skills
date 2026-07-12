@@ -1,304 +1,493 @@
 {
-  "schemaVersion": 13,
-  "rootSkill": "SKILL.md",
-  "orchestrator": "orchestrator/SKILL.md",
-  "orchestratorCount": 1,
-  "readmeCount": 1,
-  "individualSkillCount": 18,
-  "crossCuttingSkillCount": 4,
-  "sharedRoot": "shared",
-  "canonicalSourceCount": 15,
-  "canonicalSourceMutations": 0,
-  "githubReadCatalog": {
-    "entries": 56,
-    "payloadSha256": "610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e"
-  },
-  "githubWriteCatalog": {
-    "entries": 41,
-    "payloadSha256": "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d"
-  },
-  "skillCatalog": {
-    "documentation": "README.md",
-    "categorized": true,
-    "registeredSkillCount": 18,
-    "eachSkillListedOnce": true,
-    "includesPurpose": true,
-    "includesInvocationExample": true,
-    "includesActivationMode": true,
-    "operationalSourceOfTruth": "orchestrator/registry.json",
-    "stableRecoveryIds": {
-      "recovery": "Technical State Recovery",
-      "chat-recovery": "Interrupted Chat Recovery"
-    }
-  },
-  "practicalReasoning": {
-    "skill": "skills/practical-reasoning/SKILL.md",
-    "evals": "shared/evals/practical-reasoning.json",
-    "evalCaseCount": 20,
-    "autoAttachUnlessTrivial": true,
-    "lightweightGlobalFrameAlwaysActive": true,
-    "operationalOrder": [
-      "eudaimonia",
-      "telos",
-      "ergon",
-      "phronesis",
-      "arete"
-    ],
-    "phronesisContinuousFeedback": true,
-    "preservesErgonAndArete": true,
-    "addsEudaimoniaTelosAndPhronesis": true,
-    "derivesPerSkillFrameWithoutDuplicatingSkillText": true,
-    "noPaternalisticGoalSubstitution": true,
-    "doesNotAuthorizeSideEffects": true,
-    "doesNotWeakenInvariants": true,
-    "doesNotRequireChainOfThoughtDisclosure": true
-  },
-  "parallelExecution": {
-    "skill": "skills/parallel-execution/SKILL.md",
-    "reference": "shared/references/parallel-execution-policy-verbatim.md",
-    "referenceSha256": "804cc93be433bf159a7ac57d0778fbb72806c8306940343657079e8aa5db8126",
-    "referenceBytes": 12903,
-    "evals": "shared/evals/parallel-execution.json",
-    "autoAttachWhenApplicable": true,
-    "ordinaryReferenceLoading": false,
-    "coreLogicPreserved": true
-  },
-  "localGitWorkspace": {
-    "skill": "skills/local-git-workspace/SKILL.md",
-    "evals": "shared/evals/local-git-workspace.json",
-    "autoAttachBeforeLocalGit": true,
-    "requiresRootRuntime": true,
-    "onePreflightPerWorkspace": true,
-    "ownershipCommand": "sudo -n chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
-    "rootFallbackWhenSudoUnavailable": "chown -R \"$(id -u):$(id -g)\" -- \"$repo_root\"",
-    "prohibitsSafeDirectoryFallback": true,
-    "remoteGitHubTransport": "connector-only",
-    "repositoryHardcoding": null
-  },
-  "chatRecovery": {
-    "skill": "skills/chat-recovery/SKILL.md",
-    "displayName": "Interrupted Chat Recovery",
-    "evals": "shared/evals/chat-recovery.json",
-    "evalCaseCount": 18,
-    "trigger": "interrupted, stalled, cancelled, disconnected, truncated, or untrusted delegated chat execution",
-    "autoAttachOnInterruptedDelegatedChat": true,
-    "fullEnvironmentInventoryBeforeMutation": true,
-    "inventoryBoundary": "accessible-runtime-filesystem",
-    "inventoryStartsAt": "/",
-    "discoversAllMountedFilesystems": true,
-    "noDateFilter": true,
-    "noGitRepositoryOrWorkspaceFilter": true,
-    "includesAllAccessibleFilesystemEntries": true,
-    "includesSystemUserWorkspaceTemporaryCacheGeneratedHiddenBinarySymlinkAndOutsideRepositoryFiles": true,
-    "recordsExcludedVirtualFilesystems": true,
-    "recordsInaccessiblePaths": true,
-    "doesNotFollowSymlinksRecursively": true,
-    "metadataFirstHashLazily": true,
-    "reuseExistingValidFiles": true,
-    "prohibitsUnnecessaryGenerationAndRegeneration": true,
-    "preserveUnrelatedUserAndSystemChanges": true,
-    "unknownStateIsNotNotStarted": true,
-    "lastVerifiedCheckpointRequired": true,
-    "idempotentContinuationPrompt": true,
-    "promptOnlyResponse": true,
-    "doesNotAuthorizeSideEffects": true
-  },
-  "technicalStateRecovery": {
-    "skill": "skills/recovery/SKILL.md",
-    "displayName": "Technical State Recovery",
-    "stableId": "recovery",
-    "distinctFromInterruptedChatRecovery": true
-  },
-  "delegatedResultContinuation": {
-    "skill": "skills/management-delegation/SKILL.md",
-    "orchestratorSection": "Delegated-result continuation",
-    "trigger": "user returns output from a chat previously directed by the orchestrator",
-    "promptOnly": true,
-    "singleCodeBlock": true,
-    "noTextOutsidePrompt": true,
-    "additionalDetailInsidePrompt": true,
-    "preserveCompletedWork": true,
-    "avoidRepeatingCompletedWork": true,
-    "ordinaryOutputContractOverridden": true,
-    "practicalReasoningPreserved": true
-  },
-  "flatBuild": {
-    "crossCuttingSkillsBundled": true,
-    "maxFiles": 25,
-    "expectedFiles": 23
+  "schemaVersion": 14,
+  "generatedBy": "scripts/tooling.py refresh-integrity",
+  "selfExcluded": "shared/manifests/integrity.json",
+  "counts": {
+    "registeredSkills": 18,
+    "crossCuttingSkills": 4,
+    "canonicalSources": 15,
+    "sourceManifests": 15,
+    "evalCases": {
+      "shared/evals/chat-recovery.json": 18,
+      "shared/evals/gpt-5.6-sol.json": 15,
+      "shared/evals/local-git-workspace.json": 19,
+      "shared/evals/parallel-execution.json": 10,
+      "shared/evals/practical-reasoning.json": 20
+    },
+    "catalogs": {
+      "shared/catalogs/github-read-verbatim.md": {
+        "entries": 56,
+        "payloadSha256": "610c387f5f7c9047c65fef08734d5199696230866ca79e270700209eaab1324e"
+      },
+      "shared/catalogs/github-write-verbatim.md": {
+        "entries": 41,
+        "payloadSha256": "499373638143f48b0549701bf5036725a2c2bc9b332a95d9a053a1e1ce687a3d"
+      }
+    },
+    "flatOutputs": 25
   },
   "inventory": {
-    "selfExcluded": "shared/manifests/integrity.json",
-    "count": 87,
-    "sha256": "ffa619679eb9afef84bf73746846624140133b87e172f35ac7adbb3b76bb2bd6"
+    "count": 91,
+    "sha256": "93960fea3ac8e72a93e788966beef5dbdefba7d9d2c9dc4363397e42b5fc4784",
+    "files": [
+      {
+        "path": "README.md",
+        "sha256": "6ae387374ff0afb3b36a39332ae0c318ece18bcbd9102be1a1d0427ecdd27712",
+        "bytes": 17464
+      },
+      {
+        "path": "SKILL.md",
+        "sha256": "7a6c52019a231c8a8a3ca87a92986d2f05034a6eaf6d2851a4e480288eeb00cd",
+        "bytes": 8465
+      },
+      {
+        "path": "orchestrator/SKILL.md",
+        "sha256": "1aa22b3e0c1712d6777aa11c9d4493e4fc20343616199a5dd690e0986c69e826",
+        "bytes": 17982
+      },
+      {
+        "path": "orchestrator/delegation-envelope.schema.json",
+        "sha256": "423fedd852ca9f141555cf3518090752b86292e09c0065249e4e7c98f09673f8",
+        "bytes": 1638
+      },
+      {
+        "path": "orchestrator/registry.json",
+        "sha256": "ed94278df30069a4611e25e3b9007be4a44529d7983b1fb2af5cee13a3c9d109",
+        "bytes": 17789
+      },
+      {
+        "path": "scripts/build_chatgpt_flat.py",
+        "sha256": "759182fb6567b57b8a01874a97cde2e804ae9af0fb411500372efd9491b8cacb",
+        "bytes": 1081
+      },
+      {
+        "path": "scripts/build_compiled.py",
+        "sha256": "99304b2aa24a7b8cb7ce8a6c9756e1b65d45d79c6808dfe427282b83d826f5a8",
+        "bytes": 1202
+      },
+      {
+        "path": "scripts/repository_tooling.py",
+        "sha256": "75defb9693d922cc4cb8c012112fd14d0dfb980b95eecc56bfd89ce38d501a71",
+        "bytes": 81998
+      },
+      {
+        "path": "scripts/tooling.py",
+        "sha256": "6a97cbfad8bc8a0ff2ddb55442fd7d401fb18a09d32e4f5b7a7fdd21ebaac90d",
+        "bytes": 15224
+      },
+      {
+        "path": "scripts/validate.py",
+        "sha256": "96a4dae37353df898fd6e9c93c9ea8a0759d2983247ec4cc7296dcaf0c5f817c",
+        "bytes": 1121
+      },
+      {
+        "path": "scripts/validate_gpt56.py",
+        "sha256": "39a9d29882b001c02761645959ef8514c2229b9ce00aa95cdbddcee9544071e1",
+        "bytes": 856
+      },
+      {
+        "path": "scripts/verify_lossless.py",
+        "sha256": "88de104dcffd2a8c5e1614a03fc6d255842dd3d76e1a86f544c2f1e21b1d7899",
+        "bytes": 776
+      },
+      {
+        "path": "shared/catalogs/github-read-verbatim.md",
+        "sha256": "e6e1f0fbe2b63bc024bb7f9ef2ac5bfbe968c32f0ecf6816f0c2969aee53d1c6",
+        "bytes": 9647
+      },
+      {
+        "path": "shared/catalogs/github-write-verbatim.md",
+        "sha256": "213820f69ebd5410c260bf0e5e887aa842696a191ba58cf88f68899136ead281",
+        "bytes": 6902
+      },
+      {
+        "path": "shared/contracts/authorization-envelope.schema.json",
+        "sha256": "2009f127121723dea8f6181612abb730d97a0a2832370c4c140da5ae7e77d883",
+        "bytes": 2337
+      },
+      {
+        "path": "shared/contracts/connector-contracts.md",
+        "sha256": "adbf69e59d2df0d5f59a1b8c46c3e6be2a37eca8b6fce09ca46487936f14fde3",
+        "bytes": 695
+      },
+      {
+        "path": "shared/core/identity.md",
+        "sha256": "28d9b5ed3be29dee8810fcd762228a62964c2aecc2e251dd2c3ceecea0753a98",
+        "bytes": 1972
+      },
+      {
+        "path": "shared/core/project-authority-and-roles.md",
+        "sha256": "b8f679efcc1a7c093945d23e8395bffe1180065c3511e64b3c81fe2a99b13802",
+        "bytes": 10249
+      },
+      {
+        "path": "shared/core/states-and-approval.md",
+        "sha256": "15057a7cdc8fa106e319b9daa78827c4162c4d7cdac74dad31cfb7052df37b8c",
+        "bytes": 6882
+      },
+      {
+        "path": "shared/evals/chat-recovery.json",
+        "sha256": "67bee07c89f6752eec7b4700d0198ae9e86dcd9bebe28eb79553976432b48ed1",
+        "bytes": 4643
+      },
+      {
+        "path": "shared/evals/gpt-5.6-sol.json",
+        "sha256": "88654318c8b2d9927a7e2172feee466c3ad6b5dbb0283547bafa51682a3815bc",
+        "bytes": 4777
+      },
+      {
+        "path": "shared/evals/local-git-workspace.json",
+        "sha256": "5e38a5d0fa09baa73d1e35c44302131e40681eec256c5c346d3ede3883fb9f23",
+        "bytes": 6680
+      },
+      {
+        "path": "shared/evals/parallel-execution.json",
+        "sha256": "e71678fe0c5bd7860b0d86b002cad5fb9ec0996d5da97245288997c05f014c29",
+        "bytes": 2164
+      },
+      {
+        "path": "shared/evals/practical-reasoning.json",
+        "sha256": "82865a71639e9d6fa04f1f7b6654f9e3a3ce39e170bf2162b4a740433696d1d2",
+        "bytes": 6014
+      },
+      {
+        "path": "shared/manifests/routes.json",
+        "sha256": "adf26d94c66ed09f6d2e031dce6f15d2337ba2a6ee55d920748cca20bd54c989",
+        "bytes": 4722
+      },
+      {
+        "path": "shared/manifests/source-index.json",
+        "sha256": "7cdbd396f0a56953f9f445239f1e2c510057ad32ca89f881dfb12825421e16d8",
+        "bytes": 3059
+      },
+      {
+        "path": "shared/manifests/sources/01-research-architecture-security.json",
+        "sha256": "c306c76fdbafc1df2a69598a807908f241aa80d5692802b8c2d1a6d90139828b",
+        "bytes": 1467
+      },
+      {
+        "path": "shared/manifests/sources/02-implementation-validation.json",
+        "sha256": "5518bc1bbdc7f3ca451aca6cd33708765778d1a744f8728333e8082a65c26d75",
+        "bytes": 3434
+      },
+      {
+        "path": "shared/manifests/sources/03-git-publication-ci.json",
+        "sha256": "22d81607f03ba5d4003cdcd6aaf580ceb72a39250e1b75e5be119e402a4373df",
+        "bytes": 4204
+      },
+      {
+        "path": "shared/manifests/sources/04-pr-review-merge-recovery.json",
+        "sha256": "3e7981d26f379eb911abe70a9e2488717f8feb89c177026af801dd641740b4c8",
+        "bytes": 2607
+      },
+      {
+        "path": "shared/manifests/sources/05-management-communication-integrity.json",
+        "sha256": "03a237a5c82d807e3f08560154f2de7fbca20a4c5333e1b3b0929ac59f6039ba",
+        "bytes": 2637
+      },
+      {
+        "path": "shared/manifests/sources/06-workspace-delegation.json",
+        "sha256": "39440fdae87a679207fc6dc0d7a4c74a1be1d91d7e49c97a41b331fddb87b82b",
+        "bytes": 3330
+      },
+      {
+        "path": "shared/manifests/sources/07-runtime-typescript-concurrency.json",
+        "sha256": "2769c03f1ad3712c4511afa4bf84a15e690934e5a0cdcbe2e15047131c8d886b",
+        "bytes": 2118
+      },
+      {
+        "path": "shared/manifests/sources/08-qa-security-release.json",
+        "sha256": "b1f0c24e2ce9610e061b52f26005c6a00dc36116668a4c265e11b39b0ae79b42",
+        "bytes": 2828
+      },
+      {
+        "path": "shared/manifests/sources/09-automation-orchestration.json",
+        "sha256": "f08b0497725930042b76e6dfd07cd769f786d2748e51de1b2476c8abd56751ec",
+        "bytes": 3693
+      },
+      {
+        "path": "shared/manifests/sources/10-index.json",
+        "sha256": "f4e892b86df1405ba98b9b8119d1a889ac9df6ad731a6f7380cc2afda9bc6d46",
+        "bytes": 2085
+      },
+      {
+        "path": "shared/manifests/sources/11-read-capabilities.json",
+        "sha256": "19f5f49aee61939964b7e51c93028fbc2bb19991e7a6846d9865c6932ffe6519",
+        "bytes": 471
+      },
+      {
+        "path": "shared/manifests/sources/12-write-governance.json",
+        "sha256": "305c23e97ac298eae2f8d6633c701a4ea26a4c572dac0fddcad2da8fb1e4ba5c",
+        "bytes": 2462
+      },
+      {
+        "path": "shared/manifests/sources/13-write-git-data-and-ci.json",
+        "sha256": "fce37216eeab84577d2eab5660a7880e26605c761cf3e0befe86c0096963d436",
+        "bytes": 1340
+      },
+      {
+        "path": "shared/manifests/sources/14-write-verification.json",
+        "sha256": "abeb18b2c5e57a3fe9b95d67bb8c513b3ca2d37d1006c0f3361c0c7e2ad8af36",
+        "bytes": 2255
+      },
+      {
+        "path": "shared/manifests/sources/15-operations.json",
+        "sha256": "036119e9fbfff064ce43e307f9c558b15af4909dd45f8c44e541fb2f98f9dc05",
+        "bytes": 2019
+      },
+      {
+        "path": "shared/manifests/tooling.json",
+        "sha256": "4f64f49f1694bfce9d94d907548ab15991139c8ba198a882a4e14b5a9b7db5e0",
+        "bytes": 3377
+      },
+      {
+        "path": "shared/models/gpt-5.6-sol.json",
+        "sha256": "80feb4d6c4bfe6d0d7456c01adf9e0cf41321bfb0d0abfed5f7e60abc2eb4440",
+        "bytes": 2607
+      },
+      {
+        "path": "shared/policies/connector-native-integrity.md",
+        "sha256": "0f65f094b43d8e44afb204a41baa853cc9dad2e1f7b64ba3427553ef9a6278cb",
+        "bytes": 3359
+      },
+      {
+        "path": "shared/policies/github-write-safety.md",
+        "sha256": "361b88cc093e6b2562b1269b49f2df5ed09632730558e0cfe7a5a3acf3085c17",
+        "bytes": 1055
+      },
+      {
+        "path": "shared/policies/gpt-5.6-sol.md",
+        "sha256": "6131ec4f0f848a04df674ca3f935715e1b348c666837874c13931e7cf121ae7b",
+        "bytes": 7239
+      },
+      {
+        "path": "shared/policies/network-and-transport.md",
+        "sha256": "78ce517068a3478130ffaa91831881687881d1e66266ea9dd4c539694122fb19",
+        "bytes": 3119
+      },
+      {
+        "path": "shared/policies/repository-context-and-authorization.md",
+        "sha256": "f4f9b460f160ab98352afbe0544ec325cce9d239ef477357187bc76aebfb5d82",
+        "bytes": 1213
+      },
+      {
+        "path": "shared/profiles/electron.json",
+        "sha256": "74f83eaf7bf8fb8f6d7c74e9fb1672d81e60bcea981facf1494229c5a3015467",
+        "bytes": 274
+      },
+      {
+        "path": "shared/profiles/generic.json",
+        "sha256": "aedd4afd7dcd0cfb038c6fe74cd62e12e5af3d3d278992a25c525605d1275dd6",
+        "bytes": 141
+      },
+      {
+        "path": "shared/profiles/node.json",
+        "sha256": "c5df6631a3d9695cd5d2aa9414cf41c252ddd0280902d39366b0c2b358de4ab0",
+        "bytes": 188
+      },
+      {
+        "path": "shared/profiles/rust.json",
+        "sha256": "7f9f2298b6215d70255a3b2f0c1de79bfeaa05abc394688ef57db028ccb9a248",
+        "bytes": 189
+      },
+      {
+        "path": "shared/profiles/typescript.json",
+        "sha256": "23602b21bf8900044980de1ddc110438869f7746492e93168aebac655d00b661",
+        "bytes": 199
+      },
+      {
+        "path": "shared/references/gpt-5.6-sol-prompting-guidance.md",
+        "sha256": "cd838a4bd951509771738a3fe511c99cfccc229236ca45503c8181f6bb5ea9b9",
+        "bytes": 16836
+      },
+      {
+        "path": "shared/references/parallel-execution-policy-verbatim.md",
+        "sha256": "804cc93be433bf159a7ac57d0778fbb72806c8306940343657079e8aa5db8126",
+        "bytes": 12903
+      },
+      {
+        "path": "shared/sources/architecture/runtime-typescript-concurrency.md",
+        "sha256": "53bfb3065ae88ea9f9e5cf71c6fd2999bea5701cdad94a92cd4fed8ef61a9b29",
+        "bytes": 10644
+      },
+      {
+        "path": "shared/sources/delivery/git-publication-ci.md",
+        "sha256": "08e746ce135059c7b1fc56922c3954aebf8b1cd2c4cc26b7e3d31fc33852a768",
+        "bytes": 16491
+      },
+      {
+        "path": "shared/sources/delivery/pr-review-merge-recovery.md",
+        "sha256": "194a4bf666f6ed5ac6cf5079d603168eebd2e2542add057a0d4902ad13484136",
+        "bytes": 6543
+      },
+      {
+        "path": "shared/sources/github/index.md",
+        "sha256": "54f4a85e1b1555a1397d7c7fbeaeae05132a066794ee09c3eb9fab3247441648",
+        "bytes": 8604
+      },
+      {
+        "path": "shared/sources/github/operations.md",
+        "sha256": "15a8ece191d7b6704618fd8d2ba332b01c33438417cc2489b313799adb5609b4",
+        "bytes": 3942
+      },
+      {
+        "path": "shared/sources/github/read-capabilities.md",
+        "sha256": "dd01f35cb5500f89b7c81942781730b569cddc2955472767d3cc041c14c965ac",
+        "bytes": 16837
+      },
+      {
+        "path": "shared/sources/github/write-git-data-and-ci.md",
+        "sha256": "e3c42495d47499552784dfbc63bdd4674b79b113cb68a8f0ba87ec3a3c03f996",
+        "bytes": 9256
+      },
+      {
+        "path": "shared/sources/github/write-governance.md",
+        "sha256": "b7689ceab494a5bba1df4debe5a8530affcb49636401f27e1620edd719333485",
+        "bytes": 11161
+      },
+      {
+        "path": "shared/sources/github/write-verification.md",
+        "sha256": "8e603ce3a3de4c5ce00ea4dcaf90a9ddfde7501d6432f4f58c5b36df736982c1",
+        "bytes": 9139
+      },
+      {
+        "path": "shared/sources/implementation/implementation-validation.md",
+        "sha256": "ea617e3568115d771bc1c291da05b705c2b9ad92e27d695c2539117242713893",
+        "bytes": 8194
+      },
+      {
+        "path": "shared/sources/management/management-communication-integrity.md",
+        "sha256": "1332c7d74bd5473ada184571452660952b99f2bb2cf82f6ef99376b4f5b57095",
+        "bytes": 11849
+      },
+      {
+        "path": "shared/sources/management/workspace-delegation.md",
+        "sha256": "da4aeb85ff878d1f0293100e4bb3d87c08a74f8783d276d0516e0a23f615c6e6",
+        "bytes": 9114
+      },
+      {
+        "path": "shared/sources/orchestration/automation-orchestration.md",
+        "sha256": "f0007eb1ff95e709752b738a39576324d79e478b7450eb185dc7e9b5620b8508",
+        "bytes": 8832
+      },
+      {
+        "path": "shared/sources/planning/research-architecture-security.md",
+        "sha256": "9b717767f67467fed8f285155b48b1f872e67f5f897c7cfa105a7e70e145d143",
+        "bytes": 8756
+      },
+      {
+        "path": "shared/sources/quality/qa-security-release.md",
+        "sha256": "e23d6302d0eedd50448aae4e0b7bf080b6c2e3d1cec1f15be398980bdcacbcc9",
+        "bytes": 9447
+      },
+      {
+        "path": "shared/templates/gpt-5.6-prompt-contract.md",
+        "sha256": "7433a6e16c38a869324ee676982aa6c80865c578f38f20b1fe918c58a6e3c2e7",
+        "bytes": 1453
+      },
+      {
+        "path": "shared/templates/prompts.md",
+        "sha256": "0263822e50839751ee7b49a02d19a838e1a7bd0279892ed334471903d5b47156",
+        "bytes": 4456
+      },
+      {
+        "path": "skills/architecture/SKILL.md",
+        "sha256": "f213965962c44f617dd2609675cdb6f04bdf22a458cee479077b891e52a3e8fb",
+        "bytes": 2001
+      },
+      {
+        "path": "skills/chat-recovery/SKILL.md",
+        "sha256": "198ebe28c36f7340242030287df8b68c67c340f82955cf4e6fc8d4c24411576b",
+        "bytes": 11495
+      },
+      {
+        "path": "skills/ci-diagnostics/SKILL.md",
+        "sha256": "a0ab19869d7989c578f6ad2ad5aa26360eb8e62dc85ecccc32c17ae7feb223f1",
+        "bytes": 1894
+      },
+      {
+        "path": "skills/documentation-roadmap/SKILL.md",
+        "sha256": "d01a87ffe610615c0a26e053534d18c7edd5e9a9bb5e0d911e799c0a52a6497d",
+        "bytes": 1880
+      },
+      {
+        "path": "skills/frontend-visual/SKILL.md",
+        "sha256": "cc3a8f34254bf93114e99810097ff6da3e5179675c99bddecf89d00c81a89cd2",
+        "bytes": 1875
+      },
+      {
+        "path": "skills/github-read/SKILL.md",
+        "sha256": "65ad68710de216d79a5c4e2aa716aa6c18e61bb759073cab70727b2a5e6517b0",
+        "bytes": 1803
+      },
+      {
+        "path": "skills/github-write/SKILL.md",
+        "sha256": "b0054dbdf7f18fc9ff1ea5f3dd46e16d0735753cf096ea4d3ad687992d766a9a",
+        "bytes": 1914
+      },
+      {
+        "path": "skills/implementation/SKILL.md",
+        "sha256": "941cb6667d379cb8a0767a4d04ab6355f98a386a7c729601d0a296b53fbe7d8f",
+        "bytes": 1803
+      },
+      {
+        "path": "skills/local-git-workspace/SKILL.md",
+        "sha256": "781ee261333ab126da0fefb288a5e7dfcd917873bcac4bb4746aab0fb37773f1",
+        "bytes": 6441
+      },
+      {
+        "path": "skills/management-delegation/SKILL.md",
+        "sha256": "f18a8571ee11835ee17b5428871367cea3290de33bad5a3df0cb3db2280f29cd",
+        "bytes": 7492
+      },
+      {
+        "path": "skills/parallel-execution/SKILL.md",
+        "sha256": "1dd94a3369326ef48b9c2839cae80326c2d16056d2204420b0412be4b61824fa",
+        "bytes": 8016
+      },
+      {
+        "path": "skills/pr-review-merge/SKILL.md",
+        "sha256": "4c68ba0a099f8a057652b3b33f730d3d480b43ef9885468ecad2863f521df1e1",
+        "bytes": 1818
+      },
+      {
+        "path": "skills/practical-reasoning/SKILL.md",
+        "sha256": "f36bb68848f150340b143dac4fee9d1dcd3f44515fbd4590139563be5b04b13b",
+        "bytes": 10684
+      },
+      {
+        "path": "skills/prompt-engineering/SKILL.md",
+        "sha256": "f90190ee1d8630dd67e549ea3a159e3c6256f2e8e7392b0d9f2e14180d4d32f5",
+        "bytes": 1955
+      },
+      {
+        "path": "skills/recovery/SKILL.md",
+        "sha256": "b28ef526728635bec2480ea624db2dff61a9e4a881ba7b125ab94bdba25c0018",
+        "bytes": 2740
+      },
+      {
+        "path": "skills/release/SKILL.md",
+        "sha256": "11d101538736fbdbb965d5dea8a0c03f2c72aeb1fdd41894e7e91e2f59a794c4",
+        "bytes": 1817
+      },
+      {
+        "path": "skills/repository-analysis/SKILL.md",
+        "sha256": "408d9ff3df28f0e0da7882216ae03d6b4a61cd9925fd684894d06899c1fa4463",
+        "bytes": 2101
+      },
+      {
+        "path": "skills/validation-quality/SKILL.md",
+        "sha256": "b05d453bf2d192520ee4165315781d894e9dd7247e2f415d9244f1e64cc51d78",
+        "bytes": 1845
+      },
+      {
+        "path": "tests/test_dynamic_tooling.py",
+        "sha256": "c1d0b43d9368fb3614e5eceb27a566f383e6ba0ab7ba91b71c67c32b7c4ddea4",
+        "bytes": 35564
+      }
+    ]
   },
-  "repositoryHardcoding": null,
-  "githubWorkflows": false,
-  "protectedFiles": [
-    {
-      "path": "README.md",
-      "sha256": "d0d5c095b0ad26a26c7391e7b5b20699e278de0cb90bd7e79d4bf0e6d4de0007",
-      "bytes": 12535
-    },
-    {
-      "path": "SKILL.md",
-      "sha256": "7ae671c155e9ce24a765898b1cd3161b6e30f82b2b92334b51e676edf8995c5f",
-      "bytes": 8072
-    },
-    {
-      "path": "orchestrator/SKILL.md",
-      "sha256": "1aa22b3e0c1712d6777aa11c9d4493e4fc20343616199a5dd690e0986c69e826",
-      "bytes": 17982
-    },
-    {
-      "path": "orchestrator/delegation-envelope.schema.json",
-      "sha256": "423fedd852ca9f141555cf3518090752b86292e09c0065249e4e7c98f09673f8",
-      "bytes": 1638
-    },
-    {
-      "path": "orchestrator/registry.json",
-      "sha256": "ed94278df30069a4611e25e3b9007be4a44529d7983b1fb2af5cee13a3c9d109",
-      "bytes": 17789
-    },
-    {
-      "path": "scripts/build_chatgpt_flat.py",
-      "sha256": "f6bb11bce8ecd72c205d20ade1b1f1d70f4ac37915838421b2e2efa5f0311e32",
-      "bytes": 3441
-    },
-    {
-      "path": "scripts/build_compiled.py",
-      "sha256": "449fe2042620fbc6a4af57ceb76406afeeb982a91b7151874f0a9b36ae5088cf",
-      "bytes": 4043
-    },
-    {
-      "path": "scripts/validate.py",
-      "sha256": "b9840f29cdea04fe674faddf765bcfe6c69cf4d71619670489ab8cd804198b5c",
-      "bytes": 22993
-    },
-    {
-      "path": "scripts/validate_gpt56.py",
-      "sha256": "bf4afac62167090fd2ea9f513680e24d2c07e9b798e57cddbd07a3611267e02e",
-      "bytes": 1510
-    },
-    {
-      "path": "scripts/verify_lossless.py",
-      "sha256": "5755832aec392dfe0b200a31314e41610ffe0a7fce37b0092cafc49c1b6731be",
-      "bytes": 1142
-    },
-    {
-      "path": "shared/evals/chat-recovery.json",
-      "sha256": "e7dfdd4ce58461b67de9c2673e4c89a9f6271f08c0755e13a3d885520000ef0e",
-      "bytes": 5259
-    },
-    {
-      "path": "shared/evals/local-git-workspace.json",
-      "sha256": "ebc324b66d7c83fa68475cb553f1fe1e2331018ed05a87b6fb96bd11ebfe93c2",
-      "bytes": 4381
-    },
-    {
-      "path": "shared/evals/parallel-execution.json",
-      "sha256": "e71678fe0c5bd7860b0d86b002cad5fb9ec0996d5da97245288997c05f014c29",
-      "bytes": 2164
-    },
-    {
-      "path": "shared/evals/practical-reasoning.json",
-      "sha256": "82865a71639e9d6fa04f1f7b6654f9e3a3ce39e170bf2162b4a740433696d1d2",
-      "bytes": 6014
-    },
-    {
-      "path": "shared/manifests/routes.json",
-      "sha256": "f392d7bb461244a69907db4a9d54954f81d0ce1a14e3c122a94bbc5a4d83aa44",
-      "bytes": 4581
-    },
-    {
-      "path": "shared/references/parallel-execution-policy-verbatim.md",
-      "sha256": "804cc93be433bf159a7ac57d0778fbb72806c8306940343657079e8aa5db8126",
-      "bytes": 12903
-    },
-    {
-      "path": "skills/architecture/SKILL.md",
-      "sha256": "f213965962c44f617dd2609675cdb6f04bdf22a458cee479077b891e52a3e8fb",
-      "bytes": 2001
-    },
-    {
-      "path": "skills/ci-diagnostics/SKILL.md",
-      "sha256": "a0ab19869d7989c578f6ad2ad5aa26360eb8e62dc85ecccc32c17ae7feb223f1",
-      "bytes": 1894
-    },
-    {
-      "path": "skills/documentation-roadmap/SKILL.md",
-      "sha256": "d01a87ffe610615c0a26e053534d18c7edd5e9a9bb5e0d911e799c0a52a6497d",
-      "bytes": 1880
-    },
-    {
-      "path": "skills/frontend-visual/SKILL.md",
-      "sha256": "cc3a8f34254bf93114e99810097ff6da3e5179675c99bddecf89d00c81a89cd2",
-      "bytes": 1875
-    },
-    {
-      "path": "skills/github-read/SKILL.md",
-      "sha256": "65ad68710de216d79a5c4e2aa716aa6c18e61bb759073cab70727b2a5e6517b0",
-      "bytes": 1803
-    },
-    {
-      "path": "skills/github-write/SKILL.md",
-      "sha256": "b0054dbdf7f18fc9ff1ea5f3dd46e16d0735753cf096ea4d3ad687992d766a9a",
-      "bytes": 1914
-    },
-    {
-      "path": "skills/implementation/SKILL.md",
-      "sha256": "941cb6667d379cb8a0767a4d04ab6355f98a386a7c729601d0a296b53fbe7d8f",
-      "bytes": 1803
-    },
-    {
-      "path": "skills/local-git-workspace/SKILL.md",
-      "sha256": "21ccce160422a5312a88405395ee99c62bb2f12b3212278a615f5ee8adbdaea9",
-      "bytes": 6032
-    },
-    {
-      "path": "skills/management-delegation/SKILL.md",
-      "sha256": "f18a8571ee11835ee17b5428871367cea3290de33bad5a3df0cb3db2280f29cd",
-      "bytes": 7492
-    },
-    {
-      "path": "skills/parallel-execution/SKILL.md",
-      "sha256": "1dd94a3369326ef48b9c2839cae80326c2d16056d2204420b0412be4b61824fa",
-      "bytes": 8016
-    },
-    {
-      "path": "skills/pr-review-merge/SKILL.md",
-      "sha256": "4c68ba0a099f8a057652b3b33f730d3d480b43ef9885468ecad2863f521df1e1",
-      "bytes": 1818
-    },
-    {
-      "path": "skills/practical-reasoning/SKILL.md",
-      "sha256": "f36bb68848f150340b143dac4fee9d1dcd3f44515fbd4590139563be5b04b13b",
-      "bytes": 10684
-    },
-    {
-      "path": "skills/prompt-engineering/SKILL.md",
-      "sha256": "f90190ee1d8630dd67e549ea3a159e3c6256f2e8e7392b0d9f2e14180d4d32f5",
-      "bytes": 1955
-    },
-    {
-      "path": "skills/recovery/SKILL.md",
-      "sha256": "b28ef526728635bec2480ea624db2dff61a9e4a881ba7b125ab94bdba25c0018",
-      "bytes": 2740
-    },
-    {
-      "path": "skills/release/SKILL.md",
-      "sha256": "11d101538736fbdbb965d5dea8a0c03f2c72aeb1fdd41894e7e91e2f59a794c4",
-      "bytes": 1817
-    },
-    {
-      "path": "skills/repository-analysis/SKILL.md",
-      "sha256": "408d9ff3df28f0e0da7882216ae03d6b4a61cd9925fd684894d06899c1fa4463",
-      "bytes": 2101
-    },
-    {
-      "path": "skills/validation-quality/SKILL.md",
-      "sha256": "b05d453bf2d192520ee4165315781d894e9dd7247e2f415d9244f1e64cc51d78",
-      "bytes": 1845
-    }
-  ]
+  "policy": {
+    "flatMaxFiles": 25
+  }
 }
