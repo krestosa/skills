@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "skill": "local-git-workspace",
-  "purpose": "Regression specifications for root-runtime ownership normalization before local Git. These are not benchmark claims.",
+  "purpose": "Regression specifications for root-runtime ownership normalization and explicit guarded local publication. These are not benchmark claims.",
   "cases": [
     {
       "id": "root-mismatched-owner",
@@ -161,6 +161,102 @@
         "localGitRequired": true
       },
       "expected": "repeat-preflight"
+    },
+    {
+      "id": "explicit-local-publish",
+      "context": {
+        "runtimeUid": 0,
+        "gitRepository": true,
+        "command": "publish",
+        "userInvoked": true
+      },
+      "expected": "allow-guarded-native-git",
+      "required": [
+        "ownership preflight",
+        "clean worktree and index",
+        "dynamic default branch resolution",
+        "non-forced single-branch push",
+        "post-push ref verification"
+      ]
+    },
+    {
+      "id": "explicit-commit-push",
+      "context": {
+        "runtimeUid": 0,
+        "gitRepository": true,
+        "command": "commit --push",
+        "userInvoked": true
+      },
+      "expected": "commit-then-publish",
+      "required": [
+        "local validation before commit",
+        "publication only after commit",
+        "preserve local commit when push fails"
+      ]
+    },
+    {
+      "id": "offline-validation-commands",
+      "context": {
+        "commands": [
+          "validate",
+          "build",
+          "check",
+          "refresh-integrity",
+          "suggest-commit",
+          "commit"
+        ],
+        "pushFlag": false
+      },
+      "expected": "no-network",
+      "forbidden": [
+        "fetch",
+        "ls-remote",
+        "push"
+      ]
+    },
+    {
+      "id": "default-branch-publication",
+      "context": {
+        "command": "publish",
+        "currentBranch": "trunk",
+        "remoteDefaultBranch": "trunk"
+      },
+      "expected": "block",
+      "code": "DEFAULT_BRANCH_PROTECTED"
+    },
+    {
+      "id": "divergent-remote-publication",
+      "context": {
+        "command": "publish",
+        "localSha": "a",
+        "remoteSha": "b"
+      },
+      "expected": "block",
+      "code": "REMOTE_BRANCH_DIVERGED"
+    },
+    {
+      "id": "unsafe-push-options",
+      "context": {
+        "command": "publish",
+        "options": [
+          "--force",
+          "--force-with-lease",
+          "--mirror",
+          "--all",
+          "--tags"
+        ]
+      },
+      "expected": "block",
+      "code": "UNSAFE_PUSH_ARGUMENT"
+    },
+    {
+      "id": "autonomous-agent-remote-write",
+      "context": {
+        "agentInitiated": true,
+        "userInvokedLocalTooling": false,
+        "remoteGitHubWrite": true
+      },
+      "expected": "connector-only"
     }
   ]
 }
