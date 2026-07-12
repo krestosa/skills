@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "modelProfile": "gpt-5.6-sol",
-  "purpose": "Representative regression cases for surgical prompt migration. These are specifications, not benchmark claims.",
+  "purpose": "Representative regression cases for surgical prompt migration and adaptive reasoning routing. These are specifications, not benchmark claims.",
   "cases": [
     {
       "id": "review-no-mutation",
@@ -151,6 +151,276 @@
         "stop when success criteria are met",
         "do not search for phrasing only",
         "use smallest missing-field fallback"
+      ]
+    },
+    {
+      "id": "reasoning-instant-text-replacement",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to change exactly ‘colour’ to ‘color’ in a known file and verify no occurrences remain.",
+      "assertions": [
+        "selected reasoning is Instant",
+        "telos is closed and execution is mechanical",
+        "visible directive equals Razonamiento: Instant"
+      ]
+    },
+    {
+      "id": "reasoning-instant-read-only-inspection",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to inspect one known file and return the exact declared schemaVersion without mutation.",
+      "assertions": [
+        "selected reasoning is Instant",
+        "state is known and validation is exact",
+        "no mutation risk raises the floor"
+      ]
+    },
+    {
+      "id": "reasoning-medium-bounded-implementation",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to modify a known component, update its tests, and run the affected build.",
+      "assertions": [
+        "selected reasoning is Medium",
+        "work is non-trivial but bounded",
+        "limited local decisions remain"
+      ]
+    },
+    {
+      "id": "reasoning-medium-bug-fix-tests",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to fix a reproduced bug in an existing module and add regression tests.",
+      "assertions": [
+        "selected reasoning is Medium",
+        "debugging is bounded by a known reproduction",
+        "tests provide proportionate validation"
+      ]
+    },
+    {
+      "id": "reasoning-medium-reversible-publication",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to publish one verified commit to an existing non-default branch through the connector.",
+      "assertions": [
+        "selected reasoning is Medium",
+        "publication is precise reversible and bounded",
+        "base and branch prerequisites are explicit"
+      ]
+    },
+    {
+      "id": "reasoning-high-cross-system-architecture",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to redesign a capability across several subsystems while preserving compatibility.",
+      "assertions": [
+        "selected reasoning is High",
+        "architecture and compatibility are hard triggers",
+        "prompt length does not lower the risk floor"
+      ]
+    },
+    {
+      "id": "reasoning-high-interrupted-chat-recovery",
+      "category": "reasoning-routing",
+      "request": "Generate a continuation to recover an uncertain workspace after a delegated chat was interrupted.",
+      "assertions": [
+        "selected reasoning is High",
+        "unknown interrupted state is a hard trigger",
+        "recovery prevents downgrade"
+      ]
+    },
+    {
+      "id": "reasoning-high-destructive-action",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to permanently delete unmerged branches and unrecoverable artifacts.",
+      "assertions": [
+        "selected reasoning is High",
+        "destructive irreversible action is a hard trigger",
+        "prompt closure cannot downgrade it"
+      ]
+    },
+    {
+      "id": "reasoning-high-global-orchestrator-policy",
+      "category": "reasoning-routing",
+      "request": "Generate a prompt to modify the global orchestrator and classify reasoning for other agents.",
+      "assertions": [
+        "selected reasoning is High",
+        "global policy and agent classification are hard triggers",
+        "orchestrator work is not treated as ordinary code"
+      ]
+    },
+    {
+      "id": "reasoning-granularity-high-to-medium",
+      "category": "reasoning-routing",
+      "request": "Generate a fully closed prompt for an initially complex change with exact files, edits, order, fallbacks, validation, and stop rules, with no remaining hard trigger.",
+      "assertions": [
+        "initial classification may be High",
+        "prompt closure reduces by exactly one level",
+        "selected reasoning is Medium"
+      ]
+    },
+    {
+      "id": "reasoning-granularity-medium-to-instant",
+      "category": "reasoning-routing",
+      "request": "Generate a completely specified linear prompt for a bounded task after all local choices and validation steps have been fixed.",
+      "assertions": [
+        "initial classification may be Medium",
+        "prompt closure reduces by exactly one level",
+        "selected reasoning is Instant"
+      ]
+    },
+    {
+      "id": "reasoning-no-high-to-instant",
+      "category": "reasoning-routing",
+      "request": "Generate an extremely detailed prompt for work initially classified High.",
+      "assertions": [
+        "High cannot reduce directly to Instant",
+        "maximum prompt closure discount is one level",
+        "detail alone does not prove closure"
+      ]
+    },
+    {
+      "id": "reasoning-hard-trigger-blocks-downgrade",
+      "category": "reasoning-routing",
+      "request": "Generate a granular prompt for a destructive recovery involving unknown state and authentication.",
+      "assertions": [
+        "selected reasoning remains High",
+        "hard triggers prevent prompt closure downgrade",
+        "unknown state and authentication preserve the floor"
+      ]
+    },
+    {
+      "id": "reasoning-recompute-every-continuation",
+      "category": "reasoning-routing",
+      "request": "A delegated result returned; generate the next continuation prompt.",
+      "assertions": [
+        "recover original telos and classify remaining work from zero",
+        "do not inherit the previous level",
+        "emit a newly selected allowed level"
+      ]
+    },
+    {
+      "id": "reasoning-iteration-can-decrease",
+      "category": "reasoning-routing",
+      "request": "The initial architecture is now verified and only a bounded implementation remains.",
+      "assertions": [
+        "recompute from the reduced remaining scope",
+        "level may decrease from High to Medium",
+        "repeat the trailing directive even if unchanged from another iteration"
+      ]
+    },
+    {
+      "id": "reasoning-iteration-can-increase",
+      "category": "reasoning-routing",
+      "request": "A Medium continuation revealed corruption, contradictory remote state, and lost files.",
+      "assertions": [
+        "recompute from new evidence",
+        "recovery and contradictory evidence escalate to High",
+        "selected reasoning is High"
+      ]
+    },
+    {
+      "id": "output-directive-outside-block",
+      "category": "output-contract",
+      "request": "Generate one delegated prompt.",
+      "assertions": [
+        "one prompt code block appears first",
+        "reasoning directive is outside the block",
+        "directive is not part of pasted prompt"
+      ]
+    },
+    {
+      "id": "output-directive-after-block",
+      "category": "output-contract",
+      "request": "Generate one delegated prompt and reasoning recommendation.",
+      "assertions": [
+        "directive appears immediately after the closing fence",
+        "no explanation appears between block and directive",
+        "prompt precedes reasoning"
+      ]
+    },
+    {
+      "id": "output-directive-final-element",
+      "category": "output-contract",
+      "request": "Generate one delegated prompt.",
+      "assertions": [
+        "reasoning directive is the final response element",
+        "no text appears after the directive",
+        "stop immediately after the directive"
+      ]
+    },
+    {
+      "id": "output-single-block-single-directive",
+      "category": "output-contract",
+      "request": "Generate exactly one prompt for another chat.",
+      "assertions": [
+        "exactly one prompt code block",
+        "exactly one trailing reasoning directive",
+        "zero other text outside the block"
+      ]
+    },
+    {
+      "id": "output-multiple-workstreams-independent",
+      "category": "output-contract",
+      "request": "Generate separate prompts for two independent delegated workstreams.",
+      "assertions": [
+        "each prompt has its own immediate directive",
+        "no global reasoning recommendation is shared",
+        "final element is the second prompt directive"
+      ]
+    },
+    {
+      "id": "output-allowed-reasoning-values",
+      "category": "output-contract",
+      "request": "Generate a delegated prompt.",
+      "assertions": [
+        "directive value is one of Instant Medium High",
+        "no fourth effort label appears",
+        "capitalization is canonical"
+      ]
+    },
+    {
+      "id": "output-no-visible-model-label",
+      "category": "output-contract",
+      "request": "Generate a delegated prompt for the latest available model.",
+      "assertions": [
+        "internal target model is latest available",
+        "visible directive does not contain Modelo",
+        "visible directive does not contain último disponible"
+      ]
+    },
+    {
+      "id": "output-reasoning-only-line",
+      "category": "output-contract",
+      "request": "Generate a Medium delegated prompt.",
+      "assertions": [
+        "visible line equals Razonamiento: Medium",
+        "line contains no explanation or justification",
+        "line contains no configuration heading"
+      ]
+    },
+    {
+      "id": "runtime-orchestrator-high",
+      "category": "runtime-policy",
+      "request": "Describe the required runtime configuration for the orchestrator.",
+      "assertions": [
+        "orchestrator model is latest available",
+        "orchestrator reasoning is High",
+        "configuration is user-set in ChatGPT Web"
+      ]
+    },
+    {
+      "id": "runtime-target-latest-internal",
+      "category": "runtime-policy",
+      "request": "Generate a prompt for another ChatGPT Web chat.",
+      "assertions": [
+        "target model policy remains latest available",
+        "model recommendation stays internal",
+        "visible output contains reasoning only"
+      ]
+    },
+    {
+      "id": "direct-answer-no-directive",
+      "category": "output-contract",
+      "request": "Answer a factual question directly without generating a prompt.",
+      "assertions": [
+        "no reasoning directive is required",
+        "ordinary output contract applies",
+        "do not append routing metadata unnecessarily"
       ]
     }
   ]
