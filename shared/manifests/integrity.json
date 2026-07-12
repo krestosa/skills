@@ -32,13 +32,13 @@
     "files": [
       {
         "path": ".gitattributes",
-        "sha256": "d711b6ba64c7208f3059111e2a74a2453348584bef1fec237198ad08befe28b9",
-        "bytes": 20
+        "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+        "bytes": 19
       },
       {
         "path": ".gitignore",
-        "sha256": "2ed705321569bed53afe8d2c5d6c5d7bf8226f7f6d36c0e7dee48c845830e78a",
-        "bytes": 385
+        "sha256": "45c90b17e09537c8f45e4837dc84b21de5abad729c6ed39f7172e035fbd4e899",
+        "bytes": 384
       },
       {
         "path": "README.md",
@@ -247,8 +247,8 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "dfcac96a2cff916ac86c8af628de663b71528cd57c0b7fd43045e28d6bc83bda",
-        "bytes": 3533
+        "sha256": "0a1f3e4e4de6d5a3f7f644e9a805e3f2db80e7e927c48b92516051e259673210",
+        "bytes": 3417
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
