@@ -9,11 +9,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 CANDIDATE = Path(__file__).resolve().parents[1]
 SCRIPTS = CANDIDATE / "scripts"
 sys.path.insert(0, os.fspath(SCRIPTS))
 
+import repository_tooling  # noqa: E402
 from repository_tooling import (  # noqa: E402
     ToolingError,
     build_compiled,
@@ -765,23 +767,26 @@ class PublicationToolingTests(unittest.TestCase):
 
     def test_push_command_never_contains_force(self) -> None:
         bare, _ = self._initialize_remote()
-        log = self.base / "git-args.log"
-        bin_dir = self.base / "log-bin"
-        bin_dir.mkdir()
-        wrapper = bin_dir / "git"
-        wrapper.write_text(
-            "#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$GIT_ARGS_LOG\"\n"
-            f"exec {self.git_binary} \"$@\"\n",
-            encoding="utf-8",
-        )
-        wrapper.chmod(0o755)
-        env = dict(os.environ)
-        env["PATH"] = os.fspath(bin_dir) + os.pathsep + env.get("PATH", "")
-        env["GIT_ARGS_LOG"] = os.fspath(log)
-        result = self._cli("publish", env=env)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        arguments = log.read_text(encoding="utf-8")
+        calls: list[tuple[str, ...]] = []
+        original_remote_git = repository_tooling.remote_git
+
+        def recording_remote_git(model, *args: str, **kwargs):
+            calls.append(tuple(args))
+            return original_remote_git(model, *args, **kwargs)
+
+        with mock.patch.object(
+            repository_tooling,
+            "remote_git",
+            side_effect=recording_remote_git,
+        ):
+            result = publish_branch(self.fixture.model())
+
+        self.assertTrue(result["pushed"])
+        push_calls = [arguments for arguments in calls if arguments and arguments[0] == "push"]
+        self.assertEqual(len(push_calls), 1, calls)
+        arguments = push_calls[0]
         self.assertNotIn("--force", arguments)
+        self.assertNotIn("--force-with-lease", arguments)
         self.assertNotIn("--mirror", arguments)
         self.assertNotIn("--all", arguments)
         self.assertNotIn("--tags", arguments)
