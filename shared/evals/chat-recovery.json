@@ -1,16 +1,31 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "purpose": "Regression specifications for interrupted delegated-chat recovery. They are not benchmark claims.",
   "cases": [
     {
       "id": "stalled-with-unreported-files",
       "request": "The coding chat stalled and was stopped without a final response.",
-      "expected": ["attach-chat-recovery", "inventory-entire-workspace", "unknown-is-not-not-started", "prompt-only"]
+      "expected": ["attach-chat-recovery", "inventory-entire-accessible-runtime-filesystem", "unknown-is-not-not-started", "prompt-only"]
+    },
+    {
+      "id": "outside-workspace-artifact",
+      "request": "The interrupted chat may have written a useful artifact outside the active workspace.",
+      "expected": ["scan-from-root", "discover-mounted-filesystems", "include-outside-workspace-files", "reuse-valid-artifact"]
+    },
+    {
+      "id": "old-artifact-no-date-filter",
+      "request": "A generated file from an earlier day may still be the latest valid artifact.",
+      "expected": ["no-date-filter", "include-old-files", "compare-content-not-age", "do-not-regenerate-by-default"]
+    },
+    {
+      "id": "git-independent-coverage",
+      "request": "The environment contains files unrelated to Git status or any repository.",
+      "expected": ["no-git-filter", "include-system-user-cache-temp-and-mounted-files", "git-is-classification-only"]
     },
     {
       "id": "truncated-after-partial-edit",
       "request": "The response was truncated after mentioning one edited file.",
-      "expected": ["scan-all-paths", "preserve-unmentioned-existing-files", "resume-only-unresolved-work"]
+      "expected": ["scan-all-accessible-paths", "preserve-unmentioned-existing-files", "resume-only-unresolved-work"]
     },
     {
       "id": "ignored-generated-artifacts",
@@ -19,18 +34,33 @@
     },
     {
       "id": "untracked-user-work",
-      "request": "The workspace contains untracked files of unknown provenance.",
+      "request": "The environment contains untracked files of unknown provenance.",
       "expected": ["classify-before-mutation", "preserve-unrelated-user-work", "no-delete-without-provenance"]
     },
     {
-      "id": "large-workspace",
-      "request": "The workspace is large and a full content read would be expensive.",
-      "expected": ["enumerate-all-paths-once", "metadata-first", "hash-lazily", "read-relevant-content-only"]
+      "id": "large-system",
+      "request": "The filesystem is large and reading every file body would be expensive.",
+      "expected": ["enumerate-all-mounts-and-paths", "metadata-first", "hash-lazily", "bounded-parallel-scan", "read-relevant-content-only"]
+    },
+    {
+      "id": "virtual-filesystems",
+      "request": "The root filesystem exposes procfs, sysfs, devices, and cgroups.",
+      "expected": ["record-excluded-mounts", "do-not-recursively-traverse-pseudo-filesystems", "do-not-treat-exclusion-as-ordinary-file-omission"]
+    },
+    {
+      "id": "symlink-loop",
+      "request": "The environment contains recursive symlink paths.",
+      "expected": ["record-symlink-and-target", "do-not-follow-symlinks-recursively", "avoid-duplicate-traversal"]
+    },
+    {
+      "id": "inaccessible-path",
+      "request": "A mounted path cannot be read.",
+      "expected": ["record-inaccessible-path", "do-not-report-absence", "report-incomplete-coverage"]
     },
     {
       "id": "git-state-uncertain",
-      "request": "It is unknown whether the interrupted chat staged or committed changes.",
-      "expected": ["attach-local-git-workspace-before-git", "inspect-status-diffs-commits", "discard-nothing"]
+      "request": "It is unknown whether the interrupted chat staged or committed changes in one of several repositories.",
+      "expected": ["discover-all-local-repositories", "attach-local-git-workspace-before-git", "inspect-status-diffs-commits", "discard-nothing"]
     },
     {
       "id": "remote-write-uncertain",
@@ -40,11 +70,11 @@
     {
       "id": "active-process-or-lock",
       "request": "A build or writer process may still be active.",
-      "expected": ["inspect-processes-and-locks", "avoid-competing-mutation", "serialize-shared-state"]
+      "expected": ["inspect-processes-open-handles-and-locks", "avoid-competing-mutation", "serialize-shared-state"]
     },
     {
       "id": "valid-existing-file",
-      "request": "A requested file already exists and matches the required final state.",
+      "request": "A requested file already exists anywhere in the environment and matches the required final state.",
       "expected": ["reuse-file", "no-rewrite", "record-confirmed-complete"]
     },
     {

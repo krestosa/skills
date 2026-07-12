@@ -30,8 +30,9 @@ Create a minimal, dependency-aware execution structure that preserves authority,
 - handoffs preserve evidence and avoid duplicate work
 - returned results are classified against the original objective and completion bar
 - interrupted work invokes `chat-recovery` before unresolved work is assigned
-- recovery prompts require a complete active-workspace inventory before file generation or mutation
-- existing valid files and artifacts are reused rather than regenerated, rewritten, or re-edited
+- recovery prompts require a complete accessible-runtime-filesystem inventory before file generation or mutation
+- the inventory is not restricted by workspace, repository, Git state, date, or expected path
+- existing valid files and artifacts are reused rather than generated, regenerated, rewritten, or re-edited
 - continuation responses contain exactly one self-contained prompt code block and no text outside it
 - all necessary explanation, expansion, correction, constraints, and next steps are contained inside that prompt
 
@@ -71,17 +72,19 @@ Read only these routes from `../../shared/manifests/routes.json`. Do not copy or
 1. Attach `chat-recovery`.
 2. Recover the original prompt and all available partial output or progress evidence.
 3. Treat unreported execution state as unknown, not as not-started.
-4. Require the target chat to scan every file and directory inside the active workspace boundary before generating, rewriting, editing, deleting, or replacing files.
-5. Require classification and reuse of existing files, artifacts, patches, reports, builds, manifests, backups, and temporary outputs.
-6. Reconstruct the last reliable checkpoint from local and remote evidence.
-7. Generate an idempotent prompt that performs only unresolved work and validates bases before mutation.
-8. Preserve all existing permissions and prohibitions without expansion.
+4. Require the target chat to inventory every accessible filesystem entry in the execution environment before generating, regenerating, rewriting, editing, deleting, moving, or replacing files.
+5. Apply no date, Git, repository, workspace, owner, extension, or task-origin filter.
+6. Require classification and reuse of existing files, artifacts, patches, reports, builds, manifests, backups, caches, temporary outputs, and equivalent files outside the expected workspace.
+7. Record excluded virtual filesystem mounts and inaccessible paths instead of silently omitting them.
+8. Reconstruct the last reliable checkpoint from system, local, and remote evidence.
+9. Generate an idempotent prompt that performs only unresolved work and validates bases before mutation.
+10. Preserve all existing permissions and prohibitions without expansion.
 
 ## Output
 
 For initial delegation, return workstreams, selected skills, dependencies, authorization, evidence inputs, deliverables, stop rules, and integration order.
 
-For a returned or interrupted delegated result, return exactly one prompt inside one code block and nothing else. Do not add a preface, summary, diagnosis, status, rationale, citations, notes, or closing text outside the code block. The prompt itself must contain all context, specificity, corrections, evidence, workspace-inventory requirements, constraints, validation requirements, idempotency guarantees, and stop rules needed by the target chat.
+For a returned or interrupted delegated result, return exactly one prompt inside one code block and nothing else. Do not add a preface, summary, diagnosis, status, rationale, citations, notes, or closing text outside the code block. The prompt itself must contain all context, specificity, corrections, evidence, system-wide inventory requirements, exclusions, inaccessible paths, constraints, validation requirements, idempotency guarantees, and stop rules needed by the target chat.
 
 Global authorization, tool, evidence, validation, and stop rules come from `../../SKILL.md` and `../../orchestrator/SKILL.md`.
 

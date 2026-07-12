@@ -23,9 +23,11 @@ shared/                  canonical sources, policies, catalogs, profiles, and ma
 
 ## Interrupted-chat recovery
 
-Before a resumed chat generates or changes files, `chat-recovery` requires a recursive inventory of every file and directory inside the active workspace. Existing tracked, untracked, ignored, hidden, generated, temporary, binary, backup, patch, manifest, lock, and output files are inspected and reused when valid. Missing output from the interrupted chat is not treated as proof that work was not written to disk.
+Before a resumed chat generates or changes any file, `chat-recovery` requires a system-wide inventory of every accessible filesystem entry in the execution environment. The scan starts from `/`, covers every accessible mounted filesystem, and has no date, Git, repository, workspace, owner, extension, or task-origin filter.
 
-The recovery prompt must be idempotent: preserve verified work, prohibit unnecessary regeneration or rewriting, validate current bases, and continue only unresolved work from the last reliable checkpoint.
+It inventories files inside and outside the active repository, including system files, user files, workspaces, temporary directories, caches, hidden files, generated outputs, backups, patches, manifests, locks, binaries, symlinks, build directories, and artifacts from previous runs. Kernel pseudo-filesystems and device-backed virtual trees are recorded as excluded mount types rather than traversed as persistent files.
+
+The recovery prompt must be idempotent: preserve verified work, reuse every valid existing artifact, prohibit unnecessary generation or rewriting, validate current bases, and continue only unresolved work from the last reliable checkpoint.
 
 ## Invariants
 

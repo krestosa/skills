@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "orchestrator": "orchestrator/SKILL.md",
   "shared": {
     "root": "shared",
@@ -32,7 +32,7 @@
           "two or more independent tasks, tool calls, skills, modules, files, resources, errors, validations, or workstreams exist",
           "a multi-file or multi-module task contains independent work",
           "independent reads or checks can run concurrently",
-          "chat recovery contains independent workspace, process, artifact, repository, or remote inspections"
+          "chat recovery contains independent mount, filesystem, process, artifact, repository, or remote inspections"
         ],
         "skipWhenAny": [
           "single indivisible operation",
@@ -48,13 +48,13 @@
         "attachWhenAny": [
           "the selected work will execute any local git command",
           "the task inspects or changes a local Git repository",
-          "Git reports detected dubious ownership for the active workspace",
-          "chat recovery needs local Git evidence"
+          "Git reports detected dubious ownership for an active repository",
+          "chat recovery needs local Git evidence from any discovered repository"
         ],
         "skipWhenAny": [
           "the task is remote-only and uses no local Git repository",
-          "no local workspace exists",
-          "the active workspace does not contain a .git file or directory and no local Git command will run"
+          "no local filesystem environment exists",
+          "no discovered filesystem contains a .git file or directory and no local Git command will run"
         ],
         "requiresRootRuntime": true,
         "runBeforeFirstLocalGitCommand": true,
@@ -80,11 +80,19 @@
           "no prior delegated work exists",
           "the request concerns repository recovery unrelated to an interrupted chat"
         ],
-        "requiresFullWorkspaceInventoryBeforeMutation": true,
-        "inventoryBoundary": "active-workspace-only",
-        "inventoryIncludesIgnoredGeneratedHiddenTemporaryAndBinary": true,
+        "requiresFullEnvironmentInventoryBeforeMutation": true,
+        "inventoryBoundary": "accessible-runtime-filesystem",
+        "inventoryStartsAt": "/",
+        "discoversAllMountedFilesystems": true,
+        "noDateFilter": true,
+        "noGitRepositoryOrWorkspaceFilter": true,
+        "inventoryIncludesAllAccessibleFilesystemEntries": true,
+        "inventoryIncludesSystemUserWorkspaceTemporaryCacheGeneratedHiddenBinarySymlinkAndOutsideRepositoryFiles": true,
+        "recordsExcludedVirtualFilesystems": true,
+        "recordsInaccessiblePaths": true,
+        "doesNotFollowSymlinksRecursively": true,
         "reuseExistingValidFiles": true,
-        "prohibitsUnnecessaryRegeneration": true,
+        "prohibitsUnnecessaryGenerationAndRegeneration": true,
         "unknownStateIsNotNotStarted": true,
         "requiresIdempotentContinuationPrompt": true,
         "promptOnlyResponse": true,
@@ -297,7 +305,7 @@
       "loadPolicy": {
         "onDemand": true,
         "autoAttachWhenApplicable": true,
-        "requiresFullWorkspaceInventoryBeforeMutation": true,
+        "requiresFullEnvironmentInventoryBeforeMutation": true,
         "requiresIdempotentContinuationPrompt": true,
         "promptOnlyResponse": true,
         "loadOnlyReferencedSharedRoutes": true

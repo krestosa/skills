@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "rootSkill": "SKILL.md",
   "orchestrator": "orchestrator/SKILL.md",
   "orchestratorCount": 1,
@@ -42,17 +42,24 @@
   "chatRecovery": {
     "skill": "skills/chat-recovery/SKILL.md",
     "evals": "shared/evals/chat-recovery.json",
-    "evalCaseCount": 12,
+    "evalCaseCount": 18,
     "trigger": "interrupted, stalled, cancelled, disconnected, truncated, or untrusted delegated chat execution",
     "autoAttachOnInterruptedDelegatedChat": true,
-    "fullWorkspaceInventoryBeforeMutation": true,
-    "inventoryBoundary": "active-workspace-only",
-    "includesAllWorkspaceFiles": true,
-    "includesTrackedUntrackedIgnoredGeneratedHiddenTemporaryBinaryAndOutputs": true,
+    "fullEnvironmentInventoryBeforeMutation": true,
+    "inventoryBoundary": "accessible-runtime-filesystem",
+    "inventoryStartsAt": "/",
+    "discoversAllMountedFilesystems": true,
+    "noDateFilter": true,
+    "noGitRepositoryOrWorkspaceFilter": true,
+    "includesAllAccessibleFilesystemEntries": true,
+    "includesSystemUserWorkspaceTemporaryCacheGeneratedHiddenBinarySymlinkAndOutsideRepositoryFiles": true,
+    "recordsExcludedVirtualFilesystems": true,
+    "recordsInaccessiblePaths": true,
+    "doesNotFollowSymlinksRecursively": true,
     "metadataFirstHashLazily": true,
     "reuseExistingValidFiles": true,
-    "prohibitsUnnecessaryRegeneration": true,
-    "preserveUnrelatedUserChanges": true,
+    "prohibitsUnnecessaryGenerationAndRegeneration": true,
+    "preserveUnrelatedUserAndSystemChanges": true,
     "unknownStateIsNotNotStarted": true,
     "lastVerifiedCheckpointRequired": true,
     "idempotentContinuationPrompt": true,
@@ -81,8 +88,8 @@
   "protectedFiles": [
     {
       "path": "README.md",
-      "sha256": "3cf900ed646268cb9591d3837e00d5184b0a18e5c436fd61beab59b0a7ab8cdf",
-      "bytes": 2377
+      "sha256": "247b472563588d273395ffc268653d9b33a81072a66b347a6debf36985179db9",
+      "bytes": 2745
     },
     {
       "path": "SKILL.md",
@@ -116,8 +123,8 @@
     },
     {
       "path": "shared/evals/chat-recovery.json",
-      "sha256": "06de2bc675deea3356513879e0edce69af70d2ea0c491884050be252015b9862",
-      "bytes": 2941
+      "sha256": "e7dfdd4ce58461b67de9c2673e4c89a9f6271f08c0755e13a3d885520000ef0e",
+      "bytes": 5259
     },
     {
       "path": "shared/evals/local-git-workspace.json",

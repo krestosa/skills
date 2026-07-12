@@ -1,6 +1,6 @@
 ---
 name: chat-recovery
-description: Recover interrupted, stalled, cancelled, or truncated delegated chat work by reconstructing the last verified state and generating an idempotent continuation prompt.
+description: Recover interrupted, stalled, cancelled, or truncated delegated chat work by reconstructing the last verified state from a system-wide environment inventory and generating an idempotent continuation prompt.
 parent: orchestrator
 ---
 
@@ -16,7 +16,7 @@ Forensic, conservative, concise, and explicit about uncertainty. Preserve useful
 
 ## Collaboration style
 
-Assume the interrupted chat may have completed some actions without reporting them. Verify workspace and remote state before instructing regeneration, rewriting, re-editing, or repetition. Ask for no information that can be recovered from the active environment or connected evidence.
+Assume the interrupted chat may have completed actions without reporting them and may have written artifacts anywhere in the execution environment. Verify system, workspace, repository, and remote state before instructing generation, regeneration, rewriting, re-editing, deletion, or repetition. Ask for no information recoverable from the environment or connected evidence.
 
 ## Goal
 
@@ -25,9 +25,10 @@ Reconstruct the last reliable checkpoint after a chat stalls, is manually stoppe
 ## Success criteria
 
 - the original objective, prompt, scope, permissions, prohibitions, and completion bar are recovered
-- the complete active workspace is inventoried before any file is generated, rewritten, edited, deleted, or replaced
-- existing files and artifacts are classified as verified, partial, stale, generated, unknown, or unrelated
-- local Git, remote GitHub, processes, locks, outputs, and validation evidence are inspected when applicable
+- every accessible filesystem entry in the execution environment is inventoried before any file is generated, rewritten, edited, deleted, moved, or replaced
+- the scan is not limited by workspace, repository, Git status, file age, modification date, creation date, owner, extension, or relation to the current task
+- files and artifacts are classified as verified, partial, stale, generated, unknown, unrelated, or inaccessible
+- local Git, remote GitHub, processes, locks, outputs, mounts, and validation evidence are inspected when applicable
 - completed work is preserved and not repeated
 - uncertain actions remain explicitly unknown until verified
 - the last reliable checkpoint and remaining dependency graph are identified
@@ -56,67 +57,81 @@ Read only these routes from `../../shared/manifests/routes.json`. Do not copy or
 
 ## Recovery procedure
 
-1. Recover the original request and the exact prompt sent to the interrupted chat.
+1. Recover the original request and exact prompt sent to the interrupted chat.
 2. Record every available partial response, tool result, error, progress update, and user observation.
-3. Resolve the active workspace root without assuming a repository name.
-4. Before creating or editing anything, recursively inventory every file and directory inside the active workspace boundary.
-5. Record canonical path, type, size, modification time, ownership, and relevant repository status for each entry. Hash files when identity, deduplication, base validation, or patch safety requires it.
-6. Include tracked, untracked, ignored, generated, temporary, hidden, binary, build-output, report, patch, backup, manifest, lock, and recovery files. Do not scan outside the resolved workspace boundary.
-7. Classify each existing item as:
-   - verified complete
-   - present but unverified
-   - partial or truncated
-   - stale relative to dependencies
-   - generated output
-   - unrelated pre-existing user work
-   - unknown provenance
-8. Detect duplicate or equivalent artifacts by path, hash, content, manifest, or build provenance.
-9. Inspect local Git only after `local-git-workspace` completes when a `.git` repository exists. Resolve branch, HEAD, status, staged and unstaged changes, untracked files, recent commits, worktrees, stashes, and relevant diffs without discarding anything.
-10. Inspect remote GitHub through the connector when the prior prompt could have performed remote reads or writes. Verify refs, commits, files, PRs, issues, reviews, and CI by exact identifiers.
-11. Inspect active processes, lock files, temporary outputs, build directories, and tools that may still be writing to shared state when the environment exposes them.
-12. Build an evidence ledger with three categories: confirmed completed, confirmed incomplete, and unknown.
-13. Identify the last checkpoint supported by direct evidence.
-14. Build the remaining dependency graph from that checkpoint.
-15. Generate one continuation prompt that preserves existing files, reuses valid artifacts, validates bases before writing, and performs only unresolved work.
+3. Treat the execution environment root `/` as the inventory starting point.
+4. Discover every mounted filesystem and accessible root before choosing scan workers.
+5. Before creating or editing anything, recursively inventory every accessible filesystem entry across the complete runtime environment.
+6. Apply no date filter. Files created or modified today, earlier, by another run, or with unreliable timestamps remain in scope.
+7. Apply no Git filter. Tracked, untracked, ignored, outside-repository, system, generated, cached, temporary, hidden, binary, backup, patch, report, manifest, lock, build-output, and recovery files remain in scope.
+8. Record canonical path, mount, filesystem type, entry type, size, timestamps, ownership, permissions, link target, and relevant repository status when available. Hash files when identity, deduplication, base validation, or patch safety requires it.
+9. Do not follow symlinks recursively. Record their canonical link path and target to prevent loops and duplicate traversal.
+10. Record inaccessible paths and permission errors rather than silently treating them as absent.
+11. Do not recursively traverse kernel or device pseudo-filesystems whose entries are not persistent artifacts, including procfs, sysfs, devtmpfs, devpts, cgroup, cgroup2, securityfs, debugfs, tracefs, and similar virtual trees. Record each excluded mount, its type, and the reason. This exclusion does not permit omitting ordinary files on persistent, writable, temporary, overlay, bind, or user-mounted filesystems.
+12. Classify each ordinary filesystem entry as:
+    - verified complete
+    - present but unverified
+    - partial or truncated
+    - stale relative to dependencies
+    - generated output
+    - unrelated pre-existing user or system file
+    - unknown provenance
+    - inaccessible
+13. Detect duplicate or equivalent artifacts by path, hash, content, manifest, inode, link target, or build provenance.
+14. Inspect every discovered local Git repository only after `local-git-workspace` completes for that repository. Resolve branch, HEAD, status, staged and unstaged changes, untracked files, recent commits, worktrees, stashes, and relevant diffs without discarding anything.
+15. Inspect remote GitHub through the connector when the prior prompt could have performed remote reads or writes. Verify refs, commits, files, PRs, issues, reviews, and CI by exact identifiers.
+16. Inspect active processes, open handles when available, lock files, temporary outputs, build directories, and tools that may still write to shared state.
+17. Build an evidence ledger with three execution categories: confirmed completed, confirmed incomplete, and unknown.
+18. Identify the last checkpoint supported by direct evidence.
+19. Build the remaining dependency graph from that checkpoint.
+20. Generate one continuation prompt that preserves existing files, reuses valid artifacts, validates bases before writing, and performs only unresolved work.
 
-## Full workspace inventory rule
+## System-wide inventory rule
 
-The inventory is mandatory before regeneration or mutation. The target chat must not regenerate, rewrite, replace, or edit a file merely because the interrupted chat failed to mention it.
+The inventory is mandatory before regeneration or mutation. The target chat must not generate, regenerate, rewrite, replace, edit, move, or delete a file merely because the interrupted chat failed to mention it.
+
+The inventory covers the complete accessible runtime filesystem, not only the active workspace. It must include ordinary entries under locations such as `/workspace`, `/mnt`, `/mnt/data`, `/tmp`, `/var/tmp`, `/root`, `/home`, `/opt`, `/usr/local`, application caches, build roots, mounted volumes, and any other accessible filesystem discovered at runtime. These paths are examples, not a closed allowlist.
 
 For every planned file action:
 
 ```text
 resolve canonical path
-→ check whether the file already exists
+→ search the global inventory for existing or equivalent artifacts
 → inspect metadata and relevant content
 → compare with the required final state
 → reuse unchanged valid content
 → patch only missing or incorrect portions
-→ create only when absent
+→ create only when no valid artifact exists
 ```
 
-Existing files are evidence. Absence from the interrupted response is not evidence of absence from the workspace.
+Existing files are evidence. Absence from the interrupted response, Git index, active workspace, current date range, or expected output path is not evidence of absence from the environment.
 
-Do not delete temporary, generated, untracked, or unfamiliar files until their relationship to the interrupted work is established. Preserve unrelated user changes.
+Do not delete temporary, generated, untracked, outside-workspace, system, cached, or unfamiliar files until their relationship to the interrupted work is established. Preserve unrelated user and system state.
 
-For large workspaces, optimize the scan without weakening coverage:
+## Scanning efficiency without coverage loss
 
-- enumerate all paths once
+For large environments:
+
+- enumerate all mounts and all ordinary paths once
 - collect inexpensive metadata in one pass
-- use Git index and ignore metadata as classification signals, not as reasons to omit files
+- partition independent mounts and directories for bounded parallel enumeration
+- apply a concurrency limit based on CPU, memory, descriptor limits, storage latency, and output volume
+- use Git metadata only as a classification signal, never as an inclusion filter
 - hash lazily when metadata is insufficient
-- read text contents only when relevant to the requested outcome or provenance
+- read contents only when relevant to the requested outcome, artifact identity, or provenance
+- never print secret contents merely because a file was inventoried
 - avoid repeatedly rescanning unchanged paths
-- persist the inventory or its digest when the environment permits
-- rescan only paths that may have changed since the checkpoint
+- persist the inventory, digest, exclusions, and scan timestamp when the environment permits
+- rescan only paths or mounts that may have changed since the checkpoint
+- report incomplete coverage explicitly when permissions, disappearing paths, mount failures, or tool limits prevent a complete scan
 
 ## Idempotent continuation rules
 
 The generated prompt must instruct the target chat to:
 
-- begin by verifying the recorded workspace inventory and current hashes or Git state
-- reuse valid files and artifacts instead of recreating them
-- avoid overwriting newer or unrelated changes
+- begin by verifying the recorded system-wide inventory, exclusions, inaccessible paths, hashes, and Git state
+- reuse valid files and artifacts regardless of where or when they were created
+- avoid overwriting newer, unrelated, or system-managed changes
 - combine compatible edits to the same file
 - recalculate patches when the base changed
 - rerun only validations affected by new changes, followed by required global gates
@@ -128,16 +143,16 @@ The generated prompt must instruct the target chat to:
 ## Interaction with other skills
 
 - Attach `management-delegation` to recover the original workstream contract and produce the prompt-only response.
-- Attach `recovery` when local, GitHub, CI, publication, or workspace state is partial or inconsistent.
-- Attach `local-git-workspace` before any local Git command.
-- Attach `parallel-execution` for independent inventory, metadata, repository, process, artifact, and remote inspections, while serializing shared-state mutation.
+- Attach `recovery` when local, GitHub, CI, publication, or environment state is partial or inconsistent.
+- Attach `local-git-workspace` before any local Git command in each discovered repository.
+- Attach `parallel-execution` for independent mount, directory, metadata, repository, process, artifact, and remote inspections, while serializing shared-state mutation.
 - Attach domain skills only for unresolved work identified after recovery.
 
 ## Output
 
 Return no ordinary report to the user. Under delegated-result continuation mode, emit exactly one self-contained recovery or continuation prompt inside one code block and nothing outside it.
 
-The prompt must contain the recovered objective, available evidence, workspace inventory requirements, verified completed work, unknown state, remaining tasks, selected skills, tool rules, permissions, prohibitions, validation, idempotency requirements, and stop rules.
+The prompt must contain the recovered objective, available evidence, system-wide inventory requirements, exclusions and inaccessible paths, verified completed work, unknown state, remaining tasks, selected skills, tool rules, permissions, prohibitions, validation, idempotency requirements, and stop rules.
 
 ## Stop rules
 
