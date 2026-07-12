@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "scriptsRoot": "scripts",
+  "testsRoot": "tests",
+  "integrityFile": "shared/manifests/integrity.json",
+  "integritySchemaVersion": 14,
+  "ignoredDirectories": [
+    "dist"
+  ],
+  "declaredFiles": [
+    "orchestrator/delegation-envelope.schema.json"
+  ],
+  "inventoryCollections": [
+    "catalogs",
+    "contracts",
+    "core",
+    "evals",
+    "policies",
+    "profiles",
+    "references",
+    "templates"
+  ],
+  "flatBuild": {
+    "maxFiles": 25,
+    "groups": [
+      {
+        "name": "SHARED-POLICIES",
+        "collections": [
+          "policies"
+        ]
+      },
+      {
+        "name": "GITHUB-CATALOG",
+        "collections": [
+          "catalogs"
+        ],
+        "mode": "individual"
+      },
+      {
+        "name": "SHARED-CONTRACTS",
+        "collections": [
+          "contracts",
+          "core"
+        ]
+      },
+      {
+        "name": "MODEL-RESOURCES",
+        "collections": [
+          "models",
+          "templates",
+          "evals",
+          "references",
+          "profiles"
+        ]
+      },
+      {
+        "name": "MANIFESTS",
+        "collections": [
+          "manifests"
+        ],
+        "rootFiles": [
+          "orchestrator/registry.json"
+        ]
+      },
+      {
+        "name": "CANONICAL-SOURCES",
+        "collections": [
+          "sources"
+        ]
+      }
+    ],
+    "instructionText": "Load 00-MAIN.md, then 01-ORCHESTRATOR.md. The orchestrator selects only the required domain skills and attaches cross-cutting control when applicable. Practical reasoning preserves Ergon and Arete while adding Eudaimonia, Telos, and Phronesis. Attach local-git-workspace before local Git, parallel-execution when safe parallel work exists, and chat-recovery when delegated execution is interrupted or untrusted. Autonomous remote GitHub operations use the connector. Explicit user-invoked publish or commit --push may use guarded native Git fetch, ls-remote, and one non-forced branch push. Returned delegated results use one prompt-only code block."
+  },
+  "skillRequiredHeadings": [
+    "## Role",
+    "## Personality",
+    "## Collaboration style",
+    "## Goal",
+    "## Success criteria",
+    "## Select when",
+    "## Exclude when",
+    "## Shared routes",
+    "## Output",
+    "## Stop rules"
+  ],
+  "textContracts": {
+    "SKILL.md": [
+      "orchestrator/SKILL.md",
+      "Remote GitHub operations use the GitHub connector",
+      "explicit `publish` or `commit --push`",
+      "Do not expose private chain-of-thought"
+    ],
+    "orchestrator/SKILL.md": [
+      "Select one primary skill",
+      "Do not load all skills preemptively",
+      "Attach `local-git-workspace`",
+      "Attach `parallel-execution`",
+      "Attach `chat-recovery`",
+      "emit exactly one self-contained prompt inside one code block"
+    ],
+    "skills/local-git-workspace/SKILL.md": [
+      "Autonomous agent access to remote GitHub remains connector-only",
+      "Explicit user-invoked local tooling may contact GitHub only through `publish` or `commit --push`",
+      "non-forced branch `push`"
+    ],
+    "shared/policies/network-and-transport.md": [
+      "Remote GitHub operations executed autonomously by an agent use the GitHub connector",
+      "python scripts/tooling.py publish",
+      "python scripts/tooling.py commit --push",
+      "DEFAULT_BRANCH_PROTECTED",
+      "REMOTE_BRANCH_DIVERGED"
+    ]
+  }
+}

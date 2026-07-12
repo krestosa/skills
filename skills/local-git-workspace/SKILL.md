@@ -134,7 +134,9 @@ If `detected dubious ownership` persists after one repeat, stop with `BLOCKED â€
 - Do not add global, system, wildcard, or persistent `safe.directory` exceptions.
 - Do not use `chmod`, rewrite content, alter line endings, delete files, or reset user changes.
 - Do not treat ownership repair as authorization for staging, committing, merging, rebasing, publishing, or any remote operation.
-- Remote GitHub access remains connector-only.
+- Autonomous agent access to remote GitHub remains connector-only.
+- Explicit user-invoked local tooling may contact GitHub only through `publish` or `commit --push`, using controlled `fetch`, `ls-remote`, and one non-forced branch `push` after the same ownership and Git-state preflight.
+- This allowance does not authorize implicit network access, default-branch publication, force flags, tags, multiple branches, credential changes, merge, or deletion.
 - Serialize Git index, commit, merge, rebase, and equivalent shared-state operations according to the active execution policy.
 
 ## Output

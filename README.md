@@ -17,7 +17,38 @@ shared/                  canonical sources, policies, catalogs, profiles, and ma
 4. The orchestrator selects one primary domain skill and the minimum supporting skills required for correctness.
 5. Cross-cutting utilities attach automatically when their conditions apply.
 6. Selected skills read only their declared routes from `shared/manifests/routes.json`.
-7. Remote GitHub operations use the GitHub connector; local `git` remains local-only.
+7. Autonomous remote GitHub operations use the GitHub connector. Explicit user-invoked `publish` or `commit --push` may use guarded native Git transport.
+
+## Model and reasoning routing
+
+The ChatGPT Web chat acting as the orchestrator is configured by the user with the latest available model and `High` reasoning. The system cannot change the visual model or reasoning selectors itself.
+
+For every prompt generated for another chat, the orchestrator keeps the latest available model as an internal policy and independently selects one visible reasoning level:
+
+```text
+Instant
+Medium
+High
+```
+
+The level is recalculated for every new prompt, continuation, correction, validation, recovery, publication, derived action, independent workstream, or material change in evidence. It is not inherited from the previous iteration and the user is not asked to choose it.
+
+The classifier summarizes seven factors: Telos clarity, Ergon complexity, Phronesis adaptation burden, Arete validation burden, risk and reversibility, state uncertainty, and how completely the prompt closes the remaining decisions.
+
+- `Instant` is reserved for closed, mechanical, linear, known-state, low-risk work with exact validation and no strategic choice.
+- `Medium` is the default result for bounded professional work with several dependent steps, limited local decisions, known validation, and no critical trigger.
+- `High` is required for architecture, cross-system work, complex migration or compatibility, unknown or interrupted state, contradictory evidence, multi-cause debugging, security or permissions, destructive action, critical release or production work, global policy or orchestrator changes, dynamic replanning, extensive validation, high risk of lost work, or an open objective.
+
+A prompt that genuinely removes ambiguity, strategy choice, branching, undefined fallbacks, implicit success criteria, and reinterpretation may reduce the initial result by one level only: `High → Medium` or `Medium → Instant`. Hard triggers prevent a downgrade. This closes prompts before spending more reasoning and optimizes total user time, latency, quota, and corrective work.
+
+Generated-prompt delivery uses this exact visible structure:
+
+```text
+[Prompt generado]
+```
+Razonamiento: Medium
+
+The reasoning line is outside the prompt block, immediately follows it, contains no model recommendation or explanation, and is the final element of that prompt delivery. Multiple workstreams repeat the same pair independently. Direct answers that do not generate prompts do not require the line.
 
 ## How to request a skill
 
@@ -177,11 +208,13 @@ The recovery prompt must be idempotent: preserve verified work, reuse every vali
 - Exactly one repository `README.md`.
 - Skills live only under `skills/<name>/`.
 - No repository, branch, framework, product, or organization is hardcoded.
-- Remote GitHub reads and writes use the GitHub connector.
-- Local `git` is local-only and runs after ownership preflight.
+- Autonomous remote GitHub reads and writes use the GitHub connector.
+- Local `git` runs after ownership preflight; native Git network access is available only through explicit `publish` or `commit --push`.
+- Publication never targets the remote default branch, never uses force, and never publishes tags or multiple branches.
 - GitHub Read and Write catalogs remain verbatim.
 - No GitHub workflows are included.
-- Returned or interrupted delegated work produces one prompt-only code block with no external commentary.
+- Generated delegated work uses one prompt code block followed by one reasoning-only directive per prompt, with no other external commentary.
+- The latest available target model remains internal and is absent from the visible directive.
 - Practical reasoning never grants side effects or weakens authorization, safety, evidence, or quality requirements.
 
 ## Validate
@@ -196,3 +229,69 @@ python scripts/validate.py
 python scripts/build_compiled.py
 python scripts/build_chatgpt_flat.py
 ```
+
+## Repository tooling
+
+The repository tooling derives skills, routes, source manifests, model resources, inventories, counts, hashes, build inputs, and conventional tasks from the registered repository model. It uses only the Python standard library. Git is required for local status, suggestion, commit, and explicitly requested publication.
+
+Autonomous agent operations continue to use the GitHub connector. Native Git contacts a remote only when the user explicitly runs `publish` or supplies `--push` to `commit`.
+
+Requirements: Python 3.11 or later, plus Git. No third-party Python package is required.
+
+Global options such as `--root`, `--json`, and `--debug` precede the subcommand.
+
+```bash
+python scripts/tooling.py validate
+python scripts/tooling.py build --temporary
+python scripts/tooling.py build --output-base dist/tooling-builds
+python scripts/tooling.py check
+python scripts/tooling.py refresh-integrity --dry-run
+python scripts/tooling.py refresh-integrity
+python scripts/tooling.py tasks
+python scripts/tooling.py suggest-commit
+python scripts/tooling.py --json suggest-commit
+python scripts/tooling.py commit --dry-run --auto-message
+python scripts/tooling.py commit --auto-message
+python scripts/tooling.py commit --message "Explicit imperative subject"
+python scripts/tooling.py publish --dry-run
+python scripts/tooling.py publish --remote origin --branch feature/example --expected-base <sha>
+python scripts/tooling.py commit --auto-message --push --remote origin --branch feature/example
+```
+
+`validate`, `check`, `build --temporary`, `refresh-integrity --dry-run`, `suggest-commit`, and `commit --dry-run` do not modify tracked files, the index, or `HEAD`. Persistent `build` output is restricted to a configured ignored output directory. `refresh-integrity` atomically updates only `shared/manifests/integrity.json`.
+
+`commit` refreshes derived metadata, validates, builds twice in temporary directories, checks determinism, stages the authorized repository changes, generates or accepts a message, and creates one local commit. Without `--push`, it performs no network operation.
+
+`publish` is the only standalone networked command. It verifies a clean attached branch, resolves and validates the GitHub remote, discovers the remote default branch, fetches explicitly, requires exactly one local commit over the remote base, classifies the target branch as `ABSENT`, `EXACT`, or `DIVERGED`, pushes one explicit refspec without force, and verifies the remote SHA. `EXACT` is an idempotent success; `DIVERGED` is blocked.
+
+`commit --push` combines the local commit flow with `publish`. Publication starts only after the local commit succeeds. A publication failure does not remove or rewrite the local commit and is reported separately as `LOCAL_COMMIT` and `REMOTE_PUBLICATION`.
+
+`publish --dry-run` and `commit --dry-run --push` may read remote refs but do not fetch, push, change upstream configuration, update refs, write integrity metadata, or alter `HEAD`, index, or working tree.
+
+The existing scripts remain independently executable:
+
+```bash
+python scripts/validate.py
+python scripts/validate_gpt56.py
+python scripts/verify_lossless.py
+python scripts/build_compiled.py
+python scripts/build_compiled.py --skills implementation validation-quality
+python scripts/build_compiled.py --include practical-reasoning --exclude chat-recovery
+python scripts/build_chatgpt_flat.py
+```
+
+### Discovery and configuration
+
+The centralized bootstrap anchors are `SKILL.md`, `orchestrator/SKILL.md`, `orchestrator/registry.json`, `shared/manifests/routes.json`, and `shared/manifests/tooling.json`. Other files are derived from registry entries, route references, the source index, source manifests, model descriptors, profile maps, configured shared collections, and these task conventions:
+
+```text
+build_*.py
+validate_*.py
+verify_*.py
+```
+
+Private helpers, `__pycache__`, the unified CLI itself, and files outside `scripts/` are not executable tasks.
+
+Derived metadata includes current skill and cross-cutting counts, source and evaluation counts, catalog counts, inventory, file hashes and sizes, dependency and route closure, build order, output counts, task inventory, and commit statistics. Explicit policy remains in `shared/manifests/tooling.json` or the relevant model descriptor. The flat-package maximum is an explicit policy rather than a derived count.
+
+Local `commit` ends with a local commit unless `--push` is explicitly supplied. `publish` and `commit --push` use native Git only within the guarded local-tooling boundary; PR creation, merge, CI, issues, releases, and autonomous remote operations remain connector-native.

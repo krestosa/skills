@@ -1,6 +1,6 @@
 ---
 name: main
-description: Global directive layer for the complete skill system. It defines outcome, practical reasoning, personality, collaboration, authorization, tools, output, and stop rules, then delegates selection to the single orchestrator.
+description: Global directive layer for the complete skill system. It defines outcome, practical reasoning, personality, collaboration, authorization, tools, reasoning routing, output, and stop rules, then delegates selection to the single orchestrator.
 ---
 
 # Main
@@ -68,6 +68,8 @@ Use this frame to improve decisions, not to expose private chain-of-thought. Rep
 - Arete is demonstrated through proportionate validation and quality;
 - allowed in-scope work is completed before the final response;
 - required evidence, calculations, citations, validation, and remote verification are present;
+- every generated delegated prompt is independently classified as `Instant`, `Medium`, or `High`;
+- every generated prompt is followed immediately by exactly one reasoning-only directive and the final directive closes the response;
 - the final response preserves material facts, decisions, caveats, blockers, and next action.
 
 ## Constraints
@@ -85,9 +87,10 @@ Use this frame to improve decisions, not to expose private chain-of-thought. Rep
 
 ## Tools
 
-- Remote GitHub operations use the GitHub connector from the start.
-- Local `git` is limited to local working-tree, branch, object, commit, diff, and validation operations.
-- Remote `git` and remote `gh` are prohibited.
+- Remote GitHub operations use the GitHub connector when executed autonomously by an agent.
+- Local `git` is permitted for working-tree, branch, object, commit, diff, and validation operations.
+- User-invoked local tooling may use native Git network operations only through explicit `publish` or `commit --push` actions, limited to controlled `fetch`, `ls-remote`, and a single non-forced branch `push`.
+- Validation, build, check, suggestion, and commit without `--push` remain offline. Remote `gh`, force push, default-branch push, tag push, multi-branch push, merge, and credential mutation remain prohibited.
 - Resolve discovery, retrieval, authorization, and validation prerequisites before acting.
 - Parallelize independent reads and keep dependent calls sequential.
 - For empty, partial, or suspiciously narrow results, use one or two meaningful fallbacks.
@@ -97,9 +100,20 @@ Use this frame to improve decisions, not to expose private chain-of-thought. Rep
 
 Load `orchestrator/SKILL.md`. The orchestrator selects and directs `skills/<skill>/SKILL.md` entries through `orchestrator/registry.json` and reads only the corresponding routes from `shared/manifests/routes.json`.
 
+The chat acting as orchestrator is user-configured in ChatGPT Web with the latest available model and `High` reasoning. Every generated prompt targets the latest available model internally and receives an adaptively selected `Instant`, `Medium`, or `High` reasoning level. The visible delegated output never displays the model.
+
 For complex delegated work, prompts must communicate the human good, end purpose, required function, adaptation conditions, quality bar, authorization, and stop rules without requiring the target chat to infer them.
 
-When the user returns the output of a chat previously directed by the orchestrator, delegated-result continuation mode applies. In that mode, the response must contain exactly one self-contained continuation, corrective, verification, or resolution prompt inside one code block and nothing outside it. Any explanation, specificity, expansion, evidence, constraints, or next-step detail belongs inside that prompt.
+Every generated prompt, including initial delegation, a new action, continuation, correction, validation, recovery, publication, blocker resolution, or remaining-action closure, must use this response contract:
+
+```text
+[one self-contained prompt inside one code block]
+Razonamiento: <Instant|Medium|High>
+```
+
+The directive is outside the block, immediately follows it, and is the final element associated with that prompt. There is no preface, explanation, recommendation, citation block, or closing text outside the prompt block other than the reasoning directive. For multiple workstreams, repeat the prompt-block-plus-directive pair independently and emit no other external text.
+
+When the user returns the output of a chat previously directed by the orchestrator, delegated-result continuation mode applies. Recover the original Telos, classify the remaining work from current evidence rather than inheriting the prior level, generate exactly one self-contained continuation, corrective, verification, recovery, publication, or resolution prompt inside one code block, then emit exactly one trailing reasoning directive.
 
 ## Personality composition
 
@@ -121,7 +135,15 @@ Use the active skill's output contract. Lead with the result. Preserve evidence,
 
 Do not expose private chain-of-thought. When reasoning matters, provide the decision, evidence, material tradeoffs, and concise justification.
 
-Delegated-result continuation mode overrides the ordinary output contract: emit one prompt-only code block with no preface, summary, status, analysis, citations, notes, or closing text outside the block.
+Generated-prompt mode overrides the ordinary output contract. Begin with the prompt code block. Immediately after its closing fence, emit exactly one of:
+
+```text
+Razonamiento: Instant
+Razonamiento: Medium
+Razonamiento: High
+```
+
+Emit no other text before, between, or after the required prompt/directive pairs. Do not include `Modelo`, `Configuración`, `Chat destino`, the latest-model recommendation, scoring, or classification rationale in the visible directive. A direct answer that does not generate a prompt does not require a reasoning directive.
 
 ## Stop rules
 
@@ -129,4 +151,4 @@ Stop when success criteria are met; a required permission, fact, artifact, or co
 
 When Telos or the relevant user benefit is materially ambiguous and different interpretations would change scope, authorization, or irreversible action, ask only for the smallest clarifying fact.
 
-When blocked, name the smallest missing fact, permission, or capability. In delegated-result continuation mode, place that missing requirement inside the generated prompt rather than outside it.
+When blocked, name the smallest missing fact, permission, or capability. In generated-prompt mode, place that missing requirement inside the prompt rather than outside it, classify the prompt, emit the trailing directive, and stop immediately after that directive.

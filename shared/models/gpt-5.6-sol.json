@@ -40,10 +40,113 @@
     ]
   },
   "reasoning": {
+    "orchestratorRuntime": {
+      "model": "latest-available",
+      "effort": "high",
+      "userConfigured": true
+    },
+    "delegatedPrompts": {
+      "model": "latest-available",
+      "allowedEfforts": [
+        "instant",
+        "medium",
+        "high"
+      ],
+      "recomputePerPrompt": true,
+      "recomputePerIteration": true,
+      "directiveOutsidePrompt": true,
+      "directivePosition": "after-prompt",
+      "directiveFinalOutputElement": true,
+      "directiveIncludesModel": false,
+      "directiveFormat": "Razonamiento: <Instant|Medium|High>",
+      "promptClosureDiscountMaxLevels": 1,
+      "hardTriggersPreventDowngrade": true
+    },
+    "classifier": {
+      "dimensions": {
+        "telosClarity": [
+          "closed",
+          "partial",
+          "open"
+        ],
+        "ergonComplexity": [
+          "low",
+          "moderate",
+          "high"
+        ],
+        "phronesisAdaptation": [
+          "low",
+          "moderate",
+          "high"
+        ],
+        "areteValidation": [
+          "low",
+          "moderate",
+          "high"
+        ],
+        "riskAndReversibility": [
+          "low",
+          "moderate",
+          "high"
+        ],
+        "stateUncertainty": [
+          "known",
+          "partial",
+          "unknown"
+        ],
+        "promptClosure": [
+          "fully-closed",
+          "bounded",
+          "open-ended"
+        ]
+      },
+      "hardTriggers": [
+        "architecture-or-systemic-redesign",
+        "cross-subsystem-change",
+        "complex-migration-or-compatibility",
+        "unknown-or-interrupted-state",
+        "contradictory-evidence",
+        "multiple-repositories-or-services",
+        "multi-cause-debugging",
+        "security-secrets-identity-permissions-or-authentication",
+        "destructive-or-difficult-to-reverse-action",
+        "critical-release-or-production-change",
+        "high-impact-legal-medical-or-financial-decision",
+        "global-policy-or-orchestrator-modification",
+        "classification-of-work-for-other-agents",
+        "dynamic-replanning",
+        "extensive-cross-validation",
+        "high-risk-of-work-loss",
+        "open-objective"
+      ],
+      "selection": {
+        "instant": "all-material-dimensions-low-or-closed-and-no-strategic-choice",
+        "medium": "bounded-non-trivial-professional-work-with-limited-local-decisions",
+        "high": "hard-trigger-or-material-combination-of-complexity-and-uncertainty"
+      },
+      "promptClosureAdjustment": {
+        "allowed": [
+          "high-to-medium",
+          "medium-to-instant"
+        ],
+        "prohibited": [
+          "high-to-instant"
+        ],
+        "requiresRemovalOf": [
+          "ambiguity",
+          "open-strategy",
+          "branching",
+          "undefined-fallbacks",
+          "implicit-success-criteria",
+          "reinterpretation"
+        ]
+      },
+      "costRule": "choose-the-lowest-equally-reliable-level-by-total-user-cost"
+    },
     "migrationBaseline": "preserve-current-setting",
-    "defaultWhenNoBaseline": "medium",
-    "comparisonLevel": "one-level-lower",
-    "highOrAboveRequiresEvalGain": true,
+    "defaultWhenNoBaseline": "adaptive-per-prompt",
+    "comparisonLevel": "one-level-lower-when-eligible",
+    "highOrAboveRequiresEvalGain": false,
     "maxGlobalRecommendation": false
   },
   "retrieval": {
@@ -77,27 +180,22 @@
     "routineCallNarration": false
   },
   "validation": {
-    "code": [
-      "targetedTests",
-      "typeOrLintWhenApplicable",
-      "affectedBuild",
-      "minimalSmokeWhenNeeded"
+    "minimumEvalCases": 42,
+    "evalRequiredFields": [
+      "id",
+      "category",
+      "request",
+      "assertions"
     ],
-    "visual": [
-      "render",
-      "clipping",
-      "spacing",
-      "missingContent",
-      "responsiveness",
-      "consistency"
-    ],
-    "cannotRunBehavior": "explain-and-use-next-best-check"
+    "evalNonEmptyArrayFields": [
+      "assertions"
+    ]
   },
   "referenceProvenance": "user-supplied-guidance",
   "integrity": {
     "referenceSha256": "cd838a4bd951509771738a3fe511c99cfccc229236ca45503c8181f6bb5ea9b9",
-    "policySha256": "6131ec4f0f848a04df674ca3f935715e1b348c666837874c13931e7cf121ae7b",
-    "promptTemplateSha256": "7433a6e16c38a869324ee676982aa6c80865c578f38f20b1fe918c58a6e3c2e7",
-    "evalSha256": "88654318c8b2d9927a7e2172feee466c3ad6b5dbb0283547bafa51682a3815bc"
+    "policySha256": "2b32a18afb735082749b1d646f2b562131c4733f323ef8c9932f5f49223a3f6f",
+    "promptTemplateSha256": "3a7e0ab15be9f4912567450251bebbbc0316be78bb44c15b9c041e4bf2aab09e",
+    "evalSha256": "d137c6d89a4a540ef6fc7932e29cf0c1ad36ddab2deba13d6d934592c6a6ed56"
   }
 }

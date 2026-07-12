@@ -30,6 +30,24 @@ Output:
 Stop rules:
 - [When to answer, retry, fallback, ask, block, or stop]
 ```
+Razonamiento: [Instant|Medium|High]
+
+The reasoning line is outside the prompt block, appears immediately after it, and is the final element of that prompt delivery. It is not copied into the target chat. It contains no model recommendation and no explanation. The target model remains the latest available model as internal policy.
+
+When several workstreams require separate prompts, repeat the prompt-block-plus-directive pair for each workstream. Do not insert prose between pairs. The final response element is the reasoning directive for the final prompt.
+
+## Internal design record
+
+This optional diagnostic is for prompt construction or requested audits only. It is not emitted in ordinary prompt delivery.
+
+```text
+Reasoning classification:
+- residual ambiguity: [closed | bounded | open]
+- adaptation burden: [low | moderate | high]
+- risk floor: [low | moderate | high plus any hard trigger]
+- prompt closure adjustment: [none | High→Medium | Medium→Instant]
+- selected level: [Instant | Medium | High]
+```
 
 ## Coding delta
 
