@@ -9,7 +9,7 @@
     "sourceManifests": 15,
     "evalCases": {
       "shared/evals/chat-recovery.json": 18,
-      "shared/evals/gpt-5.6-sol.json": 15,
+      "shared/evals/gpt-5.6-sol.json": 42,
       "shared/evals/local-git-workspace.json": 19,
       "shared/evals/parallel-execution.json": 10,
       "shared/evals/practical-reasoning.json": 20
@@ -32,18 +32,18 @@
     "files": [
       {
         "path": "README.md",
-        "sha256": "6ae387374ff0afb3b36a39332ae0c318ece18bcbd9102be1a1d0427ecdd27712",
-        "bytes": 17464
+        "sha256": "11d96c5619b533df2406eafffae88b2ed387371ffd6e04b3f6e570923b266cf8",
+        "bytes": 20010
       },
       {
         "path": "SKILL.md",
-        "sha256": "7a6c52019a231c8a8a3ca87a92986d2f05034a6eaf6d2851a4e480288eeb00cd",
-        "bytes": 8465
+        "sha256": "c7129e3da39c663839bb2ea54185b74ad112e904ed84123a1ea4cfdfb9641c05",
+        "bytes": 10179
       },
       {
         "path": "orchestrator/SKILL.md",
-        "sha256": "1aa22b3e0c1712d6777aa11c9d4493e4fc20343616199a5dd690e0986c69e826",
-        "bytes": 17982
+        "sha256": "441d79b72766f7b7e0c79c73d0bad6a9547c9d5432f57986353be40ff05b8208",
+        "bytes": 26285
       },
       {
         "path": "orchestrator/delegation-envelope.schema.json",
@@ -132,8 +132,8 @@
       },
       {
         "path": "shared/evals/gpt-5.6-sol.json",
-        "sha256": "88654318c8b2d9927a7e2172feee466c3ad6b5dbb0283547bafa51682a3815bc",
-        "bytes": 4777
+        "sha256": "d137c6d89a4a540ef6fc7932e29cf0c1ad36ddab2deba13d6d934592c6a6ed56",
+        "bytes": 15070
       },
       {
         "path": "shared/evals/local-git-workspace.json",
@@ -242,8 +242,8 @@
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
-        "sha256": "80feb4d6c4bfe6d0d7456c01adf9e0cf41321bfb0d0abfed5f7e60abc2eb4440",
-        "bytes": 2607
+        "sha256": "e881c41d86f6e33a0d2713f3e10dacc89be9ce7b519f831aa74ad9106265830c",
+        "bytes": 5602
       },
       {
         "path": "shared/policies/connector-native-integrity.md",
@@ -257,8 +257,8 @@
       },
       {
         "path": "shared/policies/gpt-5.6-sol.md",
-        "sha256": "6131ec4f0f848a04df674ca3f935715e1b348c666837874c13931e7cf121ae7b",
-        "bytes": 7239
+        "sha256": "2b32a18afb735082749b1d646f2b562131c4733f323ef8c9932f5f49223a3f6f",
+        "bytes": 11026
       },
       {
         "path": "shared/policies/network-and-transport.md",
@@ -382,8 +382,8 @@
       },
       {
         "path": "shared/templates/gpt-5.6-prompt-contract.md",
-        "sha256": "7433a6e16c38a869324ee676982aa6c80865c578f38f20b1fe918c58a6e3c2e7",
-        "bytes": 1453
+        "sha256": "3a7e0ab15be9f4912567450251bebbbc0316be78bb44c15b9c041e4bf2aab09e",
+        "bytes": 2473
       },
       {
         "path": "shared/templates/prompts.md",
@@ -437,8 +437,8 @@
       },
       {
         "path": "skills/management-delegation/SKILL.md",
-        "sha256": "f18a8571ee11835ee17b5428871367cea3290de33bad5a3df0cb3db2280f29cd",
-        "bytes": 7492
+        "sha256": "558a64dd06336d7bef7193e3a6284f74748db6870a8178b58dc1159981e2c579",
+        "bytes": 10498
       },
       {
         "path": "skills/parallel-execution/SKILL.md",
@@ -457,8 +457,8 @@
       },
       {
         "path": "skills/prompt-engineering/SKILL.md",
-        "sha256": "f90190ee1d8630dd67e549ea3a159e3c6256f2e8e7392b0d9f2e14180d4d32f5",
-        "bytes": 1955
+        "sha256": "dc1c42c80ece888784f537420deda607864fd0a351ed99312ca8ca1820b6b12c",
+        "bytes": 4758
       },
       {
         "path": "skills/recovery/SKILL.md",
