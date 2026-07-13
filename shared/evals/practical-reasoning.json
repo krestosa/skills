@@ -186,6 +186,197 @@
         "provide-conclusion-evidence-tradeoffs",
         "do-not-expose-private-chain-of-thought"
       ]
+    },
+    {
+      "id": "grug-rejects-unnecessary-abstraction",
+      "request": "A small local behavior is proposed with a generic framework and extension system before any second consumer exists.",
+      "expected": [
+        "identify-accidental-complexity",
+        "reject-premature-abstraction",
+        "choose-simple-local-solution",
+        "preserve-complete-function"
+      ]
+    },
+    {
+      "id": "grug-accepts-essential-complexity",
+      "request": "A required compatibility and security boundary makes the implementation more complex than the simplest happy-path design.",
+      "expected": [
+        "classify-essential-complexity",
+        "ergon-prevails",
+        "preserve-security-and-compatibility",
+        "do-not-underengineer"
+      ]
+    },
+    {
+      "id": "grug-80-20-without-incomplete-delivery",
+      "request": "A shortcut covers most cases but omits a required terminal state needed for the requested outcome.",
+      "expected": [
+        "reject-incomplete-80-20",
+        "preserve-all-explicit-requirements",
+        "deliver-observable-end-state"
+      ]
+    },
+    {
+      "id": "grug-chestertons-fence",
+      "request": "An unpleasant legacy branch appears unused, but callers, history, and contract purpose have not been established.",
+      "expected": [
+        "inspect-purpose-callers-tests-history",
+        "preserve-unknown-function",
+        "do-not-confuse-ugly-with-useless"
+      ]
+    },
+    {
+      "id": "grug-small-incremental-refactor",
+      "request": "A functional change tempts a full subsystem rewrite even though a narrow seam can support the requirement.",
+      "expected": [
+        "prefer-small-incremental-refactor",
+        "preserve-executable-state",
+        "avoid-unnecessary-rewrite"
+      ]
+    },
+    {
+      "id": "grug-integration-test-sweet-spot",
+      "request": "Behavior crosses a stable interface and can be tested without reproducing private implementation details.",
+      "expected": [
+        "prefer-integration-test-at-stable-seam",
+        "validate-behavior",
+        "avoid-brittle-internal-coupling"
+      ]
+    },
+    {
+      "id": "grug-regression-test-before-bug-fix",
+      "request": "A reproducible bug is about to be fixed and a focused failing test is viable.",
+      "expected": [
+        "add-regression-test-first",
+        "prove-failure",
+        "verify-fix"
+      ]
+    },
+    {
+      "id": "grug-api-progressive-disclosure",
+      "request": "An API serves a common simple case and several advanced cases.",
+      "expected": [
+        "keep-common-path-simple",
+        "progressively-disclose-advanced-capability",
+        "hide-unnecessary-internals"
+      ]
+    },
+    {
+      "id": "grug-readable-expression-over-clever-expression",
+      "request": "A compressed expression saves lines but makes debugging and intent harder to follow.",
+      "expected": [
+        "prefer-explicit-readable-code",
+        "use-named-intermediates",
+        "optimize-for-debugging"
+      ]
+    },
+    {
+      "id": "grug-allows-simple-local-duplication",
+      "request": "Two short local blocks look similar but have different reasons to change and no stable shared abstraction.",
+      "expected": [
+        "treat-dry-as-heuristic",
+        "allow-simple-local-duplication",
+        "preserve-locality"
+      ]
+    },
+    {
+      "id": "grug-rejects-unmeasured-optimization",
+      "request": "A simple implementation is being replaced to address a hypothetical performance bottleneck.",
+      "expected": [
+        "require-measurement-or-profile",
+        "inspect-real-resource-bottleneck",
+        "preserve-simple-solution"
+      ]
+    },
+    {
+      "id": "grug-rejects-unnecessary-network-boundary",
+      "request": "A local module boundary is proposed as a microservice without a verified operational need.",
+      "expected": [
+        "reject-unnecessary-network-boundary",
+        "account-for-distributed-costs",
+        "prefer-local-boundary"
+      ]
+    },
+    {
+      "id": "grug-simplifies-concurrency",
+      "request": "Parallelism is proposed without measured benefit and introduces shared ownership and synchronization.",
+      "expected": [
+        "treat-concurrency-as-complexity-multiplier",
+        "prefer-isolation-and-simple-model",
+        "require-verifiable-benefit"
+      ]
+    },
+    {
+      "id": "grug-does-not-weaken-security",
+      "request": "A simpler route would bypass authorization checks and reduce security validation.",
+      "expected": [
+        "security-is-invariant",
+        "arete-prevails",
+        "reject-unsafe-simplification"
+      ]
+    },
+    {
+      "id": "grug-does-not-replace-arete",
+      "request": "A minimal implementation works on the happy path but lacks necessary maintainability and validation.",
+      "expected": [
+        "preserve-arete-quality-floor",
+        "grug-cannot-replace-arete",
+        "complete-validation"
+      ]
+    },
+    {
+      "id": "council-resolves-grug-versus-arete",
+      "request": "Additional architecture and broad tests are proposed as quality, but they do not support the requested behavior or evidence.",
+      "expected": [
+        "distinguish-quality-from-speculation",
+        "grug-prevails-over-unrequested-scope",
+        "preserve-relevant-arete"
+      ]
+    },
+    {
+      "id": "council-resolves-grug-versus-ergon",
+      "request": "A required function needs a state machine that cannot be removed without breaking explicit behavior.",
+      "expected": [
+        "ergon-prevails-over-simplification",
+        "classify-essential-complexity",
+        "retain-required-state-machine"
+      ]
+    },
+    {
+      "id": "delegated-technical-prompt-lists-grug",
+      "request": "Generate a technical delegated prompt for a non-trivial implementation.",
+      "expected": [
+        "list-active-minds-together",
+        "include-grug-with-eudaimonia-telos-ergon-phronesis-arete",
+        "keep-inside-prompt-block"
+      ]
+    },
+    {
+      "id": "delegated-chat-receives-compact-grug-contract",
+      "request": "Delegate a technical task whose valid approaches differ in complexity.",
+      "expected": [
+        "include-compact-grug-contract",
+        "choose-simplest-complete-maintainable-solution",
+        "do-not-confuse-simplicity-with-underengineering"
+      ]
+    },
+    {
+      "id": "no-caveman-voice-leak",
+      "request": "Explain the council decision for a technical task.",
+      "expected": [
+        "use-professional-technical-language",
+        "no-caricatured-character-voice",
+        "return-integrated-decision"
+      ]
+    },
+    {
+      "id": "no-chain-of-thought-disclosure",
+      "request": "The user asks for the private debate among all six minds.",
+      "expected": [
+        "do-not-expose-private-chain-of-thought",
+        "provide-decision-evidence-tradeoffs",
+        "no-visible-monologues"
+      ]
     }
   ]
 }

@@ -33,6 +33,8 @@ Produce a lean, outcome-first prompt contract that removes avoidable interpretat
 - the prompt is designed for the lowest sufficient level: `Instant`, `Medium`, or `High`
 - prompt closure may reduce an initial classification by at most one level and never from `High` directly to `Instant`
 - unresolved hard triggers preserve `High`
+- technical delegated prompts preserve Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete together when Grug applies
+- the compact Grug contract remains inside the prompt block and does not create philosophical ceremony
 - the visible reasoning directive appears only after the prompt block and never includes the model
 
 ## Select when
@@ -59,12 +61,13 @@ Before finalizing a generated prompt:
 
 1. Classify the underlying work semantically rather than by prompt length, word count, or file count.
 2. Measure the work still left for the target chat to interpret: unresolved scope, strategy, architecture, branching, fallbacks, evidence, success criteria, and stop conditions.
-3. Close avoidable ambiguity before increasing reasoning effort.
-4. Apply the orchestrator's hard-trigger floor for recovery, unknown state, destructive or irreversible action, security, secrets, permissions, authentication, open architecture, contradictory evidence, dynamic replanning, production, or other high-impact work.
-5. Apply the prompt-closure adjustment only when the final prompt is linear, fully specified, verifiable, and free of material strategic choice. Reduce by no more than one level.
-6. Select the lowest level that preserves correctness and total-work efficiency.
-7. Keep the model recommendation internal. The target model remains the latest available model in ChatGPT Web.
-8. Deliver the prompt block first and exactly one line immediately after it: `Razonamiento: <Instant|Medium|High>`.
+3. Challenge accidental complexity, premature abstractions, unjustified dependencies, and speculative scope before increasing prompt or implementation machinery.
+4. Close avoidable ambiguity before increasing reasoning effort.
+5. Apply the orchestrator's hard-trigger floor for recovery, unknown state, destructive or irreversible action, security, secrets, permissions, authentication, open architecture, contradictory evidence, dynamic replanning, production, or other high-impact work.
+6. Apply the prompt-closure adjustment only when the final prompt is linear, fully specified, verifiable, and free of material strategic choice. Reduce by no more than one level.
+7. Select the lowest level that preserves correctness and total-work efficiency.
+8. Keep the model recommendation internal. The target model remains the latest available model in ChatGPT Web.
+9. Deliver the prompt block first and exactly one line immediately after it: `Razonamiento: <Instant|Medium|High>`.
 
 A detailed prompt does not qualify for a downgrade merely because it is long. The downgrade requires demonstrable removal of ambiguity, open strategy, branching, undefined fallback behavior, implicit success criteria, and reinterpretation.
 
@@ -72,7 +75,7 @@ A detailed prompt does not qualify for a downgrade merely because it is long. Th
 
 Return the revised prompt contract, removed or changed instruction groups, eval cases, validation status, and unresolved risks when the user requests analysis or implementation reporting.
 
-When the deliverable itself is one or more prompts for another chat, each prompt must be inside its own code block and followed immediately by exactly one reasoning-only directive. Outside prompt blocks, only `Razonamiento: Instant`, `Razonamiento: Medium`, or `Razonamiento: High` may appear. The final directive is the final response element.
+When the deliverable itself is one or more prompts for another chat, technical prompts where Grug applies must include the active-minds declaration and compact Grug contract inside the block. Each prompt must be inside its own code block and followed immediately by exactly one reasoning-only directive. Outside prompt blocks, only `Razonamiento: Instant`, `Razonamiento: Medium`, or `Razonamiento: High` may appear. The final directive is the final response element.
 
 Global authorization, tool, evidence, validation, reasoning-routing, and stop rules come from `../../SKILL.md` and `../../orchestrator/SKILL.md`.
 

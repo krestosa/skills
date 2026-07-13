@@ -26,7 +26,7 @@ Create a minimal, dependency-aware execution structure that preserves authority,
 
 - work is divided by outcome and dependency rather than arbitrary file groups
 - each workstream has scope, inputs, allowed actions, output, and stop rules
-- each non-trivial workstream preserves Eudaimonia, Telos, Ergon, Phronesis, and Arete in ordinary technical language
+- each non-trivial workstream preserves Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete in ordinary technical language and reaches one Synthesis
 - independent work is parallelized and dependent work remains sequential
 - handoffs preserve evidence and avoid duplicate work
 - every prompt is classified semantically as `Instant`, `Medium`, or `High`
@@ -75,6 +75,9 @@ The concrete end state and why it matters.
 Ergon:
 The required functions, owned files or resources, and deliverables.
 
+Grug:
+The accidental complexity, premature abstraction, unjustified dependency, distribution, or speculative scope to challenge without weakening Ergon or Arete.
+
 Phronesis:
 Fixed invariants, adaptable tactics, evidence that should trigger replanning,
 fallback rules, and the smallest condition that requires asking.
@@ -104,7 +107,7 @@ The target model remains the latest available model as internal policy. Never di
 1. Recover the original objective, user benefit, target, scope, authorization, and completion bar from the conversation.
 2. Treat the returned chat output as evidence, not as a request for a prose review.
 3. Separate completed actions, verified evidence, unsupported claims, failures, blockers, and remaining work.
-4. Check whether the returned work satisfies Telos, Ergon, Arete, and the relevant user benefit.
+4. Check whether the returned work satisfies Telos, Ergon, the Grug complexity constraint, Arete, and the relevant user benefit.
 5. Determine whether new evidence requires a Phronesis-driven change of tactic.
 6. Reduce scope to the remaining work and classify its reasoning requirements from zero.
 7. Apply hard triggers and then the maximum one-level prompt-closure adjustment.
@@ -134,7 +137,7 @@ Do not accept an intermediate artifact as completion merely because it was produ
 
 ## Output
 
-For initial delegation, return one prompt code block per delegated workstream. Each block must contain workstream scope, selected skills, dependencies, authorization, evidence inputs, user benefit, end purpose, required functions, adaptation rules, quality bar, deliverables, stop rules, and integration order. Immediately after each block, emit exactly one line: `Razonamiento: <Instant|Medium|High>`.
+For initial delegation, return one prompt code block per delegated workstream. Each block must contain workstream scope, selected skills, dependencies, authorization, evidence inputs, user benefit, end purpose, required functions, applicable complexity constraints, adaptation rules, quality bar, deliverables, stop rules, and integration order. When technical work activates Grug, include the active-minds declaration and compact Grug contract from the registry inside the block. Immediately after each block, emit exactly one line: `Razonamiento: <Instant|Medium|High>`.
 
 For a returned or interrupted delegated result, return exactly one prompt inside one code block followed immediately by exactly one reasoning-only directive. Do not add a preface, summary, diagnosis, status, rationale, citations, notes, or closing text outside the code block. The prompt itself must contain all context, specificity, purpose, user benefit, corrections, evidence, adaptation rules, quality requirements, system-wide inventory requirements, exclusions, inaccessible paths, constraints, validation requirements, idempotency guarantees, and stop rules needed by the target chat.
 

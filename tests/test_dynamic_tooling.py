@@ -488,6 +488,85 @@ class DynamicToolingTests(unittest.TestCase):
         self.assertEqual(before_status, self._git("status", "--porcelain=v1").stdout)
 
 
+class GrugIntegrationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = CANDIDATE
+        self.registry = json.loads((self.root / "orchestrator/registry.json").read_text(encoding="utf-8"))
+        self.contract = self.registry["practicalReasoningContract"]
+
+    def test_practical_reasoning_council_and_order(self) -> None:
+        self.assertEqual(
+            self.contract["councilMembers"],
+            ["eudaimonia", "telos", "ergon", "grug", "phronesis", "arete"],
+        )
+        self.assertEqual(
+            self.contract["operationalOrder"],
+            ["eudaimonia", "telos", "ergon", "grug", "phronesis", "arete", "synthesis"],
+        )
+        self.assertTrue(self.contract["synthesisIsTerminalPhaseNotCouncilMember"])
+
+    def test_grug_is_internal_not_a_registered_skill(self) -> None:
+        registered = {item["id"] for item in self.registry["skills"]}
+        self.assertNotIn("grug", registered)
+        self.assertFalse((self.root / "skills/grug/SKILL.md").exists())
+        self.assertIn("practical-reasoning", self.registry["selectionPolicy"]["crossCuttingSkillIds"])
+
+    def test_delegated_contract_lists_all_minds_together(self) -> None:
+        delegated = self.contract["grug"]["delegatedPromptContract"]
+        self.assertEqual(
+            delegated["activeMinds"],
+            "Active minds: Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete.",
+        )
+        self.assertIn("accidental complexity", delegated["constraint"])
+        self.assertIn("simplest maintainable solution", delegated["constraint"])
+        self.assertIn("Do not confuse simplicity with underengineering.", delegated["constraint"])
+
+    def test_practical_reasoning_eval_ids_are_unique(self) -> None:
+        suite = json.loads((self.root / "shared/evals/practical-reasoning.json").read_text(encoding="utf-8"))
+        ids = [case["id"] for case in suite["cases"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        required = {
+            "grug-rejects-unnecessary-abstraction",
+            "grug-accepts-essential-complexity",
+            "council-resolves-grug-versus-arete",
+            "council-resolves-grug-versus-ergon",
+            "delegated-technical-prompt-lists-grug",
+            "delegated-chat-receives-compact-grug-contract",
+            "no-caveman-voice-leak",
+            "no-chain-of-thought-disclosure",
+        }
+        self.assertTrue(required.issubset(ids))
+
+    def test_compiled_and_flat_builds_include_grug_contract(self) -> None:
+        model = load_repository_model(self.root)
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary)
+            compiled = target / "compiled.md"
+            flat = target / "flat"
+            build_compiled(model, compiled)
+            build_flat(model, flat)
+            compiled_text = compiled.read_text(encoding="utf-8")
+            flat_text = "\n".join(path.read_text(encoding="utf-8") for path in flat.rglob("*") if path.is_file())
+        marker = "Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete"
+        compact = "Do not confuse simplicity with underengineering."
+        self.assertIn(marker, compiled_text)
+        self.assertIn(compact, compiled_text)
+        self.assertIn(marker, flat_text)
+        self.assertIn(compact, flat_text)
+
+    def test_generic_tooling_is_not_coupled_to_mind_or_eval_counts(self) -> None:
+        generic = "\n".join(path.read_text(encoding="utf-8") for path in (self.root / "scripts").glob("*.py"))
+        self.assertNotIn("councilMembers", generic)
+        self.assertNotIn("operationalOrder", generic)
+        self.assertNotIn("grug", generic.lower())
+        self.assertNotIn("minimumEvalCases = 42", generic)
+
+    def test_model_resource_hashes_remain_exact(self) -> None:
+        model = load_repository_model(self.root)
+        result = validate_model_descriptor(model)
+        self.assertEqual(result["model"], "gpt-5.6-sol")
+
+
 class PublicationToolingTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
