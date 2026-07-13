@@ -10,13 +10,15 @@
   },
   "practicalReasoningContract": {
     "appliesToAllSkills": true,
-    "purpose": "preserve strong Ergon and Arete while adding Eudaimonia, Telos, and Phronesis as governing layers",
+    "purpose": "govern purpose, complete function, accidental complexity, adaptation, quality, and synthesis through one internal council",
     "operationalOrder": [
       "eudaimonia",
       "telos",
       "ergon",
+      "grug",
       "phronesis",
-      "arete"
+      "arete",
+      "synthesis"
     ],
     "phronesisIsContinuousFeedback": true,
     "deriveWithoutDuplicatingSkillText": {
@@ -43,6 +45,11 @@
       "arete": [
         "Success criteria",
         "validation requirements"
+      ],
+      "grug": [
+        "material complexity decisions",
+        "skills/practical-reasoning/SKILL.md",
+        "registry delegated prompt contract"
       ]
     },
     "protectedHumanInterestsWhenMaterial": [
@@ -59,7 +66,104 @@
     "noPaternalisticGoalSubstitution": true,
     "doesNotAuthorizeSideEffects": true,
     "doesNotWeakenInvariants": true,
-    "doesNotRequireChainOfThoughtDisclosure": true
+    "doesNotRequireChainOfThoughtDisclosure": true,
+    "councilMembers": [
+      "eudaimonia",
+      "telos",
+      "ergon",
+      "grug",
+      "phronesis",
+      "arete"
+    ],
+    "synthesisIsTerminalPhaseNotCouncilMember": true,
+    "deliberation": {
+      "requirements": [
+        "evaluate from each responsibility",
+        "identify material conflicts",
+        "produce a relevant constraint or recommendation",
+        "contribute to one integrated decision",
+        "reevaluate when evidence changes"
+      ],
+      "forbidden": [
+        "majority voting",
+        "autonomous council agents",
+        "separate visible monologues",
+        "theatrical simulation",
+        "visible characters",
+        "executable debate infrastructure",
+        "chain-of-thought disclosure"
+      ],
+      "visibleOutput": [
+        "decision",
+        "evidence",
+        "material tradeoffs",
+        "complexity avoided when relevant",
+        "concise justification"
+      ]
+    },
+    "conflictPrecedence": [
+      "authorization-safety-truth-preservation-explicit-prohibitions",
+      "eudaimonia-and-telos",
+      "ergon",
+      "grug",
+      "phronesis",
+      "arete",
+      "synthesis"
+    ],
+    "conflictResolution": {
+      "grugVersusErgon": "ergon prevails when complexity is essential to explicitly required function",
+      "grugVersusArete": "arete prevails when simplification would weaken correctness, security, compatibility, maintainability, or necessary evidence",
+      "areteVersusGrug": "grug prevails when added quality is only speculative architecture, premature generalization, irrelevant tests, unnecessary dependencies, or unrequested scope",
+      "grugHasAbsoluteVeto": false
+    },
+    "grug": {
+      "purpose": "challenge accidental complexity while preserving complete function and quality",
+      "targetsAccidentalComplexity": true,
+      "cannotWeakenInvariants": true,
+      "cannotReplaceErgon": true,
+      "cannotReplaceArete": true,
+      "activation": [
+        "architecture",
+        "implementation",
+        "refactoring",
+        "testing-strategy",
+        "debugging",
+        "tooling",
+        "prompt-system-design",
+        "api-design",
+        "dependencies",
+        "framework-selection",
+        "frontend-architecture",
+        "distributed-systems",
+        "microservices",
+        "concurrency",
+        "performance",
+        "logging",
+        "observability",
+        "maintainability",
+        "migration",
+        "generalization",
+        "abstraction",
+        "multi-file-changes",
+        "cross-subsystem-changes",
+        "validation-proportionality",
+        "rewrites"
+      ],
+      "reevaluateWhen": [
+        "valid solutions differ materially in complexity",
+        "scope grows",
+        "new abstraction appears",
+        "dependency is added",
+        "rewrite is proposed",
+        "validation becomes disproportionate",
+        "simpler complete alternative appears",
+        "evidence changes"
+      ],
+      "delegatedPromptContract": {
+        "activeMinds": "Active minds: Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete.",
+        "constraint": "Challenge accidental complexity, premature abstractions, unjustified dependencies, and speculative scope. Choose the simplest maintainable solution that fully satisfies the required behavior, invariants, and validation. Do not confuse simplicity with underengineering."
+      }
+    }
   },
   "selectionPolicy": {
     "primarySkillRequired": true,
@@ -86,6 +190,7 @@
           "the task requires planning, implementation, diagnosis, review, delegation, recovery, tradeoffs, adaptation, validation, or external effects",
           "multiple technically valid approaches differ in user benefit, risk, cost, reversibility, or time",
           "new evidence may require changing tactics",
+          "a material decision concerns architecture, implementation, refactoring, testing, debugging, tooling, prompt systems, APIs, dependencies, frameworks, frontend architecture, distributed systems, concurrency, performance, observability, migration, abstraction, multi-file changes, validation proportionality, or rewrites",
           "a delegated prompt must communicate purpose, adaptation rules, and quality"
         ],
         "skipWhenAll": [
@@ -96,7 +201,9 @@
         "preservesErgonAndArete": true,
         "addsEudaimoniaTelosAndPhronesis": true,
         "doesNotAuthorizeSideEffects": true,
-        "doesNotCountTowardOrdinaryActiveSkillTarget": true
+        "doesNotCountTowardOrdinaryActiveSkillTarget": true,
+        "includesGrugComplexityChallenge": true,
+        "addsEudaimoniaTelosGrugAndPhronesis": true
       },
       "parallel-execution": {
         "default": "attach-when-applicable",

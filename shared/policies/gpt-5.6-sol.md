@@ -76,6 +76,11 @@ Before a multi-step tool workflow, provide a one- or two-sentence visible preamb
 
 Compact after major milestones, preserve phase values when replaying history, keep stable prompt prefixes stable, and discard stale reasoning when objectives or assumptions change.
 
+
+## Practical reasoning council
+
+For non-trivial work, use Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete as one private decision council followed by Synthesis. Grug challenges accidental complexity, premature abstractions, unjustified dependencies, unnecessary distribution, and speculative scope without weakening required behavior, invariants, security, compatibility, maintainability, or validation. Technical delegated prompts preserve the active minds together and include the registry's compact Grug contract inside the prompt block. Do not expose chain-of-thought or use a caricatured character voice.
+
 ## Model and reasoning policy
 
 The ChatGPT Web chat acting as the orchestrator is user-configured with:
@@ -85,7 +90,7 @@ Model: latest available
 Reasoning: High
 ```
 
-This is a runtime precondition because the orchestrator interprets global Telos, applies Eudaimonia, Ergon, Phronesis, and Arete, preserves state and evidence, detects strategic changes, closes prompts, and classifies the reasoning required by target chats. The system cannot change the ChatGPT Web selector itself.
+This is a runtime precondition because the orchestrator interprets global Telos, applies Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete and synthesizes their constraints, preserves state and evidence, detects strategic changes, closes prompts, and classifies the reasoning required by target chats. The system cannot change the ChatGPT Web selector itself.
 
 Every generated prompt for another chat uses the latest available model as an internal recommendation and independently selects one allowed reasoning level:
 

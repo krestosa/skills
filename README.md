@@ -134,7 +134,7 @@ Cross-cutting utilities govern or prepare domain work. They do not replace the p
 
 | Skill | ID | What it does | Example request | Activation |
 |---|---|---|---|---|
-| Practical Reasoning | `practical-reasoning` | Governs purpose, function, adaptation, quality, and user benefit through Eudaimonia, Telos, Ergon, Phronesis, and Arete. | `Use practical-reasoning to keep the work aligned with its real purpose and adapt to evidence.` | Automatically attached unless the task is trivial, exact, reversible, and mechanical. |
+| Practical Reasoning | `practical-reasoning` | Governs purpose, function, complexity, adaptation, quality, and user benefit through Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete, followed by Synthesis. | `Use practical-reasoning to keep the work aligned with its real purpose and adapt to evidence.` | Automatically attached unless the task is trivial, exact, reversible, and mechanical. |
 | Parallel Execution | `parallel-execution` | Finds independent operations, executes safe work concurrently, and serializes shared-state conflicts. | `Use parallel-execution for every independent check and serialize conflicting writes.` | Automatically attached when useful parallel work exists. |
 | Local Git Workspace | `local-git-workspace` | Resolves the repository root, repairs ownership when required, and runs the mandatory preflight before local Git commands. | `Use local-git-workspace before any local Git operation.` | Automatically attached before local Git. |
 
@@ -165,34 +165,26 @@ Prepare a repository for local Git         → local-git-workspace
 
 ## Practical reasoning
 
-The system preserves its existing strengths in function and execution quality:
+`practical-reasoning` uses six internal minds and one terminal synthesis phase:
 
 ```text
-Ergon  → what the system must do
-Arete  → how well it must do it
+Eudaimonia → legitimate user benefit or protected interest
+Telos      → observable end state and why it matters
+Ergon      → required functions
+Grug       → challenges accidental complexity, premature abstraction,
+             unjustified dependencies, unnecessary distribution,
+             speculative scope, and hard-to-debug solutions
+Phronesis  → adapts tactics to current evidence
+Arete      → preserves correctness, security, compatibility,
+             maintainability, and proportionate validation
+Synthesis  → selects the simplest complete maintainable solution
 ```
 
-The cross-cutting reasoning layer adds:
+Synthesis is not a seventh mind. The council produces one integrated decision. Grug is active for material architecture, implementation, refactoring, testing, debugging, tooling, prompt-system, API, dependency, framework, frontend, distributed-system, concurrency, performance, observability, migration, abstraction, multi-file, validation, and rewrite decisions, or whenever valid alternatives differ materially in complexity. Trivial exact mechanical work may use the frame lightly.
 
-```text
-Eudaimonia → the legitimate human good ultimately served
-Telos      → the concrete end state and why it matters
-Phronesis  → when and how to adapt under real circumstances
-```
+Grug cannot replace Ergon or Arete: required function and the necessary quality floor remain mandatory. Technical delegated prompts include Grug beside the other active minds and carry a compact instruction to challenge accidental complexity while still delivering complete behavior, invariants, and validation.
 
-Operationally:
-
-```text
-Eudaimonia frames the user benefit.
-Telos directs the work.
-Ergon defines the required functions.
-Phronesis adapts tactics when evidence changes.
-Arete establishes and verifies the quality bar.
-```
-
-The framework is behavioral, not decorative. It prevents literal completion that misses the real purpose, rigid plans contradicted by evidence, technically excellent work that wastes or harms the user, good intentions without functional delivery, and overengineering beyond the required end.
-
-It does not authorize paternalistic replacement of the user's goals. Explicit user values, authorization, safety, preservation, truthfulness, and prohibitions remain invariants.
+Deliberation remains private. Visible output contains only the integrated decision, supporting evidence, material tradeoffs, complexity avoided when useful, and concise justification; it never exposes chain-of-thought or a caricatured character voice.
 
 ## Interrupted-chat recovery
 

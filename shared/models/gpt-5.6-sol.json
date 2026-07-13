@@ -194,8 +194,8 @@
   "referenceProvenance": "user-supplied-guidance",
   "integrity": {
     "referenceSha256": "cd838a4bd951509771738a3fe511c99cfccc229236ca45503c8181f6bb5ea9b9",
-    "policySha256": "2b32a18afb735082749b1d646f2b562131c4733f323ef8c9932f5f49223a3f6f",
+    "policySha256": "3f128aed9ec5a963a21c312371204263b06431cc153d12969ea30d93033151b2",
     "promptTemplateSha256": "3a7e0ab15be9f4912567450251bebbbc0316be78bb44c15b9c041e4bf2aab09e",
-    "evalSha256": "d137c6d89a4a540ef6fc7932e29cf0c1ad36ddab2deba13d6d934592c6a6ed56"
+    "evalSha256": "3c4d1da709b52ef2c1ed442af8675dcfa93db0336ce27f0ad5c50490a5f1dd34"
   }
 }

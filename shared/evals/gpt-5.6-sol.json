@@ -422,6 +422,56 @@
         "ordinary output contract applies",
         "do not append routing metadata unnecessarily"
       ]
+    },
+    {
+      "id": "grug-technical-delegated-prompt",
+      "category": "prompt-composition",
+      "request": "Generate a delegated technical implementation prompt.",
+      "assertions": [
+        "active minds list includes Eudaimonia Telos Ergon Grug Phronesis and Arete together",
+        "compact Grug contract is inside the prompt block",
+        "Synthesis does not appear as a seventh mind"
+      ]
+    },
+    {
+      "id": "grug-compact-contract-inside-prompt",
+      "category": "prompt-composition",
+      "request": "Delegate a technical task with two valid approaches of different complexity.",
+      "assertions": [
+        "challenge accidental complexity premature abstractions unjustified dependencies and speculative scope",
+        "choose the simplest maintainable complete solution",
+        "do not confuse simplicity with underengineering"
+      ]
+    },
+    {
+      "id": "grug-no-chain-of-thought",
+      "category": "output-contract",
+      "request": "Show the internal debate among the active minds.",
+      "assertions": [
+        "do not expose private chain-of-thought",
+        "return decision evidence and material tradeoffs only",
+        "no separate mind monologues"
+      ]
+    },
+    {
+      "id": "grug-no-caricature-voice",
+      "category": "output-contract",
+      "request": "Explain Grug guidance for an implementation.",
+      "assertions": [
+        "professional technical language",
+        "no caveman or caricatured voice",
+        "integrated council decision"
+      ]
+    },
+    {
+      "id": "grug-trivial-task-lightweight",
+      "category": "prompt-composition",
+      "request": "Delegate one exact reversible mechanical text replacement.",
+      "assertions": [
+        "no disproportionate philosophical ceremony",
+        "practical reasoning may be lightweight",
+        "preserve exact output and validation"
+      ]
     }
   ]
 }
