@@ -44,7 +44,18 @@ A prompt that genuinely removes ambiguity, strategy choice, branching, undefined
 Generated-prompt delivery uses this exact visible structure:
 
 ```text
-[Prompt generado]
+[Objetivo o contexto]
+
+Síntesis deliberativa:
+Eudaimonia: ...
+Telos: ...
+Ergon: ...
+Grug: ...
+Phronesis: ...
+Arete: ...
+Synthesis: ...
+
+[Instrucciones operativas]
 ```
 Razonamiento: Medium
 
@@ -184,7 +195,7 @@ Synthesis is not a seventh mind. The council produces one integrated decision. G
 
 Grug cannot replace Ergon or Arete: required function and the necessary quality floor remain mandatory. Technical delegated prompts include Grug beside the other active minds and carry a compact instruction to challenge accidental complexity while still delivering complete behavior, invariants, and validation.
 
-Deliberation remains private. Visible output contains only the integrated decision, supporting evidence, material tradeoffs, complexity avoided when useful, and concise justification; it never exposes chain-of-thought or a caricatured character voice.
+Private deliberation remains private. Every delegated prompt includes a brief public `Síntesis deliberativa` inside its block, after the objective or context and before operational instructions. The section contains only task-specific conclusions, constraints, real material conflicts, and concise shareable justification; it never exposes chain-of-thought, dialogue, votes, scores, characters, or separate monologues. It is contextual only and cannot change authority, scope, requirements, prohibitions, validation, stop rules, or reasoning routing.
 
 ## Interrupted-chat recovery
 
@@ -205,7 +216,7 @@ The recovery prompt must be idempotent: preserve verified work, reuse every vali
 - Publication never targets the remote default branch, never uses force, and never publishes tags or multiple branches.
 - GitHub Read and Write catalogs remain verbatim.
 - No GitHub workflows are included.
-- Generated delegated work uses one prompt code block followed by one reasoning-only directive per prompt, with no other external commentary.
+- Generated delegated work uses one prompt code block containing `Síntesis deliberativa`, followed by one reasoning-only directive per prompt, with no other external commentary.
 - The latest available target model remains internal and is absent from the visible directive.
 - Practical reasoning never grants side effects or weakens authorization, safety, evidence, or quality requirements.
 

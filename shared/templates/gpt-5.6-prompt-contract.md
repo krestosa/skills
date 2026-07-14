@@ -12,6 +12,16 @@ Personality:
 Goal:
 [User-visible outcome.]
 
+Síntesis deliberativa:
+Eudaimonia: [Legitimate user benefit or protected interest.]
+Telos: [Observable end state and why it matters.]
+Ergon: [Indispensable functions.]
+Grug: [Accidental complexity to avoid and essential complexity to preserve when material.]
+Phronesis: [Adaptable tactics, replanning evidence, and fixed limits.]
+Arete: [Required quality, evidence, and validation.]
+Synthesis: [Simplest complete maintainable execution route.]
+[Conflict material: include only when a real tension exists; name the tension, prevailing invariant, and resolution.]
+
 Success criteria:
 - [Observable completion condition]
 - [Required evidence or validation]
@@ -32,7 +42,7 @@ Stop rules:
 ```
 Razonamiento: [Instant|Medium|High]
 
-The reasoning line is outside the prompt block, appears immediately after it, and is the final element of that prompt delivery. It is not copied into the target chat. It contains no model recommendation and no explanation. The target model remains the latest available model as internal policy.
+`Síntesis deliberativa` is inside the prompt block, task-specific, proportional to the selected reasoning level, and contextual only; it does not change requirements, authorization, scope, prohibitions, validation, stop rules, or reasoning routing. It contains no chain-of-thought, dialogue, voting, scores, characters, or separate monologues. The reasoning line is outside the prompt block, appears immediately after it, and is the final element of that prompt delivery. It is not copied into the target chat. It contains no model recommendation and no explanation. The target model remains the latest available model as internal policy.
 
 When several workstreams require separate prompts, repeat the prompt-block-plus-directive pair for each workstream. Do not insert prose between pairs. The final response element is the reasoning directive for the final prompt.
 

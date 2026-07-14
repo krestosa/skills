@@ -168,7 +168,7 @@ A sequence may move `High → Medium → Instant` as uncertainty and decisions d
 For one generated prompt, emit exactly:
 
 ```text
-[complete self-contained prompt]
+[complete self-contained prompt containing its task-specific Síntesis deliberativa]
 ```
 Razonamiento: <Instant|Medium|High>
 
@@ -272,6 +272,8 @@ Synthesis  ← integrated decision satisfying purpose, function, invariants, and
 ```
 
 For every technical delegated prompt where Grug applies, preserve inside the prompt block the active-minds declaration and compact Grug instruction stored in `practicalReasoningContract.grug.delegatedPromptContract`. Grug must appear with the other minds, not as an exterior note. Do not require philosophical exposition.
+
+For every delegated prompt, apply `practicalReasoningContract.publicDeliberativeSynthesis`. Insert the visible `Síntesis deliberativa` inside the prompt block after its objective or primary context and before detailed operational instructions. Derive every entry from the actual request, preserve the canonical mind order, scale brevity to `Instant`, `Medium`, or `High`, and describe material conflicts only when they exist. Treat it as non-normative context: it cannot change authorization, scope, prohibitions, required behavior, validation, stop rules, or reasoning routing. Continuations synthesize only remaining work and current evidence.
 
 Do not expose private chain-of-thought. Report decisions, evidence, material tradeoffs, complexity avoided when useful, and concise rationale only. Reasoning-classification details remain internal unless the user explicitly requests an audit.
 
@@ -410,6 +412,7 @@ For complex work, each envelope must communicate in ordinary technical language:
 
 - the user benefit or protected interest
 - the concrete end state and why it matters
+- a task-specific `Síntesis deliberativa` using the canonical contract
 - the required functions and deliverables
 - invariants, adaptation triggers, fallback behavior, and when to ask
 - the quality, evidence, validation, and completion bar
@@ -439,6 +442,7 @@ Reconstruct the last verified checkpoint from direct evidence, then generate an 
 The response contract for every generated prompt is absolute:
 
 - emit exactly one self-contained prompt inside one code block for that workstream
+- include that workstream's task-specific `Síntesis deliberativa` inside the block, never outside it
 - emit no text before the first prompt block
 - immediately after each block emit exactly one `Razonamiento: <Instant|Medium|High>` line
 - emit no explanation, summary, diagnosis, status report, checklist, citation block, recommendation, or model label outside the blocks

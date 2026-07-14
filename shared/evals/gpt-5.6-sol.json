@@ -472,6 +472,46 @@
         "practical reasoning may be lightweight",
         "preserve exact output and validation"
       ]
+    },
+    {
+      "id": "output-visible-synthesis-inside-block-only-directive-outside",
+      "category": "output-contract",
+      "request": "Generate one delegated Medium prompt with visible deliberative synthesis.",
+      "assertions": [
+        "Síntesis deliberativa is inside the prompt block",
+        "only Razonamiento: Medium is outside",
+        "no prose follows the directive"
+      ]
+    },
+    {
+      "id": "output-two-workstreams-independent-syntheses",
+      "category": "output-contract",
+      "request": "Generate two independent delegated workstream prompts.",
+      "assertions": [
+        "each prompt has its own task-specific Síntesis deliberativa",
+        "each prompt has its own immediate reasoning directive",
+        "no global synthesis or directive is shared"
+      ]
+    },
+    {
+      "id": "prompt-synthesis-does-not-change-routing",
+      "category": "reasoning-routing",
+      "request": "Add a visible synthesis to an already classified prompt.",
+      "assertions": [
+        "reasoning classification is unchanged",
+        "synthesis remains contextual",
+        "no new requirement or authorization is introduced"
+      ]
+    },
+    {
+      "id": "builds-preserve-visible-synthesis-contract",
+      "category": "build-integrity",
+      "request": "Build the compiled and flat artifacts after adding visible deliberative synthesis.",
+      "assertions": [
+        "compiled artifact contains Síntesis deliberativa",
+        "flat artifact contains the canonical contract",
+        "builds are lossless and deterministic"
+      ]
     }
   ]
 }

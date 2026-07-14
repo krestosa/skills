@@ -11,6 +11,7 @@
       "role",
       "personality",
       "goal",
+      "deliberativeSynthesis",
       "successCriteria",
       "constraints",
       "tools",
@@ -20,7 +21,15 @@
     "outcomeFirst": true,
     "stableReusablePrefix": true,
     "absoluteLanguageReservedForInvariants": true,
-    "preserveExplicitUserValues": true
+    "preserveExplicitUserValues": true,
+    "deliberativeSynthesis": {
+      "sectionName": "Síntesis deliberativa",
+      "canonicalContract": "orchestrator/registry.json#practicalReasoningContract.publicDeliberativeSynthesis",
+      "insidePromptBlock": true,
+      "taskSpecific": true,
+      "contextOnly": true,
+      "doesNotChangeReasoningRouting": true
+    }
   },
   "text": {
     "verbosityDefault": "medium",
@@ -194,8 +203,8 @@
   "referenceProvenance": "user-supplied-guidance",
   "integrity": {
     "referenceSha256": "cd838a4bd951509771738a3fe511c99cfccc229236ca45503c8181f6bb5ea9b9",
-    "policySha256": "3f128aed9ec5a963a21c312371204263b06431cc153d12969ea30d93033151b2",
-    "promptTemplateSha256": "3a7e0ab15be9f4912567450251bebbbc0316be78bb44c15b9c041e4bf2aab09e",
-    "evalSha256": "3c4d1da709b52ef2c1ed442af8675dcfa93db0336ce27f0ad5c50490a5f1dd34"
+    "policySha256": "79499f5a8771de7782e4884b734bf9518070723c4aabb7798b7d365003ca19c0",
+    "promptTemplateSha256": "d92f66e737e4dc66ffee4301456d69057366c6d0aa8d6d58d37b2f134a2e0e24",
+    "evalSha256": "3c07fa2cd5b8acb266604c5bfb7227085e961111ec8791e28a0a7b80c577571c"
   }
 }

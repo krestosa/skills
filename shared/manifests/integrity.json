@@ -9,10 +9,10 @@
     "sourceManifests": 15,
     "evalCases": {
       "shared/evals/chat-recovery.json": 18,
-      "shared/evals/gpt-5.6-sol.json": 47,
+      "shared/evals/gpt-5.6-sol.json": 51,
       "shared/evals/local-git-workspace.json": 19,
       "shared/evals/parallel-execution.json": 10,
-      "shared/evals/practical-reasoning.json": 41
+      "shared/evals/practical-reasoning.json": 55
     },
     "catalogs": {
       "shared/catalogs/github-read-verbatim.md": {
@@ -42,28 +42,28 @@
       },
       {
         "path": "README.md",
-        "sha256": "a63356a63d4f6f42de3130754213c53e7094f844178069a7284e753466a8f6c6",
-        "bytes": 20694
+        "sha256": "1c2fcec1aaf3caabb42b0efc925c497bb4d9de57b375abc9a5ea830c56e69ba9",
+        "bytes": 21177
       },
       {
         "path": "SKILL.md",
-        "sha256": "da7135142cc66a7b1e0f85affbeb10fc1653549a38904295434b9ce48ab97194",
-        "bytes": 11016
+        "sha256": "6cee2abababe6793404289942f7b90fd81c8a86b4ad735626c80c5e90490da15",
+        "bytes": 11762
       },
       {
         "path": "orchestrator/SKILL.md",
-        "sha256": "dc952f879949daec4307ec9df22f58eecb1a95ce278a4d6b00b582dff1dfee2b",
-        "bytes": 28024
+        "sha256": "59909b5f47c37fe8ab964063826c7da1617a4cb6fcd98bb4b1933f304e47d6e3",
+        "bytes": 28898
       },
       {
         "path": "orchestrator/delegation-envelope.schema.json",
-        "sha256": "423fedd852ca9f141555cf3518090752b86292e09c0065249e4e7c98f09673f8",
-        "bytes": 1638
+        "sha256": "e21c467c107cb927a9e4da09bce681be622f6782f5e67882876dc14860e73357",
+        "bytes": 1899
       },
       {
         "path": "orchestrator/registry.json",
-        "sha256": "feef6d03d159fd65b9ad0dce6b09fec3209817ac930a4212f35eaf8e75521e02",
-        "bytes": 21817
+        "sha256": "bf6b7ba98c5471763b55782d3bc6ddfeb7bef82cf51ec43c9af36c57638c9b42",
+        "bytes": 25220
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -142,8 +142,8 @@
       },
       {
         "path": "shared/evals/gpt-5.6-sol.json",
-        "sha256": "3c4d1da709b52ef2c1ed442af8675dcfa93db0336ce27f0ad5c50490a5f1dd34",
-        "bytes": 16955
+        "sha256": "3c07fa2cd5b8acb266604c5bfb7227085e961111ec8791e28a0a7b80c577571c",
+        "bytes": 18531
       },
       {
         "path": "shared/evals/local-git-workspace.json",
@@ -157,8 +157,8 @@
       },
       {
         "path": "shared/evals/practical-reasoning.json",
-        "sha256": "26c650b30d1243edf95939932b37580df96a0be1e72e587fe0cff0596cc1c88e",
-        "bytes": 12882
+        "sha256": "0684c46b05f49ca7cd163b6277fa640ba5c93e4ef14b1ab91bb683e09999fb52",
+        "bytes": 17473
       },
       {
         "path": "shared/manifests/routes.json",
@@ -247,13 +247,13 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "afac939648f10ad298e33067afb4aaace45f4892d8197813247b387c43305fb0",
-        "bytes": 3933
+        "sha256": "7a7c28c55320c6cc831e74e7766fad3bea147192ce89cf290f9edd34d64a70f5",
+        "bytes": 4484
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
-        "sha256": "78850257bbf48c06c25569a832f6a40977c0097feccb66a69b4acae27dcd1a6a",
-        "bytes": 5602
+        "sha256": "121f3b4ef904cf40d1320b5a2505971f64acdeb88962f2a9d884a074425114eb",
+        "bytes": 5962
       },
       {
         "path": "shared/policies/connector-native-integrity.md",
@@ -267,8 +267,8 @@
       },
       {
         "path": "shared/policies/gpt-5.6-sol.md",
-        "sha256": "3f128aed9ec5a963a21c312371204263b06431cc153d12969ea30d93033151b2",
-        "bytes": 11690
+        "sha256": "79499f5a8771de7782e4884b734bf9518070723c4aabb7798b7d365003ca19c0",
+        "bytes": 12141
       },
       {
         "path": "shared/policies/network-and-transport.md",
@@ -392,13 +392,13 @@
       },
       {
         "path": "shared/templates/gpt-5.6-prompt-contract.md",
-        "sha256": "3a7e0ab15be9f4912567450251bebbbc0316be78bb44c15b9c041e4bf2aab09e",
-        "bytes": 2473
+        "sha256": "d92f66e737e4dc66ffee4301456d69057366c6d0aa8d6d58d37b2f134a2e0e24",
+        "bytes": 3382
       },
       {
         "path": "shared/templates/prompts.md",
-        "sha256": "0263822e50839751ee7b49a02d19a838e1a7bd0279892ed334471903d5b47156",
-        "bytes": 4456
+        "sha256": "80b0672abbd6dffab9454fcbc53d67e644955c6462a5f2572aa57fecf3c990fe",
+        "bytes": 4735
       },
       {
         "path": "skills/architecture/SKILL.md",
@@ -447,8 +447,8 @@
       },
       {
         "path": "skills/management-delegation/SKILL.md",
-        "sha256": "9d1b349dea63f55dd1acb4c4bc64ca2397c99a347beebc08e327eb1fbe9ff558",
-        "bytes": 10895
+        "sha256": "794f6fb569c698791713682f7f6babb7c82321b7d96184162f6b6683fdf56c63",
+        "bytes": 11410
       },
       {
         "path": "skills/parallel-execution/SKILL.md",
@@ -462,13 +462,13 @@
       },
       {
         "path": "skills/practical-reasoning/SKILL.md",
-        "sha256": "73f2870b75d35c4a68d658e5ae4517afbda0bc693493bc6d19f1bd349027fd33",
-        "bytes": 20683
+        "sha256": "bf51e8374fd7be7ffd92a3f73239094a495f720433dce4049197ecda685f830a",
+        "bytes": 22695
       },
       {
         "path": "skills/prompt-engineering/SKILL.md",
-        "sha256": "8f87901dc1e6d9406ba188286cb6e68681f415d5027b998b560a75265403ba55",
-        "bytes": 5265
+        "sha256": "2843c2e70acfa5aa38ee89257b556216366e571ffb5839c7be61d44a105378cd",
+        "bytes": 5762
       },
       {
         "path": "skills/recovery/SKILL.md",
@@ -492,8 +492,8 @@
       },
       {
         "path": "tests/test_dynamic_tooling.py",
-        "sha256": "ece9906b1c837075ef6bc36d81619fba44d100f8d4c11cdfa3505cd5dae416a6",
-        "bytes": 39638
+        "sha256": "78384446d101cd38db833b090d72357dadba3ab858f58224a5863fd7133bb321",
+        "bytes": 43686
       }
     ]
   },

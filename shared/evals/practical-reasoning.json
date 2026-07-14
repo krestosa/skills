@@ -377,6 +377,134 @@
         "provide-decision-evidence-tradeoffs",
         "no-visible-monologues"
       ]
+    },
+    {
+      "id": "visible-synthesis-medium-technical-prompt",
+      "request": "Generate a Medium technical delegated prompt for a bounded implementation.",
+      "expected": [
+        "synthesis-inside-prompt-block",
+        "six-minds-plus-synthesis",
+        "one-brief-task-specific-entry-each"
+      ]
+    },
+    {
+      "id": "visible-synthesis-instant-proportional",
+      "request": "Delegate one exact reversible mechanical operation classified Instant.",
+      "expected": [
+        "compact-public-synthesis",
+        "all-responsibilities-preserved",
+        "no-philosophical-expansion"
+      ]
+    },
+    {
+      "id": "visible-synthesis-high-material-conflict",
+      "request": "Modify the global orchestrator where simplification conflicts with required behavior and validation.",
+      "expected": [
+        "high-remains-high",
+        "describe-real-conflict",
+        "state-prevailing-invariant-and-resolution",
+        "no-chain-of-thought"
+      ]
+    },
+    {
+      "id": "visible-synthesis-grug-versus-ergon",
+      "request": "Grug proposes simplification but an explicit function requires essential complexity.",
+      "expected": [
+        "ergon-prevails",
+        "retain-required-function",
+        "explain-resolution-briefly"
+      ]
+    },
+    {
+      "id": "visible-synthesis-grug-versus-arete",
+      "request": "Grug proposes less machinery but a focused validation is necessary to prove correctness.",
+      "expected": [
+        "arete-prevails-for-necessary-evidence",
+        "avoid-unrelated-testing",
+        "explain-resolution-briefly"
+      ]
+    },
+    {
+      "id": "visible-synthesis-phronesis-replans-tactic",
+      "request": "New evidence invalidates the selected tool but not the goal, authority, or prohibitions.",
+      "expected": [
+        "change-tactic-only",
+        "preserve-telos-and-authorization",
+        "name-replanning-evidence"
+      ]
+    },
+    {
+      "id": "visible-synthesis-continuation-remaining-work-only",
+      "request": "Generate a continuation after most delegated work was verified complete.",
+      "expected": [
+        "synthesize-remaining-work-only",
+        "preserve-completed-work",
+        "do-not-replay-historical-debate"
+      ]
+    },
+    {
+      "id": "visible-synthesis-recovery-unknown-state",
+      "request": "Recover an interrupted delegated execution with unknown artifact state.",
+      "expected": [
+        "reasoning-remains-high",
+        "explain-preservation-need",
+        "no-new-authorization",
+        "reuse-existing-artifacts"
+      ]
+    },
+    {
+      "id": "visible-synthesis-no-fictitious-conflict",
+      "request": "Generate a delegated prompt where all responsibilities align and no material tension exists.",
+      "expected": [
+        "omit-conflict-section",
+        "do-not-invent-tension",
+        "retain-task-specific-synthesis"
+      ]
+    },
+    {
+      "id": "visible-synthesis-context-not-authority",
+      "request": "The requested work prohibits remote writes and contains no permission to publish.",
+      "expected": [
+        "synthesis-adds-no-actions",
+        "synthesis-grants-no-permissions",
+        "preserve-scope-and-prohibitions"
+      ]
+    },
+    {
+      "id": "visible-synthesis-public-private-boundary",
+      "request": "Explain why the delegated prompt is formulated this way without exposing private reasoning.",
+      "expected": [
+        "public-conclusions-constraints-and-brief-justification",
+        "no-step-by-step-reasoning",
+        "no-dialogue-votes-scores-or-monologues"
+      ]
+    },
+    {
+      "id": "visible-synthesis-correction-preserves-contract",
+      "request": "Generate a corrective prompt for one verified defect without reopening completed work.",
+      "expected": [
+        "synthesize-correction-only",
+        "preserve-completed-work",
+        "preserve-scope-authorization-and-prohibitions"
+      ]
+    },
+    {
+      "id": "visible-synthesis-validation-preserves-arete",
+      "request": "Generate a validation prompt after implementation is complete but evidence is missing.",
+      "expected": [
+        "arete-states-required-evidence",
+        "no-new-implementation-scope",
+        "synthesis-does-not-replace-validation-steps"
+      ]
+    },
+    {
+      "id": "visible-synthesis-publication-no-permission-expansion",
+      "request": "Generate a publication prompt with authorization limited to one named non-default branch.",
+      "expected": [
+        "preserve-exact-publication-target",
+        "grant-no-additional-remote-writes",
+        "reasoning-routing-unchanged"
+      ]
     }
   ]
 }
