@@ -33,6 +33,8 @@ Produce a lean, outcome-first prompt contract that removes avoidable interpretat
 - the prompt is designed for the lowest sufficient level: `Instant`, `Medium`, or `High`
 - prompt closure may reduce an initial classification by at most one level and never from `High` directly to `Instant`
 - unresolved hard triggers preserve `High`
+- every delegated prompt contains a task-specific `Síntesis deliberativa` inside the prompt block, in canonical order and proportionate to its selected reasoning level
+- the synthesis exposes conclusions and material constraints without chain-of-thought and cannot change scope, authorization, or reasoning routing
 - technical delegated prompts preserve Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete together when Grug applies
 - the compact Grug contract remains inside the prompt block and does not create philosophical ceremony
 - the visible reasoning directive appears only after the prompt block and never includes the model
@@ -75,7 +77,7 @@ A detailed prompt does not qualify for a downgrade merely because it is long. Th
 
 Return the revised prompt contract, removed or changed instruction groups, eval cases, validation status, and unresolved risks when the user requests analysis or implementation reporting.
 
-When the deliverable itself is one or more prompts for another chat, technical prompts where Grug applies must include the active-minds declaration and compact Grug contract inside the block. Each prompt must be inside its own code block and followed immediately by exactly one reasoning-only directive. Outside prompt blocks, only `Razonamiento: Instant`, `Razonamiento: Medium`, or `Razonamiento: High` may appear. The final directive is the final response element.
+When the deliverable itself is one or more prompts for another chat, each block must contain the task-specific `Síntesis deliberativa` defined by the registry after its objective or primary context and before detailed operational instructions. Technical prompts where Grug applies must also include the active-minds declaration and compact Grug contract inside the block. Each prompt must be inside its own code block and followed immediately by exactly one reasoning-only directive. Outside prompt blocks, only `Razonamiento: Instant`, `Razonamiento: Medium`, or `Razonamiento: High` may appear. The final directive is the final response element.
 
 Global authorization, tool, evidence, validation, reasoning-routing, and stop rules come from `../../SKILL.md` and `../../orchestrator/SKILL.md`.
 

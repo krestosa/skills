@@ -26,6 +26,7 @@ Create a minimal, dependency-aware execution structure that preserves authority,
 
 - work is divided by outcome and dependency rather than arbitrary file groups
 - each workstream has scope, inputs, allowed actions, output, and stop rules
+- each workstream carries a task-specific visible `Síntesis deliberativa` inside its prompt block
 - each non-trivial workstream preserves Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete in ordinary technical language and reaches one Synthesis
 - independent work is parallelized and dependent work remains sequential
 - handoffs preserve evidence and avoid duplicate work
@@ -86,7 +87,7 @@ Arete:
 The quality bar, evidence, validation, completion criteria, and limitations.
 ```
 
-Do not add philosophical exposition when ordinary technical wording is clearer. The frame must change execution behavior.
+Do not add philosophical exposition when ordinary technical wording is clearer. The frame must change execution behavior. Convert the frame into the visible `Síntesis deliberativa` required by `practicalReasoningContract.publicDeliberativeSynthesis`; keep it brief, task-specific, inside the prompt block, and non-normative.
 
 A workstream may own part of Ergon but may not redefine the global Telos or Eudaimonia independently. When local optimization conflicts with the global purpose, the global purpose wins unless the user changes it.
 
@@ -137,9 +138,9 @@ Do not accept an intermediate artifact as completion merely because it was produ
 
 ## Output
 
-For initial delegation, return one prompt code block per delegated workstream. Each block must contain workstream scope, selected skills, dependencies, authorization, evidence inputs, user benefit, end purpose, required functions, applicable complexity constraints, adaptation rules, quality bar, deliverables, stop rules, and integration order. When technical work activates Grug, include the active-minds declaration and compact Grug contract from the registry inside the block. Immediately after each block, emit exactly one line: `Razonamiento: <Instant|Medium|High>`.
+For initial delegation, return one prompt code block per delegated workstream. Each block must contain its task-specific `Síntesis deliberativa` after the objective or primary context, followed by workstream scope, selected skills, dependencies, authorization, evidence inputs, required functions, applicable complexity constraints, adaptation rules, quality bar, deliverables, stop rules, and integration order. When technical work activates Grug, include the active-minds declaration and compact Grug contract from the registry inside the block. Immediately after each block, emit exactly one line: `Razonamiento: <Instant|Medium|High>`.
 
-For a returned or interrupted delegated result, return exactly one prompt inside one code block followed immediately by exactly one reasoning-only directive. Do not add a preface, summary, diagnosis, status, rationale, citations, notes, or closing text outside the code block. The prompt itself must contain all context, specificity, purpose, user benefit, corrections, evidence, adaptation rules, quality requirements, system-wide inventory requirements, exclusions, inaccessible paths, constraints, validation requirements, idempotency guarantees, and stop rules needed by the target chat.
+For a returned or interrupted delegated result, return exactly one prompt inside one code block followed immediately by exactly one reasoning-only directive. Its `Síntesis deliberativa` must cover only the remaining work and current material evidence rather than replaying the full historical debate. Do not add a preface, summary, diagnosis, status, rationale, citations, notes, or closing text outside the code block. The prompt itself must contain all context, specificity, purpose, user benefit, corrections, evidence, adaptation rules, quality requirements, system-wide inventory requirements, exclusions, inaccessible paths, constraints, validation requirements, idempotency guarantees, and stop rules needed by the target chat.
 
 For multiple prompts, outside the blocks only the corresponding `Razonamiento: <nivel>` lines may appear. The final directive is the final response element. The directive never contains the model, explanation, score, or private reasoning.
 

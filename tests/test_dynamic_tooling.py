@@ -567,6 +567,79 @@ class GrugIntegrationTests(unittest.TestCase):
         self.assertEqual(result["model"], "gpt-5.6-sol")
 
 
+class VisibleDeliberativeSynthesisTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = CANDIDATE
+        self.registry = json.loads((self.root / "orchestrator/registry.json").read_text(encoding="utf-8"))
+        self.contract = self.registry["practicalReasoningContract"]["publicDeliberativeSynthesis"]
+
+    def test_canonical_visible_synthesis_contract(self) -> None:
+        self.assertEqual(self.contract["visibleSectionName"], "Síntesis deliberativa")
+        self.assertTrue(self.contract["insidePromptBlock"])
+        self.assertTrue(self.contract["requiredInEveryDelegatedPrompt"])
+        self.assertEqual(
+            self.contract["order"],
+            ["eudaimonia", "telos", "ergon", "grug", "phronesis", "arete", "synthesis"],
+        )
+        self.assertTrue(self.registry["practicalReasoningContract"]["synthesisIsTerminalPhaseNotCouncilMember"])
+
+    def test_synthesis_is_context_only(self) -> None:
+        context = self.contract["contextOnly"]
+        self.assertTrue(context)
+        self.assertTrue(all(context.values()))
+        self.assertTrue(self.contract["materialConflicts"]["includeOnlyWhenReal"])
+        self.assertTrue(self.contract["materialConflicts"]["inventedConflictForbidden"])
+
+    def test_delegation_envelope_requires_synthesis(self) -> None:
+        schema = json.loads((self.root / "orchestrator/delegation-envelope.schema.json").read_text(encoding="utf-8"))
+        self.assertIn("deliberative_synthesis", schema["required"])
+        self.assertEqual(schema["properties"]["deliberative_synthesis"]["type"], "string")
+
+    def test_required_regression_cases_exist(self) -> None:
+        practical = json.loads((self.root / "shared/evals/practical-reasoning.json").read_text(encoding="utf-8"))
+        gpt = json.loads((self.root / "shared/evals/gpt-5.6-sol.json").read_text(encoding="utf-8"))
+        ids = {case["id"] for case in practical["cases"]} | {case["id"] for case in gpt["cases"]}
+        required = {
+            "visible-synthesis-medium-technical-prompt",
+            "visible-synthesis-instant-proportional",
+            "visible-synthesis-high-material-conflict",
+            "visible-synthesis-grug-versus-ergon",
+            "visible-synthesis-grug-versus-arete",
+            "visible-synthesis-phronesis-replans-tactic",
+            "visible-synthesis-continuation-remaining-work-only",
+            "visible-synthesis-recovery-unknown-state",
+            "output-two-workstreams-independent-syntheses",
+            "output-visible-synthesis-inside-block-only-directive-outside",
+            "visible-synthesis-public-private-boundary",
+            "visible-synthesis-context-not-authority",
+            "visible-synthesis-no-fictitious-conflict",
+            "builds-preserve-visible-synthesis-contract",
+        }
+        self.assertTrue(required.issubset(ids))
+
+    def test_template_places_synthesis_before_operational_detail(self) -> None:
+        template = (self.root / "shared/templates/gpt-5.6-prompt-contract.md").read_text(encoding="utf-8")
+        self.assertLess(template.index("Síntesis deliberativa:"), template.index("Success criteria:"))
+        self.assertIn("Razonamiento: [Instant|Medium|High]", template)
+
+    def test_compiled_and_flat_builds_preserve_synthesis_contract(self) -> None:
+        model = load_repository_model(self.root)
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary)
+            compiled = target / "compiled.md"
+            flat = target / "flat"
+            build_compiled(model, compiled)
+            build_flat(model, flat)
+            compiled_text = compiled.read_text(encoding="utf-8")
+            flat_text = "\n".join(path.read_text(encoding="utf-8") for path in flat.rglob("*") if path.is_file())
+        marker = "Síntesis deliberativa"
+        canonical = "publicDeliberativeSynthesis"
+        self.assertIn(marker, compiled_text)
+        self.assertIn(canonical, compiled_text)
+        self.assertIn(marker, flat_text)
+        self.assertIn(canonical, flat_text)
+
+
 class PublicationToolingTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()

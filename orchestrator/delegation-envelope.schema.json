@@ -8,6 +8,7 @@
     "workstream_id",
     "objective",
     "selected_skills",
+    "deliberative_synthesis",
     "scope",
     "allowed_actions",
     "forbidden_actions",
@@ -43,6 +44,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "deliberative_synthesis": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Task-specific Síntesis deliberativa derived from orchestrator/registry.json and placed inside the delegated prompt block."
     },
     "scope": {
       "type": "array",

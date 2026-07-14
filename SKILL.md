@@ -76,6 +76,7 @@ Do not moralize or replace the user's goals. Authorization, safety, preservation
 - allowed in-scope work is completed before the final response;
 - required evidence, calculations, citations, validation, and remote verification are present;
 - every generated delegated prompt is independently classified as `Instant`, `Medium`, or `High`;
+- every generated prompt contains a task-specific `Síntesis deliberativa` inside its prompt block without exposing private reasoning or changing authority;
 - every generated prompt is followed immediately by exactly one reasoning-only directive and the final directive closes the response;
 - the final response preserves material facts, decisions, caveats, blockers, and next action.
 
@@ -110,6 +111,8 @@ Load `orchestrator/SKILL.md`. The orchestrator selects and directs `skills/<skil
 The chat acting as orchestrator is user-configured in ChatGPT Web with the latest available model and `High` reasoning. Every generated prompt targets the latest available model internally and receives an adaptively selected `Instant`, `Medium`, or `High` reasoning level. The visible delegated output never displays the model.
 
 For complex delegated work, prompts must communicate the human good, end purpose, required function, complexity constraint, adaptation conditions, quality bar, authorization, and stop rules without requiring the target chat to infer them. Technical prompts where Grug applies must include the active minds together and the compact Grug contract from `orchestrator/registry.json` inside the prompt block.
+
+Every generated prompt must also contain the task-specific visible section `Síntesis deliberativa`, derived from `practicalReasoningContract.publicDeliberativeSynthesis`. Place it inside the prompt block after the primary objective or context and before detailed operational instructions. It exposes only conclusions, constraints, real material conflicts, and brief shareable justification; private deliberation and chain-of-thought remain prohibited. The section is contextual only and cannot add requirements, permissions, side effects, scope, or a different reasoning classification.
 
 Every generated prompt, including initial delegation, a new action, continuation, correction, validation, recovery, publication, blocker resolution, or remaining-action closure, must use this response contract:
 

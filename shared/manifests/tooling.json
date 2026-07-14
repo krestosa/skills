@@ -71,7 +71,7 @@
         ]
       }
     ],
-    "instructionText": "Load 00-MAIN.md, then 01-ORCHESTRATOR.md. The orchestrator selects only the required domain skills and attaches cross-cutting control when applicable. Practical reasoning uses Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete, followed by Synthesis; Grug challenges accidental complexity without weakening complete function or quality. Attach local-git-workspace before local Git, parallel-execution when safe parallel work exists, and chat-recovery when delegated execution is interrupted or untrusted. Autonomous remote GitHub operations use the connector. Explicit user-invoked publish or commit --push may use guarded native Git fetch, ls-remote, and one non-forced branch push. Returned delegated results use one prompt-only code block."
+    "instructionText": "Load 00-MAIN.md, then 01-ORCHESTRATOR.md. The orchestrator selects only the required domain skills and attaches cross-cutting control when applicable. Practical reasoning uses Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete, followed by Synthesis; Grug challenges accidental complexity without weakening complete function or quality. Every delegated prompt contains a task-specific Síntesis deliberativa inside its prompt block; it exposes public conclusions and constraints without changing authority or revealing chain-of-thought. Attach local-git-workspace before local Git, parallel-execution when safe parallel work exists, and chat-recovery when delegated execution is interrupted or untrusted. Autonomous remote GitHub operations use the connector. Explicit user-invoked publish or commit --push may use guarded native Git fetch, ls-remote, and one non-forced branch push. Returned delegated results use one prompt-only code block."
   },
   "skillRequiredHeadings": [
     "## Role",
@@ -90,7 +90,8 @@
       "orchestrator/SKILL.md",
       "Remote GitHub operations use the GitHub connector",
       "explicit `publish` or `commit --push`",
-      "Do not expose private chain-of-thought"
+      "Do not expose private chain-of-thought",
+      "Síntesis deliberativa"
     ],
     "orchestrator/SKILL.md": [
       "Select one primary skill",
@@ -100,7 +101,9 @@
       "Attach `chat-recovery`",
       "emit exactly one self-contained prompt inside one code block",
       "Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete",
-      "practicalReasoningContract.grug.delegatedPromptContract"
+      "practicalReasoningContract.grug.delegatedPromptContract",
+      "practicalReasoningContract.publicDeliberativeSynthesis",
+      "Síntesis deliberativa"
     ],
     "skills/local-git-workspace/SKILL.md": [
       "Autonomous agent access to remote GitHub remains connector-only",
@@ -118,7 +121,14 @@
       "Active minds: Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete.",
       "Do not confuse simplicity with underengineering.",
       "Synthesis is a terminal phase, not a seventh mind.",
-      "Never expose private chain-of-thought."
+      "Never expose private chain-of-thought.",
+      "## Síntesis deliberativa",
+      "contextual and non-normative"
+    ],
+    "shared/templates/gpt-5.6-prompt-contract.md": [
+      "Síntesis deliberativa:",
+      "Synthesis:",
+      "contains no chain-of-thought"
     ]
   }
 }

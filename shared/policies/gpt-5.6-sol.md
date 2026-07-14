@@ -79,7 +79,7 @@ Compact after major milestones, preserve phase values when replaying history, ke
 
 ## Practical reasoning council
 
-For non-trivial work, use Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete as one private decision council followed by Synthesis. Grug challenges accidental complexity, premature abstractions, unjustified dependencies, unnecessary distribution, and speculative scope without weakening required behavior, invariants, security, compatibility, maintainability, or validation. Technical delegated prompts preserve the active minds together and include the registry's compact Grug contract inside the prompt block. Do not expose chain-of-thought or use a caricatured character voice.
+For non-trivial work, use Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete as one private decision council followed by Synthesis. Grug challenges accidental complexity, premature abstractions, unjustified dependencies, unnecessary distribution, and speculative scope without weakening required behavior, invariants, security, compatibility, maintainability, or validation. Every delegated prompt contains the task-specific visible section `Síntesis deliberativa` inside the prompt block, after objective or context and before operational detail. It exposes only conclusions, constraints, real material conflicts, and brief shareable justification; it never exposes chain-of-thought and cannot change requirements, authorization, scope, prohibitions, validation, stop rules, or reasoning routing. Technical delegated prompts preserve the active minds together and include the registry's compact Grug contract inside the prompt block. Do not use a caricatured character voice.
 
 ## Model and reasoning policy
 
@@ -131,7 +131,7 @@ Between two levels that reach the same result with equal reliability, choose the
 
 ## Generated-prompt output contract
 
-For every generated prompt, emit exactly one self-contained prompt inside one code block followed immediately by exactly one line outside the block:
+For every generated prompt, emit exactly one self-contained prompt containing its task-specific `Síntesis deliberativa` inside one code block followed immediately by exactly one line outside the block:
 
 ```text
 Razonamiento: <Instant|Medium|High>

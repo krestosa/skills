@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "orchestrator": "orchestrator/SKILL.md",
   "shared": {
     "root": "shared",
@@ -163,6 +163,92 @@
         "activeMinds": "Active minds: Eudaimonia, Telos, Ergon, Grug, Phronesis, and Arete.",
         "constraint": "Challenge accidental complexity, premature abstractions, unjustified dependencies, and speculative scope. Choose the simplest maintainable solution that fully satisfies the required behavior, invariants, and validation. Do not confuse simplicity with underengineering."
       }
+    },
+    "publicDeliberativeSynthesis": {
+      "visibleSectionName": "Síntesis deliberativa",
+      "requiredInEveryDelegatedPrompt": true,
+      "insidePromptBlock": true,
+      "placement": {
+        "after": [
+          "primary objective",
+          "primary context"
+        ],
+        "before": [
+          "detailed operational instructions"
+        ],
+        "fallback": "the first unambiguous position after the requested outcome and before execution steps"
+      },
+      "order": [
+        "eudaimonia",
+        "telos",
+        "ergon",
+        "grug",
+        "phronesis",
+        "arete",
+        "synthesis"
+      ],
+      "responsibilities": {
+        "eudaimonia": "legitimate user benefit or protected interest",
+        "telos": "observable end state and why it matters",
+        "ergon": "indispensable functions required to reach the end state",
+        "grug": "accidental complexity to avoid and essential complexity to preserve when material",
+        "phronesis": "adaptable tactics, replanning evidence, and fixed limits",
+        "arete": "required quality, evidence, and validation",
+        "synthesis": "the simplest complete maintainable execution route integrating all prior constraints"
+      },
+      "publicContentOnly": [
+        "conclusions",
+        "constraints",
+        "material conflicts when present",
+        "brief shareable justification"
+      ],
+      "privateOrForbiddenContent": [
+        "chain-of-thought",
+        "step-by-step private reasoning",
+        "internal diaries",
+        "mental scores",
+        "majority voting",
+        "autonomous council agents",
+        "characters",
+        "theatrical dialogue",
+        "separate monologues"
+      ],
+      "nonTrivialRequiresConcreteContributionPerEntry": true,
+      "brevity": {
+        "taskSpecific": true,
+        "genericBoilerplateForbidden": true,
+        "lengthTracksActualComplexity": true,
+        "doesNotDuplicateOperationalPromptExtensively": true
+      },
+      "proportionality": {
+        "instant": "one compact paragraph or very short entries covering all six minds and Synthesis",
+        "medium": "one brief task-specific entry per mind and one brief Synthesis entry",
+        "high": "one line or short paragraph per mind plus material conflicts only when they exist"
+      },
+      "materialConflicts": {
+        "includeOnlyWhenReal": true,
+        "explain": [
+          "responsibilities in tension",
+          "the invariant or need that prevails",
+          "how the prompt formulation resolves the tension"
+        ],
+        "inventedConflictForbidden": true
+      },
+      "contextOnly": {
+        "doesNotAddRequirements": true,
+        "doesNotGrantPermissions": true,
+        "doesNotAuthorizeSideEffects": true,
+        "doesNotChangeScope": true,
+        "doesNotWeakenProhibitions": true,
+        "doesNotReplaceOperationalInstructions": true,
+        "doesNotReplaceSuccessCriteriaValidationOrStopRules": true,
+        "doesNotChangeReasoningClassification": true,
+        "doesNotRequireTargetRedeliberation": true,
+        "doesNotRequireTargetSynthesisOutput": true,
+        "isNotACommandChain": true
+      },
+      "continuations": "synthesize only remaining work and current material evidence, not the full historical debate",
+      "multipleWorkstreams": "each prompt carries its own task-specific section and its own reasoning directive"
     }
   },
   "selectionPolicy": {

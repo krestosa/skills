@@ -44,6 +44,8 @@ Ensure that every non-trivial task:
 - good intentions and superficial simplicity are not accepted without functional and quality evidence;
 - the final result preserves user autonomy, time, work, privacy, safety, resources, and decision-making when material;
 - technical delegated prompts preserve the six active minds and compact Grug contract inside the prompt block;
+- every delegated prompt contains a brief task-specific `Síntesis deliberativa` inside the block;
+- the public synthesis does not add authority, scope, requirements, commands, or a new reasoning classification;
 - no separate Grug skill, visible character voice, or chain-of-thought is produced.
 
 ## Select when
@@ -282,6 +284,16 @@ Do not implement majority voting, autonomous agents, separate visible monologues
 
 Visible output may contain the decision, evidence, material tradeoffs, complexity avoided when relevant, and concise justification. Never expose private chain-of-thought.
 
+## Síntesis deliberativa
+
+Every delegated prompt includes a visible section named exactly `Síntesis deliberativa`. This is a public summary of conclusions, constraints, real material conflicts, and brief shareable justification. It is not the private deliberation and must not reconstruct chain-of-thought, intermediate reasoning steps, mental scores, votes, characters, dialogue, or separate monologues.
+
+Place the section inside the prompt block after the primary objective or context and before detailed operational instructions. Use the canonical order `Eudaimonia`, `Telos`, `Ergon`, `Grug`, `Phronesis`, `Arete`, and `Synthesis`; Synthesis remains a terminal phase rather than a seventh mind. Each contribution must be specific to the actual request.
+
+Scale the section to the selected reasoning level without changing that level: `Instant` may compress all contributions into one compact paragraph or very short entries; `Medium` uses one brief line per mind and Synthesis; `High` may use a short line or paragraph per mind and adds conflict resolution only when a real conflict exists. Never invent conflict to fill the section.
+
+The section is contextual and non-normative. It cannot add requirements, grant permissions, authorize side effects, change scope, weaken prohibitions, replace operational instructions, success criteria, validation, or stop rules, or require the target chat to debate or emit another synthesis. Continuations summarize only remaining work and current material evidence. Multiple workstreams each receive an independent synthesis. The structural source of truth is `../../orchestrator/registry.json` at `practicalReasoningContract.publicDeliberativeSynthesis`.
+
 ## Conflict precedence
 
 Apply this order:
@@ -395,7 +407,7 @@ The primary skill owns the domain outcome. This skill governs alignment, complex
 
 ## Delegated prompts
 
-For complex delegated work, include enough information for the target chat to recover:
+For complex delegated work, first include the task-specific `Síntesis deliberativa` required by the registry, then include enough operational information for the target chat to recover:
 
 - Eudaimonia: user benefit and protected interests;
 - Telos: concrete end state and why it matters;

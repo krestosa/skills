@@ -9,6 +9,8 @@
 > - `{{branch}}`: explicitly authorized working branch.
 >
 > No repository, owner, branch, framework, product, or organization is a built-in default.
+>
+> Every generated prompt inserts the task-specific section `Síntesis deliberativa` after its objective or primary context and before detailed operational instructions. Derive it from `orchestrator/registry.json`; do not duplicate the full canonical contract in each template.
 
 # SOURCE: authorization.md
 
