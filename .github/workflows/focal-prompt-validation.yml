@@ -43,8 +43,8 @@ jobs:
       - name: Compile Python sources
         run: python -m compileall -q scripts tests
 
-      - name: Run unit tests
-        run: python -m unittest discover -s tests -v
+      - name: Run unit tests under required root runtime
+        run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
 
       - name: Run repository validation
         run: python scripts/tooling.py validate
