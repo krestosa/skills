@@ -543,9 +543,51 @@ def load_repository_model(root: Path | None = None, *, verify_sources: bool = Tr
             "unsafe push option",
             "explicit local publication must remain single-branch and non-forced",
         )
+    workflow_files = tooling.get("workflowFiles", [])
+    if not isinstance(workflow_files, list) or any(not isinstance(value, str) or not value for value in workflow_files):
+        raise issue("INVALID_WORKFLOW_FILES", anchors.tooling, "workflowFiles", workflow_files, "workflowFiles must be a string array")
+    if len(workflow_files) != len(set(workflow_files)):
+        raise issue("DUPLICATE_WORKFLOW_FILE", anchors.tooling, "workflowFiles", workflow_files, "workflow paths must be unique")
+
+    declared_workflows: set[Path] = set()
+    for workflow_rel in workflow_files:
+        workflow_posix = PurePosixPath(workflow_rel.replace("\\", "/"))
+        if workflow_posix.parent != PurePosixPath(".github/workflows") or workflow_posix.suffix not in {".yml", ".yaml"}:
+            raise issue("INVALID_WORKFLOW_PATH", anchors.tooling, "workflowFiles", workflow_rel, "workflow must be a .yml or .yaml file directly under .github/workflows")
+        workflow_path = safe_path(root, workflow_rel, entity="tooling.workflowFiles", must_exist=True)
+        if not workflow_path.is_file():
+            raise issue("INVALID_WORKFLOW_FILE", relative(root, workflow_path), "workflow", workflow_path, "declared workflow must be a regular file")
+        workflow_text = workflow_path.read_text(encoding="utf-8")
+        if not re.search(r"(?m)^on:\s*(?:#.*)?$", workflow_text):
+            raise issue("WORKFLOW_TRIGGER_MISSING", relative(root, workflow_path), "on", "missing", "workflow must declare triggers")
+        if not re.search(r"(?m)^permissions:\s*(?:#.*)?$", workflow_text):
+            raise issue("WORKFLOW_PERMISSIONS_MISSING", relative(root, workflow_path), "permissions", "missing", "workflow must declare explicit top-level permissions")
+        if not re.search(r"(?m)^\s+timeout-minutes:\s*[1-9][0-9]*\s*(?:#.*)?$", workflow_text):
+            raise issue("WORKFLOW_TIMEOUT_MISSING", relative(root, workflow_path), "timeout-minutes", "missing", "every workflow must declare a positive job timeout")
+        if re.search(r"(?m)^\s*pull_request_target\s*:", workflow_text):
+            raise issue("WORKFLOW_TRIGGER_PROHIBITED", relative(root, workflow_path), "trigger", "pull_request_target", "privileged pull_request_target workflows are prohibited")
+        for action_spec in re.findall(r"(?m)^\s*-\s*uses:\s*([^\s#]+)", workflow_text):
+            if action_spec.startswith("./"):
+                continue
+            action, separator, action_ref = action_spec.rpartition("@")
+            if not separator or not action or not re.fullmatch(r"[0-9a-f]{40}", action_ref):
+                raise issue("UNPINNED_WORKFLOW_ACTION", relative(root, workflow_path), "uses", action_spec, "external actions must be pinned to a full lowercase commit SHA")
+        expected.add(workflow_path)
+        declared_workflows.add(workflow_path.resolve())
+
     workflow_root = root / ".github" / "workflows"
+    actual_workflows: set[Path] = set()
     if workflow_root.exists():
-        raise issue("GITHUB_WORKFLOWS_PROHIBITED", relative(root, workflow_root), "workflows", workflow_root, "repository must not contain GitHub workflows")
+        if not workflow_root.is_dir():
+            raise issue("INVALID_WORKFLOW_ROOT", relative(root, workflow_root), "workflows", workflow_root, ".github/workflows must be a directory")
+        actual_workflows = {
+            path.resolve()
+            for path in workflow_root.iterdir()
+            if path.is_file() and path.suffix in {".yml", ".yaml"}
+        }
+    undeclared_workflows = sorted(relative(root, path) for path in actual_workflows - declared_workflows)
+    if undeclared_workflows:
+        raise issue("UNDECLARED_GITHUB_WORKFLOW", relative(root, workflow_root), "workflows", ", ".join(undeclared_workflows), "every GitHub workflow must be declared in tooling.workflowFiles")
 
     model_path_rel = routes_manifest.get("modelProfileFile")
     if isinstance(model_path_rel, str):

@@ -27,13 +27,18 @@
     "flatOutputs": 25
   },
   "inventory": {
-    "count": 93,
-    "sha256": "1f08c01fa3b87d1d39aab7a5c3d20a33912bf46247ceec96a60b4a566cea7b15",
+    "count": 105,
+    "sha256": "7cf016847834716528713e6bb40faf5c2f1b5419f04f5ee990bbfbee4ba5d597",
     "files": [
       {
         "path": ".gitattributes",
         "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
         "bytes": 19
+      },
+      {
+        "path": ".github/workflows/focal-prompt-validation.yml",
+        "sha256": "8f3c5b724203fed8c7ec7d21bc55fe52995b8f3a33ec6386126159ca68bff7d4",
+        "bytes": 2550
       },
       {
         "path": ".gitignore",
@@ -66,6 +71,56 @@
         "bytes": 25220
       },
       {
+        "path": "prompts/focal-autonomous-development.md",
+        "sha256": "474e264c43c3480f7a4280268cc3bf022a3fe5f784206e1aaec4760fcf17e6fa",
+        "bytes": 4461
+      },
+      {
+        "path": "prompts/focal/01-operating-cycle.md",
+        "sha256": "92251fdae056433c2e8f0b7d62a0349c86e13cd20b300fea265d9e2969c28b5f",
+        "bytes": 5231
+      },
+      {
+        "path": "prompts/focal/02-autonomy-and-scope.md",
+        "sha256": "9de5346e00b8cb68f9637a525b0c3054670085290877ac202c325a856dfb6882",
+        "bytes": 3729
+      },
+      {
+        "path": "prompts/focal/03-coordination.md",
+        "sha256": "e89eefd32318458210d1a293d922786d96196dc528d00123033b15c16d56f257",
+        "bytes": 7319
+      },
+      {
+        "path": "prompts/focal/04-roadmap.md",
+        "sha256": "c2320c29f7d75304539bfe1d59eb10ef4d4bdf7ad459eed1e6764fa73bfc190d",
+        "bytes": 6410
+      },
+      {
+        "path": "prompts/focal/05-iris-capability-research.md",
+        "sha256": "43858330a5e7de34c25f3a1ec8a7d781cd0117232a3fb06e260dc3f4b7a392ca",
+        "bytes": 4367
+      },
+      {
+        "path": "prompts/focal/06-technical-requirements.md",
+        "sha256": "ca8f88e4d06717bec21af20e689ff29770a65f7ebe2d44eb81232c0dba31c6e1",
+        "bytes": 4999
+      },
+      {
+        "path": "prompts/focal/07-validation-and-acceptance.md",
+        "sha256": "51345e2bde3db96491a3f815ff57682c3a7bb102aa9961ebb102e969bd58ab80",
+        "bytes": 4230
+      },
+      {
+        "path": "prompts/focal/08-terminal-report.md",
+        "sha256": "71efdd9d5f55298086d8b934ba4e31aee81abc3bb46b78e1111d6782de2c5076",
+        "bytes": 1520
+      },
+      {
+        "path": "prompts/focal/09-skills-maintenance.md",
+        "sha256": "58cdd5d44b6e247adede07a7a373b79856670ac4723d77255f343aa1edabdb58",
+        "bytes": 3206
+      },
+      {
         "path": "scripts/build_chatgpt_flat.py",
         "sha256": "759182fb6567b57b8a01874a97cde2e804ae9af0fb411500372efd9491b8cacb",
         "bytes": 1081
@@ -77,8 +132,8 @@
       },
       {
         "path": "scripts/repository_tooling.py",
-        "sha256": "75defb9693d922cc4cb8c012112fd14d0dfb980b95eecc56bfd89ce38d501a71",
-        "bytes": 81998
+        "sha256": "9e5754a0a14b4792f9bab699f377ff16217ec250186324c69dbb61e7a51f1ef7",
+        "bytes": 85432
       },
       {
         "path": "scripts/tooling.py",
@@ -87,8 +142,13 @@
       },
       {
         "path": "scripts/validate.py",
-        "sha256": "96a4dae37353df898fd6e9c93c9ea8a0759d2983247ec4cc7296dcaf0c5f817c",
-        "bytes": 1121
+        "sha256": "c92a5fd75513e12f6ad07f06aeb239570e878f8f0609b626d6a968341df49558",
+        "bytes": 1137
+      },
+      {
+        "path": "scripts/validate_focal_prompt_stack.py",
+        "sha256": "d374d400b991ca4ec57531cc3858f8fc5f295416bc4d3367b988b40eefac899f",
+        "bytes": 3892
       },
       {
         "path": "scripts/validate_gpt56.py",
@@ -247,8 +307,8 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "7a7c28c55320c6cc831e74e7766fad3bea147192ce89cf290f9edd34d64a70f5",
-        "bytes": 4484
+        "sha256": "6acd18d7a1dcb29c99b4b3c0a535bb82c29e053024778b0b0813106270a7b393",
+        "bytes": 5070
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
@@ -492,8 +552,8 @@
       },
       {
         "path": "tests/test_dynamic_tooling.py",
-        "sha256": "78384446d101cd38db833b090d72357dadba3ab858f58224a5863fd7133bb321",
-        "bytes": 43686
+        "sha256": "bacd69c65243520b6a3356bd3767368748cbaf08959531f35c19edacc13407b7",
+        "bytes": 45313
       }
     ]
   },
