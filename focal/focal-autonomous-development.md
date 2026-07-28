@@ -326,6 +326,246 @@ Solo `RESOURCE_CONFIRMED_ABSENT` permite afirmar que el recurso no existe.
 
 No declares nuevamente `TARGET_REPOSITORY_UNINITIALIZED` salvo que la ausencia de commits haya sido confirmada por múltiples operaciones remotas independientes.
 
+# Corrección 11 — Recuperación prioritaria desde el entorno local de la VM
+
+Esta corrección reemplaza expresamente toda regla del archivo base o de este archivo que afirme que el estado local anterior debe descartarse siempre, que GitHub es la única fuente posible de recuperación o que está prohibido continuar desde trabajo local legítimo encontrado en la VM.
+
+GitHub continúa siendo la autoridad remota para coordinación, locks, ramas compartidas, PRs, CI, merges y persistencia final. Sin embargo, el entorno local de la VM es la primera fuente de recuperación de trabajo no publicado cuando contiene evidencia inequívoca de una ejecución anterior de `krestosa/Focal`.
+
+## Orden obligatorio al comenzar
+
+Después de iniciar el reloj monotónico y el supervisor, cargar íntegramente ambos archivos del prompt y antes de buscar bugs, optimizaciones, tareas nuevas o implementar cambios:
+
+1. Inspeccioná en modo de solo lectura el entorno local de la VM.
+2. Buscá workspaces Git plausibles de `krestosa/Focal` en el directorio de trabajo actual y en las raíces de workspace disponibles y razonables.
+3. No recorras de forma ilimitada todo el sistema de archivos.
+4. Excluí caches, dependencias, directorios temporales irrelevantes, copias de otros repositorios y rutas sin `.git` válido.
+5. Recién después resolvé el estado remoto correspondiente en GitHub.
+6. Antes de modificar, confirmar, publicar o continuar cualquier trabajo local, inspeccioná el lock remoto y adquirilo mediante compare-and-swap.
+7. Si no existe trabajo local recuperable, reconstruí el trabajo desde GitHub conforme al resto del prompt.
+
+La inspección local previa al lock es estrictamente de solo lectura. No permite editar archivos, ejecutar formatters que modifiquen contenido, resolver merges, crear commits, cambiar ramas, eliminar archivos, aplicar stashes ni iniciar procesos funcionales.
+
+## Detección de workspaces candidatos
+
+Para cada candidato local obtené, como mínimo:
+
+- ruta absoluta;
+- validez del repositorio Git;
+- resultado de `git rev-parse --show-toplevel`;
+- URL o URLs de los remotos;
+- rama actual o estado detached;
+- SHA de `HEAD`;
+- estado porcelain completo;
+- archivos modificados;
+- archivos staged;
+- archivos sin seguimiento;
+- archivos eliminados;
+- commits locales visibles;
+- stashes existentes;
+- presencia de merge, rebase, cherry-pick, revert o bisect en curso;
+- worktrees vinculados;
+- fecha de modificación de los archivos relevantes cuando pueda obtenerse sin alterar el workspace.
+
+Normalizá variantes equivalentes de la URL remota, incluidas HTTPS, SSH y URLs con sufijo `.git`. Un workspace solo puede atribuirse a Focal si el remoto normalizado corresponde exactamente a `krestosa/Focal` o si existe evidencia Git inequívoca de que fue materializado desde ese repositorio por la ejecución anterior.
+
+No uses únicamente el nombre de la carpeta `Focal` como prueba de identidad.
+
+## Clasificación local obligatoria
+
+Clasificá cada candidato como uno de estos estados:
+
+```text
+LOCAL_CLEAN_MATCH
+LOCAL_RECOVERABLE_UNCOMMITTED
+LOCAL_RECOVERABLE_COMMITS
+LOCAL_RECOVERABLE_OPERATION
+LOCAL_DIVERGED
+LOCAL_AMBIGUOUS
+LOCAL_UNRELATED
+LOCAL_CORRUPT
+```
+
+### `LOCAL_CLEAN_MATCH`
+
+El workspace pertenece a `krestosa/Focal`, no contiene trabajo no publicado y puede reutilizarse únicamente si su commit y árbol coinciden con el estado remoto que se decida continuar.
+
+### `LOCAL_RECOVERABLE_UNCOMMITTED`
+
+El workspace pertenece a `krestosa/Focal` y contiene cambios staged, unstaged o sin seguimiento que pueden atribuirse razonablemente a una ejecución anterior y no presentan señales de secretos, corrupción o trabajo ajeno.
+
+### `LOCAL_RECOVERABLE_COMMITS`
+
+El workspace pertenece a `krestosa/Focal` y contiene uno o más commits locales que no están representados todavía por una rama remota verificada.
+
+### `LOCAL_RECOVERABLE_OPERATION`
+
+Existe una operación Git incompleta con metadata suficiente para identificar su intención y continuarla o preservarla de forma segura.
+
+### `LOCAL_DIVERGED`
+
+El historial local y el remoto contienen cambios distintos que requieren reconciliación explícita.
+
+### `LOCAL_AMBIGUOUS`
+
+Existe contenido potencialmente útil, pero no puede atribuirse con seguridad a Focal o a la ejecución anterior.
+
+### `LOCAL_UNRELATED`
+
+El repositorio o los cambios pertenecen a otro proyecto.
+
+### `LOCAL_CORRUPT`
+
+El repositorio Git, su índice, sus objetos o su metadata son ilegibles o inconsistentes.
+
+## Selección entre varios candidatos
+
+Si existen varios workspaces locales de Focal:
+
+1. No combines sus cambios automáticamente.
+2. Compará remoto, rama, HEAD, timestamps, operación en curso y relación con ramas o PRs existentes.
+3. Preferí el candidato que tenga evidencia más fuerte de ser la continuación directa del último trabajo no publicado.
+4. Priorizá trabajo recuperable sobre una copia limpia.
+5. No elijas por fecha únicamente.
+6. Si dos candidatos contienen cambios incompatibles y ninguno puede descartarse con evidencia, no continúes implementación nueva.
+7. Preservá ambos de forma separada después de adquirir el lock, mediante ramas de recuperación distintas, o finalizá como `BLOCKED — MULTIPLE_LOCAL_WORKSPACES_AMBIGUOUS` si no pueden preservarse con seguridad dentro del tiempo disponible.
+
+## Reconciliación con GitHub
+
+Aunque exista trabajo local, siempre resolvé también:
+
+- head remoto actual de `main`;
+- rama remota equivalente, si existe;
+- PR relacionada, si existe;
+- último checkpoint registrado;
+- lock y lease actuales;
+- commits remotos;
+- checks conocidos;
+- cualquier cambio remoto posterior al `HEAD` local.
+
+No asumas que el trabajo local es más nuevo ni que el remoto no cambió.
+
+Después de adquirir y verificar el lock:
+
+### Para cambios locales sin commit
+
+1. Conservá el workspace original sin limpiar ni resetear.
+2. Revisá cada path y su diff.
+3. Detectá secretos, binarios inesperados y archivos ajenos.
+4. Determiná el commit base local.
+5. Comparalo con la rama remota relacionada.
+6. Si la base es compatible, continuá desde el workspace local.
+7. Creá commits separados por archivo conforme a la política general.
+8. Publicá el primer checkpoint remoto antes de realizar trabajo adicional.
+9. Solo después continuá la implementación pendiente.
+
+### Para commits locales no publicados
+
+1. Verificá cada commit y los paths que modifica.
+2. Verificá autoría, mensaje, padres y relación con el remoto.
+3. No reescribas ni descartes los commits antes de preservarlos.
+4. Publicalos en la rama remota correspondiente cuando sea seguro.
+5. Si la rama remota no existe, creá una rama `recovery/local-<runId>` desde una base remota compatible y reconstruí o publicá allí los commits preservando su contenido y trazabilidad.
+6. Registrá el SHA remoto resultante como checkpoint.
+7. Continuá desde esa rama.
+
+### Para una operación Git incompleta
+
+1. Inspeccioná su metadata antes de ejecutar comandos de continuación o aborto.
+2. Continuá la operación únicamente si la intención, las ramas y los conflictos son inequívocos.
+3. Si no es inequívoca, no ejecutes `--abort`, `reset --hard`, `clean`, checkout destructivo ni eliminación de metadata.
+4. Preservá los archivos y commits recuperables en una rama remota de recuperación.
+5. Documentá la operación pendiente.
+
+### Para historial divergente
+
+1. No fuerces push.
+2. No resetees el trabajo local.
+3. No sobrescribas la rama remota.
+4. Creá una rama de recuperación desde un punto remoto verificable.
+5. Aplicá o reconstruí los cambios locales de manera explícita, manteniendo un archivo por commit.
+6. Abrí o actualizá una PR draft para reconciliación.
+7. No fusiones hasta que la divergencia esté resuelta y validada.
+
+## Stashes locales
+
+Los stashes deben inspeccionarse como posible evidencia de trabajo anterior, pero no deben aplicarse automáticamente.
+
+Solo aplicá un stash cuando:
+
+- pertenece inequívocamente al workspace de Focal;
+- su base puede determinarse;
+- no duplica cambios ya presentes;
+- no sobrescribe cambios actuales;
+- el lock fue adquirido;
+- existe tiempo suficiente para preservar inmediatamente el resultado en GitHub.
+
+Si no se cumplen estas condiciones, conservá el stash intacto e informalo.
+
+## Trabajo local ambiguo, corrupto o ajeno
+
+- No descartes contenido ambiguo.
+- No lo mezcles con Focal.
+- No lo publiques en ramas funcionales.
+- No abras sus archivos sensibles innecesariamente.
+- No continúes desde un repositorio ajeno.
+- Si el candidato es corrupto, intentá únicamente diagnóstico no destructivo.
+- Si no existe trabajo local válido, continuá desde GitHub.
+- Si existe trabajo potencialmente valioso pero no puede preservarse o atribuirse con seguridad, finalizá como `BLOCKED — LOCAL_RECOVERY_UNSAFE`.
+
+## Prioridad de continuación
+
+Cuando exista trabajo local recuperable y el lock pueda adquirirse:
+
+1. Recuperar y publicar el trabajo local es la prioridad anterior a buscar bugs nuevos, optimizaciones o features.
+2. No reconstruyas desde GitHub ignorando ese trabajo.
+3. No reemplaces el workspace local por un checkout limpio antes de preservarlo.
+4. No declares el workspace local descartable hasta que su contenido recuperable esté publicado o descartado con evidencia.
+5. Después del primer checkpoint remoto verificado, GitHub vuelve a ser la fuente persistente compartida para el resto del ciclo.
+
+Cuando no exista trabajo local recuperable:
+
+1. Registrá que la inspección local fue realizada.
+2. Indicá las rutas examinadas de forma resumida.
+3. Continuá desde la rama o PR remota correspondiente.
+4. No bloquees por ausencia de un workspace local.
+
+## Límites de seguridad y tiempo
+
+La recuperación local forma parte del presupuesto total de 59 minutos.
+
+- No prolongues indefinidamente la búsqueda local.
+- Utilizá una búsqueda acotada y determinista.
+- Si la recuperación no puede completarse antes del soft stop, preservá el máximo estado seguro en GitHub y finalizá `INCOMPLETE — LOCAL_RECOVERY_CHECKPOINTED`.
+- Si no puede preservarse antes del hard stop, no inicies operaciones destructivas.
+- El hard killswitch continúa teniendo precedencia.
+- La recuperación local nunca autoriza saltarse el lock, los gates de CI, la política de commits ni las reglas de procedencia.
+
+## Informe terminal de recuperación local
+
+Añadí al informe terminal:
+
+```text
+Entorno local inspeccionado: sí | no
+Raíces locales examinadas:
+Workspaces candidatos encontrados:
+Workspace local seleccionado:
+Clasificación local:
+Remote local normalizado:
+Rama local:
+HEAD local:
+Operación Git en curso:
+Paths locales modificados:
+Commits locales no publicados:
+Stashes detectados:
+Trabajo local retomado: sí | no
+Primer checkpoint remoto de recuperación:
+Fallback a GitHub utilizado: sí | no
+Motivo del fallback a GitHub:
+```
+
+Un PASS posterior a recuperación local exige que todo trabajo recuperado que forme parte del resultado esté representado en GitHub y validado conforme al resto del prompt.
+
 # Ejecución final
 
 Después de cargar íntegramente el archivo base y aplicar estas correcciones:
@@ -335,10 +575,11 @@ Después de cargar íntegramente el archivo base y aplicar estas correcciones:
 3. No reduzcas la cobertura técnica.
 4. No omitas pruebas por el hecho de que este archivo sea más corto.
 5. Aplicá el límite temporal completo.
-6. Utilizá GitHub como fuente canónica.
-7. Utilizá el lock compartido como exclusión primaria.
-8. Utilizá detección de Actions cuando esté disponible.
-9. Aplicá el fallback `COORDINATED_BY_SHARED_LOCK` cuando corresponda.
-10. Finalizá con evidencia exacta y sin afirmaciones aproximadas evitables.
+6. Inspeccioná primero el entorno local de la VM y recuperá trabajo válido; cuando no exista trabajo local recuperable, continuá desde GitHub.
+7. Utilizá GitHub como autoridad remota de coordinación y destino persistente de los checkpoints recuperados.
+8. Utilizá el lock compartido como exclusión primaria.
+9. Utilizá detección de Actions cuando esté disponible.
+10. Aplicá el fallback `COORDINATED_BY_SHARED_LOCK` cuando corresponda.
+11. Finalizá con evidencia exacta y sin afirmaciones aproximadas evitables.
 
 Razonamiento: High
