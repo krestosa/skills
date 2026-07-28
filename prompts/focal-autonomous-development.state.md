@@ -1,54 +1,84 @@
 # Focal — Política vinculante de estado operativo fuera del historial Git
 
-Esta política reemplaza el mecanismo anterior basado en la rama `automation/runtime-state` y el archivo `automation/run-state.json`.
+Esta política reemplaza completamente los mecanismos anteriores basados en:
 
-Su objetivo es coordinar chats programados, chats manuales y GitHub Actions sin crear commits de adquisición, heartbeat, cambio de fase o liberación.
+- la rama `automation/runtime-state`;
+- el archivo `automation/run-state.json`;
+- commits operativos;
+- comentarios acumulativos en issues;
+- resultados publicados como comentarios.
 
-# Corrección 13 — Coordinador de lease basado en GitHub Issue y GitHub Actions
+Su objetivo es coordinar ejecuciones programadas, ejecuciones manuales y GitHub Actions sin contaminar el historial Git ni acumular elementos visibles en el issue de estado.
 
-## Principio rector
+# Corrección 13 — Coordinador body-only mediante GitHub Issue y GitHub Actions
 
-El estado operativo no debe almacenarse mediante commits Git.
+## Fuente canónica
 
-La fuente canónica de coordinación es:
+La única fuente actual de coordinación es:
 
 ```text
 Repositorio: krestosa/Focal
-Issue: #2
-Título esperado: [automation-state] Focal autonomous execution coordinator
+Issue: #7
+Título esperado: [automation-state] Focal execution state
 Workflow: .github/workflows/automation-state.yml
 ```
 
-El issue contiene un bloque JSON delimitado por:
+Los issues #2 y #5 son prototipos cerrados y obsoletos. No deben leerse, reabrirse ni utilizarse para coordinación.
+
+La rama `automation/runtime-state` y `automation/run-state.json` son legado congelado. No representan el estado actual.
+
+## Principio rector
+
+El issue #7 mantiene en su cuerpo dos bloques JSON:
 
 ```text
-<!-- focal-state:v1 -->
+<!-- focal-command:v3 -->
+...
+<!-- /focal-command -->
+```
+
+```text
+<!-- focal-state:v3 -->
 ...
 <!-- /focal-state -->
 ```
 
-El workflow `Automation State Coordinator` procesa comandos enviados como comentarios y actualiza el bloque JSON del issue.
+El bloque de comando contiene la solicitud más reciente.
 
-Las adquisiciones, heartbeats, cambios de fase, checkpoints y liberaciones no deben crear commits.
+El bloque de estado contiene:
 
-## Compatibilidad obligatoria con el conector de GitHub para ChatGPT
+- la lease actual;
+- el propietario;
+- la fase;
+- los timestamps;
+- la rama, PR y checkpoint;
+- el resultado del último comando procesado;
+- el resultado del último ciclo finalizado.
 
-La ejecución debe utilizar únicamente operaciones disponibles mediante el conector:
+No se crean comentarios para adquirir, inspeccionar, renovar, cambiar de fase o liberar.
 
-- leer el issue #2;
-- leer sus comentarios;
-- publicar un comentario en el issue #2;
-- leer ramas, PRs, commits y checks cuando corresponda.
+No se crean commits para ninguna transición operativa.
 
-No depende de acceso directo a `gh`, `curl`, GitHub CLI, REST desde la VM, secretos locales ni acceso de red directo.
+## Compatibilidad obligatoria con el conector de GitHub
 
-El workflow utiliza `GITHUB_TOKEN` dentro de GitHub Actions para aplicar el comando de forma serializada.
+La ejecución debe operar únicamente mediante acciones disponibles en el conector:
+
+1. leer el issue #7;
+2. conservar íntegramente su cuerpo actual;
+3. reemplazar únicamente el objeto JSON del bloque `focal-command:v3`;
+4. actualizar el cuerpo del mismo issue;
+5. releer el issue hasta observar el resultado correlacionado en `focal-state:v3`;
+6. leer ramas, PRs, commits, checks y workflows cuando corresponda.
+
+No depende de GitHub CLI, `gh`, `curl`, secretos locales ni acceso de red directo desde la VM.
+
+No publiques comentarios operativos en el issue.
+
+No utilices `add_comment_to_issue` para este protocolo.
 
 ## Atomicidad y exclusión mutua
 
-La atomicidad ya no depende de compare-and-swap sobre un blob Git.
-
-Depende de:
+El workflow declara:
 
 ```yaml
 concurrency:
@@ -56,63 +86,85 @@ concurrency:
   cancel-in-progress: false
 ```
 
-y de que el workflow:
+El workflow procesa las ediciones del issue #7 en forma serializada.
 
-1. procese un único comando por vez;
-2. relea el estado actual del issue;
-3. valide la lease y el propietario;
-4. aplique o rechace el comando;
-5. actualice el issue;
-6. publique un resultado correlacionado.
+Para cada comando:
 
-Solo una adquisición puede ser aceptada cuando el estado es `idle` o la lease está vencida.
+1. relee el cuerpo actual;
+2. extrae el comando y el estado;
+3. verifica `schemaVersion: 3`;
+4. rechaza un `commandId` ya procesado;
+5. valida lease, propietario y timestamps;
+6. aplica o rechaza la operación;
+7. actualiza el bloque de estado en el mismo cuerpo;
+8. registra `lastCommandId`, `lastCommandAccepted`, `lastCommandReason` y `lastCommandProcessedAt`;
+9. incrementa `version`.
 
-Una ejecución no posee el lock hasta recibir un resultado explícito con:
+La edición posterior realizada por el workflow puede disparar otro evento, pero el mismo `commandId` debe detectarse como ya procesado y no generar una nueva mutación.
+
+## Regla de preservación del cuerpo
+
+Antes de enviar un comando:
+
+1. leé nuevamente el issue #7;
+2. verificá que ambos bloques existan y sean JSON válidos;
+3. conservá exactamente el texto fuera del bloque de comando;
+4. conservá intacto el bloque de estado observado;
+5. reemplazá únicamente el JSON entre los delimitadores del comando;
+6. actualizá el cuerpo completo del issue con esa modificación puntual.
+
+No reconstruyas el issue desde memoria.
+
+No sobrescribas el estado con una versión vieja.
+
+No elimines los delimitadores, el texto descriptivo ni campos desconocidos.
+
+## Identidad de comandos
+
+Cada operación usa un `commandId` único e irrepetible.
+
+Debe ser suficientemente aleatorio o incluir UUID para impedir colisiones entre ejecuciones.
+
+El comando usa:
 
 ```json
 {
-  "accepted": true,
-  "commandId": "<mismo commandId>",
-  "reason": "LEASE_ACQUIRED",
-  "runId": "<runId propio>",
-  "status": "working"
+  "schemaVersion": 3,
+  "commandId": "<identificador único>",
+  "operation": "inspect | acquire | recover | heartbeat | release"
 }
 ```
 
-Publicar el comentario no equivale a adquirir el lock.
+Toda operación excepto `inspect` requiere `runId`.
 
-## Formato de comandos
-
-Todo comando debe comenzar exactamente con:
-
-```text
-<!-- focal-state-command:v1 -->
-```
-
-seguido por un objeto JSON, preferentemente dentro de un bloque `json`.
-
-Cada comando debe incluir un `commandId` único e irrepetible.
-
-### Inspección
+## Inspección
 
 ```json
 {
-  "schemaVersion": 1,
-  "commandId": "<uuid o identificador único>",
+  "schemaVersion": 3,
+  "commandId": "<identificador único>",
   "operation": "inspect"
 }
 ```
 
-### Adquisición normal
+La inspección es exitosa cuando el estado observado contiene:
+
+```text
+lastCommandId == commandId enviado
+lastCommandAccepted == true
+lastCommandReason == STATE_OBSERVED
+```
+
+## Adquisición normal
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "commandId": "<identificador único>",
   "operation": "acquire",
   "runId": "<UUID v4>",
-  "owner": "scheduled-chat",
-  "executionSource": "scheduled-chat",
+  "owner": "scheduled-run",
+  "executionSource": "scheduled-run",
   "mode": "normal",
   "phase": "LOCK_ACQUISITION",
   "startedAt": "<UTC ISO-8601>",
@@ -127,13 +179,26 @@ Cada comando debe incluir un `commandId` único e irrepetible.
   "workBranchHeadSha": null,
   "pullRequest": null,
   "checkpointSha": null,
-  "note": "<nota opcional>"
+  "note": null
 }
 ```
 
-### Recuperación
+La ejecución posee la lease únicamente cuando el estado contiene simultáneamente:
 
-Utilizá el mismo formato que adquisición, con:
+```text
+lastCommandId == commandId enviado
+lastCommandAccepted == true
+lastCommandReason == LEASE_ACQUIRED
+status == working
+runId == runId propio
+leaseExpiresAt es futuro
+```
+
+Editar el issue no equivale a adquirir la lease.
+
+## Recuperación
+
+Usá el formato de adquisición con:
 
 ```json
 {
@@ -142,11 +207,13 @@ Utilizá el mismo formato que adquisición, con:
 }
 ```
 
-### Heartbeat o cambio de fase
+La confirmación exige `lastCommandReason == LEASE_RECOVERED`.
+
+## Heartbeat y cambio de fase
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "commandId": "<identificador único>",
   "operation": "heartbeat",
   "runId": "<runId propietario>",
@@ -157,15 +224,27 @@ Utilizá el mismo formato que adquisición, con:
   "workBranchHeadSha": "<SHA o null>",
   "pullRequest": "<número o null>",
   "checkpointSha": "<SHA o null>",
-  "note": "<nota opcional>"
+  "note": null
 }
 ```
 
-### Liberación
+La renovación es válida únicamente cuando:
+
+```text
+lastCommandId == commandId enviado
+lastCommandAccepted == true
+lastCommandReason == HEARTBEAT_ACCEPTED
+runId == runId propio
+leaseExpiresAt es futuro
+```
+
+Si aparece `NOT_LEASE_OWNER`, detené inmediatamente nuevas mutaciones funcionales.
+
+## Liberación
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "commandId": "<identificador único>",
   "operation": "release",
   "runId": "<runId propietario>",
@@ -176,175 +255,132 @@ Utilizá el mismo formato que adquisición, con:
 }
 ```
 
-## Formato de resultados
-
-El workflow responde mediante un comentario que comienza con:
+La liberación es válida cuando:
 
 ```text
-<!-- focal-state-result:v1 -->
+lastCommandId == commandId enviado
+lastCommandAccepted == true
+lastCommandReason == LEASE_RELEASED
+status == idle
+runId == null
+lastRunId == runId propio
 ```
 
-El resultado contiene, como mínimo:
+## Protocolo de espera
 
-```json
-{
-  "schemaVersion": 1,
-  "commandId": "<commandId recibido>",
-  "accepted": true,
-  "reason": "<resultado>",
-  "stateVersion": 1,
-  "status": "idle | working",
-  "runId": "<runId o null>",
-  "leaseExpiresAt": "<timestamp o null>"
-}
-```
+Después de editar el issue:
 
-La ejecución debe buscar el resultado cuyo `commandId` coincida exactamente con el comando enviado.
+1. conservá el `commandId` enviado;
+2. dormí entre 3 y 10 segundos;
+3. releé el issue #7;
+4. extraé el bloque de estado actual;
+5. verificá si `lastCommandId` coincide;
+6. si no coincide, repetí con sleep acotado;
+7. no hagas busy-wait;
+8. no publiques otro comando mientras el anterior siga sin resultado, salvo recuperación explícita de un timeout comprobado;
+9. aplicá un límite conservador de intentos.
 
-No puede aceptar la respuesta de otro comando ni inferir aceptación por el paso del tiempo.
+Una coincidencia de `lastCommandId` sin `lastCommandAccepted: true` es un rechazo, no una adquisición parcial.
 
-## Protocolo de espera compatible con ChatGPT
+`ACTIVE_LEASE` obliga a sleep mode o finalización conforme a la política de ejecución concurrente.
 
-Después de publicar un comando:
-
-1. conservá el ID del comentario cuando el conector lo devuelva;
-2. dormí de 3 a 10 segundos;
-3. releé los comentarios del issue #2;
-4. buscá el resultado con el mismo `commandId`;
-5. si no aparece, repetí con sleep acotado;
-6. aplicá un máximo conservador de intentos y tiempo;
-7. releé además el cuerpo del issue para distinguir retraso de respuesta y fallo real;
-8. no hagas busy-wait.
-
-Para adquisición, no realices mutaciones funcionales hasta obtener `accepted: true`.
-
-Si recibe:
-
-```text
-ACTIVE_LEASE
-```
-
-entrá en sleep mode o finalizá conforme al protocolo de ejecución activa.
-
-Si recibe:
-
-```text
-NOT_LEASE_OWNER
-```
-
-considerá perdida o inexistente la propiedad y detené nuevas mutaciones.
-
-Si recibe:
-
-```text
-COMMAND_ERROR
-```
-
-inspeccioná y corregí el formato del comando o el workflow como infraestructura interna.
+`COMMAND_ERROR` obliga a diagnosticar y reparar el comando o workflow como infraestructura interna.
 
 ## Heartbeats
 
-Los heartbeats se registran en el issue y sus comentarios, no en commits.
+Los heartbeats modifican únicamente el cuerpo del issue #7.
 
-Mantené la frecuencia definida por el prompt general, pero evitá heartbeats redundantes cuando una operación breve termine antes del siguiente intervalo.
+Mantené la frecuencia definida por el prompt general, evitando renovaciones redundantes en ciclos muy breves.
 
-Cada heartbeat debe recibir confirmación explícita.
+Cada heartbeat requiere confirmación correlacionada.
 
-Si no puede confirmarse:
+Si no puede confirmarse antes de que la lease sea insegura:
 
-- releé el estado del issue;
 - no asumas renovación;
-- detené nuevas mutaciones si la lease puede expirar;
+- detené nuevas mutaciones;
 - preservá el trabajo remoto;
-- liberá solo cuando siga siendo propietario.
+- liberá únicamente si el estado todavía reconoce la propiedad.
 
-## Issue y workflow faltantes
+## Issue o workflow faltante
 
-La ausencia del issue #2 o del workflow no es un motivo ordinario de intervención.
+La ausencia o corrupción del issue #7 o del workflow no es un bloqueo ordinario.
 
 Clasificala como infraestructura interna y:
 
-1. verificá que no exista un coordinador equivalente;
-2. creá o repará el issue;
+1. verificá que no exista un coordinador equivalente vigente;
+2. creá o repará el issue body-only;
 3. creá o repará `.github/workflows/automation-state.yml` mediante rama y PR;
 4. validá el workflow;
 5. fusioná sin squash cuando los gates correspondan;
 6. ejecutá un comando `inspect` de smoke test;
-7. continuá únicamente cuando el workflow responda correctamente.
+7. verificá que el issue siga con cero comentarios operativos;
+8. continuá únicamente cuando el estado registre `STATE_OBSERVED`.
 
-Si el issue fue reemplazado deliberadamente, actualizá esta política en `krestosa/skills` únicamente mediante una tarea autorizada específica; las ejecuciones ordinarias de Focal no modifican `krestosa/skills`.
+Las ejecuciones ordinarias no modifican `krestosa/skills`. Una migración deliberada del protocolo requiere una tarea específica autorizada.
 
-## Rama operativa anterior
+## Legado congelado
 
-La rama:
+No utilices:
 
 ```text
 automation/runtime-state
-```
-
-y el archivo:
-
-```text
 automation/run-state.json
+issue #2
+issue #5
 ```
 
-quedan declarados como legado congelado.
+Reglas:
 
-Reglas obligatorias:
-
-- no utilizarlos para adquirir o liberar el lock;
-- no escribir nuevos heartbeats allí;
-- no crear commits operativos allí;
-- no interpretarlos como estado actual;
-- no fusionar esa rama con `main`;
-- conservarlos únicamente como evidencia histórica hasta que puedan eliminarse mediante una operación autorizada y segura;
-- el issue #2 y su workflow tienen precedencia completa.
+- no escribir heartbeats en la rama antigua;
+- no crear commits operativos;
+- no interpretar sus datos como actuales;
+- no reabrir los issues obsoletos;
+- no publicar nuevos comentarios allí;
+- no fusionar la rama operativa con `main`.
 
 ## Historial y trazabilidad
 
-Este mecanismo no crea commits de estado.
+El mecanismo actual conserva únicamente:
 
-Sí conserva una auditoría operativa fuera de Git mediante:
+- el estado más reciente en el cuerpo del issue #7;
+- el historial interno de ediciones del issue provisto por GitHub;
+- los runs del workflow coordinador.
 
-- historial de edición del issue;
-- comentarios de comandos;
-- comentarios de resultados;
-- runs del workflow coordinador.
+No conserva una secuencia visible de comentarios operativos.
 
-Esta auditoría no forma parte del historial de código, no altera `main`, no ensucia ramas funcionales y no viola la política de un archivo por commit.
+No altera `main`, no ensucia ramas funcionales y no viola la política de un archivo por commit.
 
 ## GitHub Actions mutadoras
 
 Todo workflow capaz de modificar código o estado funcional debe:
 
 - respetar su grupo de concurrencia funcional;
-- adquirir la misma lease del issue #2 antes de mutar;
-- utilizar `executionSource: github-actions`;
+- adquirir la misma lease del issue #7 antes de mutar;
+- registrar una fuente de ejecución inequívoca;
 - liberar mediante un finalizador cuando siga siendo propietario.
 
-El workflow coordinador de estado es la única excepción: administra la lease y por definición no debe intentar adquirirla para procesar comandos.
+El workflow coordinador es la única excepción: administra la lease y no intenta adquirirla para procesar comandos.
 
 ## PASS y evidencia
 
-Una ejecución puede considerar verificada la coordinación cuando:
+La coordinación puede considerarse verificada cuando:
 
-- el issue fue leído;
-- el comando de adquisición recibió resultado correlacionado;
-- `accepted` fue `true`;
-- el `runId` coincide;
-- el estado quedó `working`;
-- la lease es futura;
-- la liberación posterior recibió `LEASE_RELEASED` o el cuerpo del issue confirma el estado final esperado.
-
-No es necesario crear ni inspeccionar commits operativos.
+- el issue #7 fue leído;
+- el comando fue escrito en el cuerpo preservando el estado observado;
+- el estado registró el mismo `commandId`;
+- `lastCommandAccepted` fue `true`;
+- el `runId` coincide cuando corresponde;
+- la lease es futura durante el trabajo;
+- la liberación termina en `idle`;
+- no se crearon commits ni comentarios operativos.
 
 ## Informe terminal ampliado
 
 Añadí:
 
 ```text
-Coordinador de estado: issue-backed
-Issue de estado: #2
+Coordinador de estado: issue-body-backed
+Issue de estado: #7
 Workflow coordinador: Automation State Coordinator
 Command ID de adquisición:
 Resultado de adquisición:
@@ -354,6 +390,7 @@ Resultado del último heartbeat:
 Command ID de liberación:
 Resultado de liberación:
 Estado final observado en el issue:
+Comentarios operativos creados: 0
 Commits operativos creados: 0
 Rama automation/runtime-state utilizada: no
 ```
@@ -364,9 +401,10 @@ Esta política reemplaza toda instrucción anterior que exija:
 
 - modificar `automation/run-state.json`;
 - crear commits para adquirir, renovar o liberar;
-- usar el SHA de un blob operativo como compare-and-swap;
-- considerar la rama `automation/runtime-state` como fuente actual;
-- ensuciar el historial Git con estado efímero.
+- usar compare-and-swap sobre un blob Git;
+- usar comentarios para enviar comandos o resultados;
+- leer el issue #2 o #5 como estado vigente;
+- considerar la rama `automation/runtime-state` como fuente actual.
 
 No reemplaza:
 
