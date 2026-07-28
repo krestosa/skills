@@ -190,6 +190,7 @@ class Fixture:
             "integritySchemaVersion": 1,
             "ignoredDirectories": ["dist"],
             "declaredFiles": ["orchestrator/delegation-envelope.schema.json"],
+            "workflowFiles": [],
             "flatBuild": {
                 "maxFiles": max_files,
                 "groups": [
@@ -246,6 +247,41 @@ class DynamicToolingTests(unittest.TestCase):
         self.fixture._skill("orphan")
         with self.assertRaisesRegex(ToolingError, "INVENTORY_EXTRA"):
             validate_inventory(self.fixture.model())
+
+    def _write_fixture_workflow(self, action_ref: str, *, declare: bool) -> Path:
+        workflow = self.fixture.root / ".github/workflows/fixture.yml"
+        workflow.parent.mkdir(parents=True, exist_ok=True)
+        workflow.write_text(
+            "name: Fixture\n\n"
+            "on:\n  pull_request:\n\n"
+            "permissions:\n  contents: read\n\n"
+            "jobs:\n  validate:\n    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    steps:\n"
+            "      - name: Checkout\n"
+            f"        uses: actions/checkout@{action_ref}\n",
+            encoding="utf-8",
+        )
+        if declare:
+            config_path = self.fixture.root / "shared/manifests/tooling.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config.setdefault("workflowFiles", []).append(".github/workflows/fixture.yml")
+            config.setdefault("declaredFiles", []).append(".github/workflows/fixture.yml")
+            write_json(config_path, config)
+        return workflow
+
+    def test_declared_pinned_workflow_is_allowed(self) -> None:
+        self._write_fixture_workflow("a" * 40, declare=True)
+        self.fixture.refresh()
+        validate_inventory(self.fixture.model())
+
+    def test_undeclared_workflow_is_rejected(self) -> None:
+        self._write_fixture_workflow("a" * 40, declare=False)
+        with self.assertRaisesRegex(ToolingError, "UNDECLARED_GITHUB_WORKFLOW"):
+            self.fixture.model()
+
+    def test_unpinned_workflow_action_is_rejected(self) -> None:
+        self._write_fixture_workflow("v7", declare=True)
+        with self.assertRaisesRegex(ToolingError, "UNPINNED_WORKFLOW_ACTION"):
+            self.fixture.model()
 
     def test_registered_missing_skill_is_rejected(self) -> None:
         shutil.rmtree(self.fixture.root / "skills/alpha")

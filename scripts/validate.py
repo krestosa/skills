@@ -27,7 +27,7 @@ def main() -> int:
     print("cross_cutting_skills:", len(model.cross_cutting_ids))
     print("canonical_sources:", len(model.canonical_sources), "lossless")
     print("github_remote: connector-for-agents; explicit-local-publish-native-git")
-    print("github_workflows: absent")
+    print("github_workflows: declared-and-validated")
     return 0
 
 

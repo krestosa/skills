@@ -10,7 +10,18 @@
   "declaredFiles": [
     ".gitattributes",
     ".gitignore",
-    "orchestrator/delegation-envelope.schema.json"
+    "orchestrator/delegation-envelope.schema.json",
+    ".github/workflows/focal-prompt-validation.yml",
+    "prompts/focal-autonomous-development.md",
+    "prompts/focal/01-operating-cycle.md",
+    "prompts/focal/02-autonomy-and-scope.md",
+    "prompts/focal/03-coordination.md",
+    "prompts/focal/04-roadmap.md",
+    "prompts/focal/05-iris-capability-research.md",
+    "prompts/focal/06-technical-requirements.md",
+    "prompts/focal/07-validation-and-acceptance.md",
+    "prompts/focal/08-terminal-report.md",
+    "prompts/focal/09-skills-maintenance.md"
   ],
   "inventoryCollections": [
     "catalogs",
@@ -130,5 +141,8 @@
       "Synthesis:",
       "contains no chain-of-thought"
     ]
-  }
+  },
+  "workflowFiles": [
+    ".github/workflows/focal-prompt-validation.yml"
+  ]
 }
