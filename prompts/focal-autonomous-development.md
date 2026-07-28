@@ -58,9 +58,9 @@ Leé íntegramente desde la rama predeterminada actual de `krestosa/skills`:
 prompts/focal-autonomous-development.state.md
 ```
 
-Esta política define el coordinador basado en el issue #2 de `krestosa/Focal` y el workflow `Automation State Coordinator`.
+Esta política define el coordinador body-only basado en el issue #7 de `krestosa/Focal` y el workflow `Automation State Coordinator`.
 
-La Capa 4 reemplaza completamente el almacenamiento del lock mediante commits. La adquisición, heartbeat, cambio de fase y liberación se realizan mediante comandos en comentarios del issue y resultados correlacionados del workflow.
+La Capa 4 reemplaza completamente el almacenamiento del lock mediante commits o comentarios. La adquisición, heartbeat, cambio de fase y liberación se realizan reemplazando únicamente el bloque de comando dentro del cuerpo del issue y observando el resultado correlacionado dentro del bloque de estado del mismo cuerpo.
 
 ## Protocolo obligatorio de carga
 
@@ -86,13 +86,13 @@ Cuando exista una diferencia entre las capas, aplicá este orden:
 
 1. Seguridad, límites de autorización y restricciones legales.
 2. Hard killswitch y límite temporal absoluto.
-3. Coordinación, propiedad de lease y protocolo issue-backed de la Capa 4.
+3. Coordinación, propiedad de lease y protocolo body-only de la Capa 4.
 4. Política de autonomía y bootstrap de la Capa 3.
 5. Correcciones operativas consolidadas de la Capa 2 que no hayan sido reemplazadas.
 6. Especificación técnica completa de la Capa 1.
 7. Decisiones tácticas de la ejecución.
 
-La Capa 4 reemplaza expresamente cualquier regla anterior que exija modificar `automation/run-state.json`, crear commits operativos, actualizar una rama de estado o usar compare-and-swap sobre un blob Git.
+La Capa 4 reemplaza expresamente cualquier regla anterior que exija modificar `automation/run-state.json`, crear commits operativos, actualizar una rama de estado, usar compare-and-swap sobre un blob Git o publicar comentarios operativos.
 
 La Capa 3 reemplaza expresamente cualquier regla anterior que convierta una carencia interna implementable en un bloqueo o que permita terminar el ciclo limitándose a informar que falta CI, checks, runtime guard, workflows, herramientas, validadores, tests, schemas, fixtures, configuración o infraestructura propia del repositorio.
 
@@ -106,9 +106,9 @@ Solo puede requerirse intervención cuando exista un bloqueo externo real que no
 
 Una ausencia interna debe producir trabajo. No debe producir parálisis.
 
-## Mandato de limpieza del historial
+## Mandato de limpieza del historial y del issue
 
-No crees commits para:
+No crees commits ni comentarios para:
 
 - adquirir el lock;
 - renovar la lease;
@@ -118,6 +118,6 @@ No crees commits para:
 - liberar el lock;
 - actualizar el resultado terminal.
 
-El estado efímero pertenece al issue #2 y a su workflow. Los commits quedan reservados para código, configuración, documentación, tests, workflows y otros cambios reales del proyecto.
+El estado efímero pertenece exclusivamente al cuerpo del issue #7 y a su workflow. Los commits quedan reservados para código, configuración, documentación, tests, workflows y otros cambios reales del proyecto.
 
 Razonamiento: High
