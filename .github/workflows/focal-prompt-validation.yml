@@ -1,0 +1,53 @@
+name: Focal Prompt Validation
+
+on:
+  pull_request:
+    paths:
+      - "prompts/focal-autonomous-development.md"
+      - "prompts/focal/**"
+      - "scripts/validate_focal_prompt_stack.py"
+      - ".github/workflows/focal-prompt-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "prompts/focal-autonomous-development.md"
+      - "prompts/focal/**"
+      - "scripts/validate_focal_prompt_stack.py"
+      - ".github/workflows/focal-prompt-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: focal-prompt-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Focal prompt stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate Focal prompt contracts
+        run: |
+          python -m py_compile scripts/validate_focal_prompt_stack.py
+          python scripts/validate_focal_prompt_stack.py
+
+      - name: Compile Python sources
+        run: python -m compileall -q scripts tests
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Run repository validation
+        run: python scripts/tooling.py validate
+
+      - name: Run repository checks
+        run: python scripts/tooling.py check
