@@ -14,7 +14,7 @@ Command block: <!-- focal-command:v3 -->
 State block: <!-- focal-state:v3 -->
 ```
 
-El cuerpo del issue es la única fuente de lease. El historial Git, ramas operativas, archivos JSON y comentarios no son estado activo.
+El cuerpo del issue es la única fuente de lease. El historial Git, ramas operativas, archivos JSON y comentarios no son estado activo. El workflow serializa comandos mediante `concurrency.group: focal-automation-state` y `cancel-in-progress: false`.
 
 ## Estado legacy retirado
 
@@ -28,6 +28,25 @@ issue #5
 ```
 
 No mantengas una ruta fallback hacia esos mecanismos. El historial puede documentar su existencia, pero no son ejecutables.
+
+## Campos canónicos del bloque de estado
+
+Interpretá como estado operativo:
+
+- `schemaVersion` y `version`: contrato y revisión del estado;
+- `status`: `idle` o `working`;
+- `mode`: `normal` o `recovery`;
+- `phase`: fase vigente;
+- `runId`, `owner` y `executionSource`: propietario;
+- `startedAt`, `heartbeatAt` y `leaseExpiresAt`: vigencia;
+- `softStopAt`, `cleanupAt`, `hardKillAt` y `deadlineAt`: límites;
+- `baseMainSha`: baseline observado;
+- `workBranch`, `workBranchHeadSha`, `pullRequest` y `checkpointSha`: continuidad remota;
+- `lastCompletedAt`, `lastResult` y `lastRunId`: último ciclo finalizado;
+- `lastCommandId`, `lastCommandAccepted`, `lastCommandReason` y `lastCommandProcessedAt`: correlación del comando;
+- campos adicionales desconocidos: conservarlos sin reinterpretarlos ni eliminarlos.
+
+`status == working`, un `runId` ajeno y `leaseExpiresAt` futuro representan una ejecución activa. `status == idle` y `runId == null` representan ausencia de propietario.
 
 ## Identidad y lease
 
@@ -56,29 +75,115 @@ Para cada comando:
 7. Esperá de 3 a 10 segundos y releé.
 8. Correlacioná por `lastCommandId`.
 9. Usá polling acotado; no busy-wait ni esperas indefinidas.
+10. No crees comentarios operativos.
 
-## Inspección y adquisición
+## Comandos canónicos
+
+### Inspección
+
+```json
+{
+  "schemaVersion": 3,
+  "commandId": "<único>",
+  "operation": "inspect"
+}
+```
+
+Exigí `lastCommandAccepted == true` y `lastCommandReason == STATE_OBSERVED`.
+
+### Adquisición
+
+```json
+{
+  "schemaVersion": 3,
+  "commandId": "<único>",
+  "operation": "acquire",
+  "runId": "<UUID v4>",
+  "owner": "<identidad no secreta>",
+  "executionSource": "<scheduled-chat|github-actions|manual>",
+  "mode": "normal",
+  "phase": "LOCK_ACQUISITION",
+  "startedAt": "<UTC>",
+  "heartbeatAt": "<UTC>",
+  "leaseExpiresAt": "<UTC futuro>",
+  "softStopAt": "<UTC>",
+  "cleanupAt": "<UTC>",
+  "hardKillAt": "<UTC>",
+  "deadlineAt": "<UTC>",
+  "baseMainSha": "<SHA>",
+  "workBranch": null,
+  "workBranchHeadSha": null,
+  "pullRequest": null,
+  "checkpointSha": null,
+  "note": null
+}
+```
+
+La adquisición exige `LEASE_ACQUIRED`, `status == working`, `runId` propio y expiración futura.
+
+### Recuperación
+
+Usá el mismo contrato de adquisición con:
+
+```json
+{
+  "operation": "recover",
+  "mode": "recovery"
+}
+```
+
+La recuperación exige `LEASE_RECOVERED`.
+
+### Heartbeat
+
+```json
+{
+  "schemaVersion": 3,
+  "commandId": "<único>",
+  "operation": "heartbeat",
+  "runId": "<propietario>",
+  "phase": "<fase actual>",
+  "heartbeatAt": "<UTC>",
+  "leaseExpiresAt": "<UTC futuro>",
+  "workBranch": "<rama o null>",
+  "workBranchHeadSha": "<SHA o null>",
+  "pullRequest": "<número o null>",
+  "checkpointSha": "<SHA o null>",
+  "note": null
+}
+```
+
+Exigí `HEARTBEAT_ACCEPTED`, `runId` propio y expiración futura.
+
+### Liberación
+
+```json
+{
+  "schemaVersion": 3,
+  "commandId": "<único>",
+  "operation": "release",
+  "runId": "<propietario>",
+  "completedAt": "<UTC>",
+  "result": "PASS | PARTIAL | BLOCKED | NO-OP",
+  "checkpointSha": "<último SHA remoto o null>",
+  "note": "<resultado conciso>"
+}
+```
+
+La liberación exige `LEASE_RELEASED`, `status == idle`, `runId == null` y `lastRunId` propio.
+
+## Adquisición y ejecución activa
 
 Antes de mutar `krestosa/Focal`:
 
-1. Enviá `inspect` y exigí:
-   - `lastCommandAccepted == true`;
-   - `lastCommandReason == STATE_OBSERVED`.
-2. Si `status == working` y `leaseExpiresAt` es futuro para otro `runId`, no adquieras:
+1. Ejecutá `inspect`.
+2. Si existe una lease ajena futura, no envíes `acquire`:
    - terminá `NO-OP`;
    - no duermas esperando que finalice;
-   - no crees rama ni PR.
-3. Si el estado está `idle`, enviá `acquire` con:
-   - `runId`, owner y fuente;
-   - límites temporales;
-   - SHA actual de la rama predeterminada;
-   - fase `LOCK_ACQUISITION`.
-4. La adquisición es válida solo con:
-   - `lastCommandReason == LEASE_ACQUIRED`;
-   - `status == working`;
-   - `runId` propio;
-   - expiración futura.
-5. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.
+   - no crees rama, PR, comentario ni commit.
+3. Si el estado está `idle`, enviá `acquire`.
+4. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.
+5. Solo comenzá mutaciones después de confirmar propiedad.
 
 ## Recuperación de lock abandonado
 
@@ -95,14 +200,12 @@ Antes de `recover`:
 2. Inspeccioná workflows mutadores conocidos y su estado.
 3. Verificá que no exista evidencia positiva de una ejecución todavía activa.
 4. Preservá referencias al ciclo anterior.
-5. Enviá `recover` con un `runId` nuevo y `mode: recovery`.
+5. Enviá `recover` con un `runId` nuevo.
 6. Continuá solo con `LEASE_RECOVERED`.
 
 La recuperación no autoriza descartar trabajo. La primera unidad debe reconciliar o preservar el estado previo.
 
-## Heartbeat y pérdida de propiedad
-
-Un heartbeat válido exige `HEARTBEAT_ACCEPTED`, `runId` propio y expiración futura.
+## Pérdida de propiedad
 
 Si recibís `NOT_LEASE_OWNER`, si el estado cambia a otro `runId` o si no podés confirmar renovación antes de una expiración insegura:
 
@@ -112,25 +215,6 @@ Si recibís `NOT_LEASE_OWNER`, si el estado cambia a otro `runId` o si no podés
 - no liberes una lease ajena;
 - ejecutá reconciliación con la evidencia disponible;
 - reportá `PARTIAL` o `BLOCKED` según exista trabajo remoto útil.
-
-## Liberación
-
-Enviá `release` con:
-
-- `runId` propietario;
-- `completedAt`;
-- resultado `PASS`, `PARTIAL`, `BLOCKED` o `NO-OP` cuando el workflow admita el valor; mientras el schema operativo conserve valores anteriores, usá el valor compatible más cercano y registrá el resultado terminal exacto en `note`;
-- último checkpoint remoto;
-- nota concisa.
-
-La liberación se confirma solo con:
-
-- `lastCommandReason == LEASE_RELEASED`;
-- `status == idle`;
-- `runId == null`;
-- `lastRunId` igual al propio.
-
-No crees comentarios ni commits operativos.
 
 ## Workflow ausente o corrupto
 
