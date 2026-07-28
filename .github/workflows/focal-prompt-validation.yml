@@ -5,7 +5,13 @@ on:
     paths:
       - "prompts/focal-autonomous-development.md"
       - "prompts/focal/**"
+      - "scripts/repository_tooling.py"
+      - "scripts/tooling.py"
+      - "scripts/validate.py"
       - "scripts/validate_focal_prompt_stack.py"
+      - "tests/test_dynamic_tooling.py"
+      - "shared/manifests/tooling.json"
+      - "shared/manifests/integrity.json"
       - ".github/workflows/focal-prompt-validation.yml"
   push:
     branches:
@@ -13,7 +19,13 @@ on:
     paths:
       - "prompts/focal-autonomous-development.md"
       - "prompts/focal/**"
+      - "scripts/repository_tooling.py"
+      - "scripts/tooling.py"
+      - "scripts/validate.py"
       - "scripts/validate_focal_prompt_stack.py"
+      - "tests/test_dynamic_tooling.py"
+      - "shared/manifests/tooling.json"
+      - "shared/manifests/integrity.json"
       - ".github/workflows/focal-prompt-validation.yml"
   workflow_dispatch:
 
@@ -45,6 +57,21 @@ jobs:
 
       - name: Run unit tests under required root runtime
         run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
+
+      - name: Verify integrity metadata is current
+        run: |
+          python scripts/tooling.py --json refresh-integrity --dry-run > integrity-check.json
+          cat integrity-check.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("integrity-check.json").read_text(encoding="utf-8"))
+          if payload.get("status") != "PASS":
+              raise SystemExit("integrity dry-run failed")
+          if payload.get("changed"):
+              raise SystemExit("shared/manifests/integrity.json is stale")
+          PY
 
       - name: Run repository validation
         run: python scripts/tooling.py validate
