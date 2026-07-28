@@ -1,80 +1,159 @@
-name: Focal Prompt Validation
+name: Finalize Focal Prompt CI Migration
 
 on:
   pull_request:
     paths:
-      - "prompts/focal-autonomous-development.md"
-      - "prompts/focal/**"
-      - "scripts/repository_tooling.py"
-      - "scripts/tooling.py"
-      - "scripts/validate.py"
-      - "scripts/validate_focal_prompt_stack.py"
-      - "tests/test_dynamic_tooling.py"
-      - "shared/manifests/tooling.json"
-      - "shared/manifests/integrity.json"
       - ".github/workflows/focal-prompt-validation.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "prompts/focal-autonomous-development.md"
-      - "prompts/focal/**"
-      - "scripts/repository_tooling.py"
-      - "scripts/tooling.py"
-      - "scripts/validate.py"
-      - "scripts/validate_focal_prompt_stack.py"
-      - "tests/test_dynamic_tooling.py"
-      - "shared/manifests/tooling.json"
-      - "shared/manifests/integrity.json"
-      - ".github/workflows/focal-prompt-validation.yml"
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: focal-prompt-validation-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: finalize-focal-prompt-ci-migration
+  cancel-in-progress: false
 
 jobs:
-  validate:
-    name: Validate Focal prompt stack
+  finalize:
+    if: github.repository == 'krestosa/skills' && github.head_ref == 'ci/validate-focal-prompt-stack'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Check out repository
+      - name: Check out migration branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          ref: ci/validate-focal-prompt-stack
+          fetch-depth: 0
 
-      - name: Validate Focal prompt contracts
+      - name: Finalize migration files
         run: |
-          python -m py_compile scripts/validate_focal_prompt_stack.py
-          python scripts/validate_focal_prompt_stack.py
-
-      - name: Compile Python sources
-        run: python -m compileall -q scripts tests
-
-      - name: Run unit tests under required root runtime
-        run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
-
-      - name: Verify integrity metadata is current
-        run: |
-          python scripts/tooling.py --json refresh-integrity --dry-run > integrity-check.json
-          cat integrity-check.json
           python - <<'PY'
-          import json
           from pathlib import Path
 
-          payload = json.loads(Path("integrity-check.json").read_text(encoding="utf-8"))
-          if payload.get("status") != "PASS":
-              raise SystemExit("integrity dry-run failed")
-          if payload.get("changed"):
-              raise SystemExit("shared/manifests/integrity.json is stale")
+          tests_path = Path("tests/test_dynamic_tooling.py")
+          lines = tests_path.read_text(encoding="utf-8").splitlines(keepends=True)
+          start = next(i for i, line in enumerate(lines) if line.startswith("    def _write_fixture_workflow("))
+          end = next(i for i in range(start + 1, len(lines)) if lines[i].startswith("    def test_declared_pinned_workflow_is_allowed("))
+          for index in range(start + 1, end):
+              if lines[index].strip():
+                  lines[index] = "    " + lines[index]
+          text = "".join(lines)
+          old_fixture_action = 'f"      - uses: actions/checkout@{action_ref}\\n",'
+          new_fixture_action = '"      - name: Checkout\\n"\n            f"        uses: actions/checkout@{action_ref}\\n",'
+          if text.count(old_fixture_action) != 1:
+              raise SystemExit("fixture action line did not match exactly once")
+          tests_path.write_text(text.replace(old_fixture_action, new_fixture_action), encoding="utf-8")
+
+          tooling_path = Path("scripts/repository_tooling.py")
+          tooling = tooling_path.read_text(encoding="utf-8")
+          old_regex = 're.findall(r"(?m)^\\s*-\\s*uses:\\s*([^\\s#]+)", workflow_text)'
+          new_regex = 're.findall(r"(?m)^\\s*(?:-\\s*)?uses:\\s*([^\\s#]+)", workflow_text)'
+          if tooling.count(old_regex) != 1:
+              raise SystemExit("workflow action regex did not match exactly once")
+          tooling_path.write_text(tooling.replace(old_regex, new_regex), encoding="utf-8")
+
+          Path(".github/workflows/bootstrap-fix-workflow-tests.yml").unlink(missing_ok=True)
+
+          final_workflow = '''name: Focal Prompt Validation
+
+          on:
+            pull_request:
+              paths:
+                - "prompts/focal-autonomous-development.md"
+                - "prompts/focal/**"
+                - "scripts/repository_tooling.py"
+                - "scripts/tooling.py"
+                - "scripts/validate.py"
+                - "scripts/validate_focal_prompt_stack.py"
+                - "tests/test_dynamic_tooling.py"
+                - "shared/manifests/tooling.json"
+                - "shared/manifests/integrity.json"
+                - ".github/workflows/focal-prompt-validation.yml"
+            push:
+              branches:
+                - main
+              paths:
+                - "prompts/focal-autonomous-development.md"
+                - "prompts/focal/**"
+                - "scripts/repository_tooling.py"
+                - "scripts/tooling.py"
+                - "scripts/validate.py"
+                - "scripts/validate_focal_prompt_stack.py"
+                - "tests/test_dynamic_tooling.py"
+                - "shared/manifests/tooling.json"
+                - "shared/manifests/integrity.json"
+                - ".github/workflows/focal-prompt-validation.yml"
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+
+          concurrency:
+            group: focal-prompt-validation-${{ github.workflow }}-${{ github.ref }}
+            cancel-in-progress: true
+
+          jobs:
+            validate:
+              name: Validate Focal prompt stack
+              runs-on: ubuntu-latest
+              timeout-minutes: 10
+              steps:
+                - name: Check out repository
+                  uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+                  with:
+                    persist-credentials: false
+
+                - name: Validate Focal prompt contracts
+                  run: |
+                    python -m py_compile scripts/validate_focal_prompt_stack.py
+                    python scripts/validate_focal_prompt_stack.py
+
+                - name: Compile Python sources
+                  run: python -m compileall -q scripts tests
+
+                - name: Run unit tests under required root runtime
+                  run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
+
+                - name: Verify integrity metadata is current
+                  run: |
+                    python scripts/tooling.py --json refresh-integrity --dry-run > integrity-check.json
+                    cat integrity-check.json
+                    python - <<'PY_CHECK'
+                    import json
+                    from pathlib import Path
+
+                    payload = json.loads(Path("integrity-check.json").read_text(encoding="utf-8"))
+                    if payload.get("status") != "PASS":
+                        raise SystemExit("integrity dry-run failed")
+                    if payload.get("changed"):
+                        raise SystemExit("shared/manifests/integrity.json is stale")
+                    PY_CHECK
+
+                - name: Run repository validation
+                  run: python scripts/tooling.py validate
+
+                - name: Run repository checks
+                  run: python scripts/tooling.py check
+          '''
+          import textwrap
+          Path(".github/workflows/focal-prompt-validation.yml").write_text(
+              textwrap.dedent(final_workflow),
+              encoding="utf-8",
+          )
           PY
 
-      - name: Run repository validation
-        run: python scripts/tooling.py validate
+      - name: Regenerate integrity and validate final tree
+        run: |
+          python -m py_compile scripts/repository_tooling.py scripts/tooling.py scripts/validate.py scripts/validate_focal_prompt_stack.py tests/test_dynamic_tooling.py
+          python scripts/tooling.py refresh-integrity
+          python scripts/validate_focal_prompt_stack.py
+          sudo --preserve-env=PATH python -m unittest discover -s tests -v
+          python scripts/tooling.py validate
+          python scripts/tooling.py check
 
-      - name: Run repository checks
-        run: python scripts/tooling.py check
+      - name: Publish final migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Finalize declared workflow validation"
+          git push origin HEAD:ci/validate-focal-prompt-stack
