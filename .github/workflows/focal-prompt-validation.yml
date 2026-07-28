@@ -60,13 +60,13 @@ jobs:
 
       - name: Verify integrity metadata is current
         run: |
-          python scripts/tooling.py --json refresh-integrity --dry-run > integrity-check.json
-          cat integrity-check.json
+          python scripts/tooling.py --json refresh-integrity --dry-run > /tmp/focal-integrity-check.json
+          cat /tmp/focal-integrity-check.json
           python - <<'PY_CHECK'
           import json
           from pathlib import Path
 
-          payload = json.loads(Path("integrity-check.json").read_text(encoding="utf-8"))
+          payload = json.loads(Path("/tmp/focal-integrity-check.json").read_text(encoding="utf-8"))
           if payload.get("status") != "PASS":
               raise SystemExit("integrity dry-run failed")
           if payload.get("changed"):
