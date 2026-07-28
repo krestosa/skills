@@ -64,9 +64,9 @@ La Capa 4 reemplaza completamente el almacenamiento del lock mediante commits o 
 
 ## Capa 5 — Roadmap maestro vivo y auditoría integral de Iris
 
-Esta capa impone un gate documental obligatorio antes de cualquier implementación funcional. El roadmap no es un resumen, una lista aspiracional ni una tarea opcional: es el registro canónico, exhaustivo, verificable y continuamente reconciliado de todo el trabajo necesario para completar Focal.
+Esta capa impone un gate documental obligatorio antes de cualquier implementación funcional. El roadmap es el registro canónico, exhaustivo, verificable y continuamente reconciliado de todo el trabajo necesario para completar Focal.
 
-### Archivo canónico
+### Archivo y gate obligatorio
 
 El roadmap debe existir en:
 
@@ -74,214 +74,127 @@ El roadmap debe existir en:
 docs/ROADMAP.md
 ```
 
-Si no existe en la rama predeterminada actual de `krestosa/Focal`, crealo. Si existe, leelo íntegramente y auditá su exactitud contra el estado remoto real del repositorio antes de seleccionar o implementar cualquier unidad funcional.
+Si no existe en la rama predeterminada actual de `krestosa/Focal`, crealo. Si existe, leelo íntegramente y auditá su exactitud contra el estado remoto real. No inicies cambios de shader, código, configuración, tests, workflows, tooling, packaging ni documentación funcional mientras el roadmap esté ausente, superficial, estructuralmente incompleto, desactualizado respecto del `main` remoto o no represente el trabajo ya existente.
 
-No inicies cambios de shader, código, configuración, tests, workflows, tooling, packaging ni documentación funcional mientras el roadmap esté ausente, estructuralmente incompleto, desactualizado respecto del `main` remoto o no represente el trabajo ya existente.
+Después de cargar las cinco capas, verificar concurrencia, adquirir válidamente la lease y reconstruir el estado remoto, la primera fase de análisis debe ser `ROADMAP_AUDIT`:
 
-### Momento obligatorio dentro del ciclo
-
-Después de cargar las cinco capas, verificar concurrencia, adquirir válidamente la lease y reconstruir el estado remoto, la primera fase de análisis del repositorio debe ser `ROADMAP_AUDIT`.
-
-En `ROADMAP_AUDIT`:
-
-1. Resolvé el SHA exacto del `main` remoto.
-2. Inspeccioná el árbol completo del repositorio y los archivos relevantes desde GitHub.
-3. Inspeccioná ramas de trabajo recuperables, PRs abiertos o recientemente fusionados, commits, checks y workflows que puedan cambiar el estado real de una unidad.
-4. Leé íntegramente `docs/ROADMAP.md` si existe.
-5. Consultá la documentación oficial y vigente de Iris aplicable a la combinación objetivo.
-6. Compará cada capacidad requerida con evidencia concreta del repositorio.
-7. Creá, expandí o corregí el roadmap hasta que represente de forma exhaustiva el estado real.
-8. Publicá el cambio del roadmap como commit documental aislado, conforme a la política de commits vigente, antes de iniciar implementación funcional.
-9. Si el roadmap todavía no puede considerarse completo y verificable dentro del presupuesto temporal, dedicá el ciclo a completarlo y publicarlo. No empieces implementación funcional con un roadmap parcial.
-
-Un roadmap presente pero superficial, genérico, sin evidencia, sin documentación enlazada o sin desglose técnico suficiente se considera inexistente a efectos de este gate.
+1. Resolvé el SHA exacto de `main`.
+2. Inspeccioná el árbol completo, archivos relevantes, ramas recuperables, PRs, commits, checks y workflows.
+3. Leé íntegramente `docs/ROADMAP.md` si existe.
+4. Consultá la documentación oficial y vigente de Iris aplicable a la combinación objetivo.
+5. Compará cada capacidad requerida con evidencia concreta del repositorio.
+6. Creá, expandí o corregí el roadmap hasta que represente exhaustivamente el estado real.
+7. Publicá el roadmap como commit documental aislado antes de iniciar implementación funcional.
+8. Si no puede completarse dentro del presupuesto temporal, dedicá el ciclo a terminarlo y publicarlo. No implementes features con un roadmap parcial.
 
 ### Fuentes oficiales obligatorias
 
-El roadmap debe incluir enlaces directos y trazables, como mínimo, a las fuentes oficiales vigentes que correspondan:
+El roadmap debe enlazar y auditar, como mínimo:
 
-- documentación principal de Iris: `https://shaders.properties/current/`;
-- referencia general: `https://shaders.properties/current/reference/overview/`;
-- programas y orden de ejecución: `https://shaders.properties/current/reference/programs/overview/`;
-- `shaders.properties`, directivas y configuración: `https://shaders.properties/current/reference/shadersproperties/overview/`;
-- opciones, pantallas, sliders, perfiles y localización: `https://shaders.properties/current/reference/shadersproperties/shader_settings/`;
-- repositorio oficial de Iris: `https://github.com/IrisShaders/Iris`;
-- repositorio oficial de documentación: `https://github.com/IrisShaders/docs`;
-- ShaderDoc oficial del proyecto: `https://github.com/IrisShaders/ShaderDoc`.
+- `https://shaders.properties/current/`;
+- `https://shaders.properties/current/reference/overview/`;
+- `https://shaders.properties/current/reference/programs/overview/`;
+- `https://shaders.properties/current/reference/shadersproperties/overview/`;
+- `https://shaders.properties/current/reference/shadersproperties/shader_settings/`;
+- `https://github.com/IrisShaders/Iris`;
+- `https://github.com/IrisShaders/docs`;
+- `https://github.com/IrisShaders/ShaderDoc`.
 
-Estas URL son puntos de entrada, no una lista suficiente. En cada auditoría, recorré las secciones, subpáginas, archivos de documentación, notas de versión, código fuente público, issues técnicos relevantes y referencias oficiales necesarias para cubrir todas las capacidades expuestas por la versión objetivo. Registrá para cada fuente la URL exacta consultada, la fecha UTC de consulta y, cuando exista, el tag, versión, rama o commit correspondiente.
-
-No uses blogs, videos, wikis no oficiales, fragmentos de terceros ni memoria como fuente principal. Una fuente secundaria solo puede utilizarse cuando no exista fuente oficial suficiente, debe identificarse expresamente como secundaria y no puede contradecir la implementación ni la documentación oficial de Iris.
+Estas URL son puntos de entrada. Recorré subpáginas, documentación, notas de versión, código fuente público, issues técnicos relevantes y referencias oficiales necesarias para cubrir la versión objetivo. Registrá URL exacta, fecha UTC de consulta y, cuando exista, tag, versión, rama o commit. No uses memoria ni fuentes de terceros como fuente principal; una fuente secundaria debe identificarse y no puede contradecir a Iris.
 
 ### Inventario integral obligatorio de Iris
 
-El roadmap debe auditar todas las capacidades de shader pack expuestas, soportadas, limitadas o explícitamente no soportadas por la versión objetivo de Iris. Como mínimo, y sin limitarse a esta lista, debe cubrir:
+Auditá todas las capacidades expuestas, soportadas, limitadas, deprecadas o no soportadas por la versión objetivo. Descomponé cada categoría hasta unidades pequeñas, implementables y validables. Como mínimo cubrí:
 
-1. Matriz de versiones y compatibilidad entre Minecraft, Fabric Loader, Fabric API cuando corresponda, Iris, Sodium, Java, Gradle, Loom, drivers y nivel de OpenGL/GLSL.
-2. Estructura completa del shader pack, nombres de archivos, carpetas, includes, preprocessado, macros y reglas de descubrimiento.
-3. Todos los programas, pases, etapas y órdenes de ejecución documentados, incluyendo cada etapa gráfica o de cómputo que la versión objetivo exponga.
-4. Programas `setup`, `begin`, `shadow`, `shadowcomp`, `prepare`, `gbuffers_*`, `deferred`, `composite` y `final`, además de todos sus sufijos, variantes y condiciones aplicables según la documentación vigente.
-5. Compute shaders, geometry shaders, tessellation shaders y cualquier otra etapa opcional, con requisitos, extensiones, límites y degradación segura.
-6. Buffers de color, profundidad, sombra, historial y datos auxiliares; formatos, attachments, lectura, escritura, ping-pong, clearing, mipmaps, escalado, viewport y vida útil.
-7. `DRAWBUFFERS`, `RENDERTARGETS`, constantes, directivas, comentarios especiales y reglas de escaneo.
-8. Uniforms, atributos, vertex format extensions, varyings, built-ins, matrices, temporización, cámara, clima, mundo, entidades, iluminación y estados de render.
-9. `shaders.properties`: feature flags requeridas u opcionales, custom uniforms, custom textures, custom images, SSBO, buffers, ordenamiento de programas y toda directiva disponible.
-10. Opciones de usuario, defines, sliders, perfiles, pantallas, subscreens, columnas, traducciones `.lang`, tooltips y valores visibles.
-11. Mapeos de bloques, ítems, entidades, block entities, biomas, dimensiones y cualquier identificador o tabla requerida.
-12. Manejo de Overworld, Nether, End y dimensiones modificadas, incluyendo diferencias de pipeline y fallback.
-13. Sombras: shadow map, resolución, distancia, culling, filtros, color, profundidad, entidades, terreno, translucent shadows y estabilidad temporal.
-14. Materiales, PBR, normal/specular maps, labPBR cuando corresponda, emisión, roughness, metallic, porosidad, subsurface, AO y degradación ante texturas faltantes.
-15. Iluminación directa e indirecta, skylight, block light, GI aproximada, SSAO, screen-space effects, voxelización y acumulación temporal, limitadas a capacidades realmente disponibles.
-16. Agua, hielo, vidrio, partículas, clima, nubes, niebla, translucencia, hand rendering, entities y separación de draws.
-17. Postprocesado, exposición, tonemapping, color grading, bloom, antialiasing, TAA, sharpen, depth of field, motion blur y efectos opcionales.
-18. Compatibilidad con Sodium y límites conocidos de interacción con el renderer.
-19. Compatibilidad con Distant Horizons u otras integraciones oficialmente documentadas, sin asumir soporte cuando no esté probado.
-20. Iris Patcher, transformación GLSL, nombres reservados, código parcheado, diferencias entre fuente y shader compilado, y diagnóstico de errores.
-21. Feature flags y extensiones exclusivas de Iris, sus requisitos de hardware y sus rutas de fallback.
-22. Funciones no soportadas, limitaciones no corregibles, diferencias respecto del formato histórico y riesgos de portabilidad.
-23. Herramientas de depuración, debug mode, patched shaders, logs, mensajes de compilación y evidencia reproducible.
-24. Seguridad de GPU, prevención de hangs, límites de memoria, loops acotados, watchdogs, aislamiento de procesos y recuperación ante fallos.
-25. QA estático, compilación GLSL, harness OpenGL real, pruebas visuales deterministas, métricas de imagen, benchmarks, compatibilidad de drivers y pruebas dentro de Minecraft mediante CI.
-26. Packaging, detección por Iris, metadata, licencias, releases, checksums, changelog, instalación y rollback.
-27. Perfiles `SAFE`, `BALANCED`, `HIGH` y `ULTRA`, con capacidades activas, presupuestos, límites, fallback y criterios cuantitativos para cada uno.
-28. Automatización, GitHub Actions, concurrencia, lease, recuperación, killswitch, presupuesto temporal y preservación remota.
-29. Documentación de usuario, documentación técnica, troubleshooting, matrices de soporte y criterios de release.
-30. Cualquier feature nueva, renombrada, deprecada o removida que aparezca en la documentación o el código de la versión objetivo.
+1. Matriz Minecraft, Fabric Loader/API, Iris, Sodium, Java, Gradle, Loom, drivers y OpenGL/GLSL.
+2. Estructura del pack, archivos, carpetas, includes, macros, preprocessado y descubrimiento.
+3. Todos los programas, pases, sufijos, orden de ejecución y etapas gráficas o de cómputo documentadas, incluyendo `setup`, `begin`, `shadow`, `shadowcomp`, `prepare`, `gbuffers_*`, `deferred`, `composite` y `final`.
+4. Compute, geometry, tessellation y demás etapas opcionales, con requisitos y fallback.
+5. Buffers de color, profundidad, sombra, historial y auxiliares; formatos, attachments, lectura/escritura, ping-pong, clear, mipmaps, escalado, viewport y vida útil.
+6. `DRAWBUFFERS`, `RENDERTARGETS`, constantes, directivas y comentarios especiales.
+7. Uniforms, atributos, vertex format extensions, varyings, built-ins, matrices, cámara, tiempo, clima, mundo, entidades, iluminación y estado de render.
+8. `shaders.properties`: feature flags, custom uniforms/textures/images, SSBO, buffers, orden de programas y toda directiva disponible.
+9. Opciones, defines, sliders, perfiles, pantallas, subscreens, columnas y `.lang`.
+10. Mapeos de bloques, ítems, entidades, block entities, biomas y dimensiones.
+11. Overworld, Nether, End y dimensiones modificadas, con pipeline y fallback.
+12. Sombras, culling, filtros, terreno, entidades, translucencia y estabilidad temporal.
+13. Materiales y PBR: normal/specular, labPBR cuando corresponda, emisión, roughness, metallic, porosidad, subsurface y AO.
+14. Iluminación directa/indirecta, skylight, block light, GI aproximada, SSAO, screen-space, voxelización y acumulación temporal.
+15. Agua, hielo, vidrio, partículas, clima, nubes, niebla, translucencia y hand rendering.
+16. Postprocesado: exposición, tonemapping, color grading, bloom, AA/TAA, sharpen, DOF y motion blur.
+17. Compatibilidad con Sodium, Distant Horizons e integraciones oficialmente documentadas, sin asumir soporte.
+18. Iris Patcher, transformación GLSL, nombres reservados, patched shaders y diagnóstico.
+19. Features exclusivas, extensiones, requisitos de hardware, limitaciones y funciones no soportadas.
+20. Debug mode, logs, errores de compilación y evidencia reproducible.
+21. Seguridad GPU/CPU, memoria, loops, watchdogs, aislamiento y recuperación.
+22. QA estático, compilación GLSL, harness OpenGL, pruebas visuales, benchmarks, drivers y Minecraft/Iris en CI.
+23. Packaging, metadata, licencias, releases, checksums, changelog, instalación y rollback.
+24. Perfiles `SAFE`, `BALANCED`, `HIGH` y `ULTRA`, con features, presupuestos, límites, fallback y aceptación cuantitativa.
+25. Automatización, Actions, concurrencia, lease, recovery, killswitch, presupuesto temporal y preservación remota.
+26. Documentación, troubleshooting, soporte y criterios de release.
+27. Toda feature nueva, renombrada o removida detectada en la versión objetivo.
 
-No marques la categoría como cubierta por mencionar solamente su nombre. Cada categoría debe descomponerse hasta unidades pequeñas, implementables y validables.
+Mencionar una categoría no equivale a cubrirla. Debe existir desglose técnico, implementación prevista, pruebas y aceptación.
 
-### Estructura mínima de `docs/ROADMAP.md`
+### Estructura y estados de `docs/ROADMAP.md`
 
-El documento debe utilizar Markdown enriquecido compatible con GitHub y contener, como mínimo:
+El documento debe usar Markdown compatible con GitHub y contener: título, objetivo, leyenda, fecha UTC, SHA baseline, versiones verificadas, índice, fuentes consultadas, matriz de compatibilidad, resumen de cobertura, roadmap jerárquico, decisiones, dependencias, riesgos, bloqueos, evidencia, historial de auditorías y próxima unidad prioritaria.
 
-1. Título y objetivo.
-2. Leyenda de estados.
-3. Fecha UTC de la última auditoría.
-4. SHA de `main` usado como baseline.
-5. Versiones objetivo verificadas.
-6. Índice navegable.
-7. Fuentes oficiales y matriz de documentación consultada.
-8. Matriz de compatibilidad.
-9. Resumen ejecutivo de cobertura.
-10. Roadmap jerárquico completo.
-11. Registro de decisiones y dependencias.
-12. Riesgos y bloqueos reales.
-13. Evidencia de validación.
-14. Historial breve de auditorías.
-15. Próxima unidad prioritaria.
-
-Usá obligatoriamente esta semántica visual:
+Semántica obligatoria:
 
 ```markdown
 - [ ] ⚪ PENDIENTE — trabajo no iniciado.
-- [ ] 🟡 EN CURSO — trabajo iniciado y preservado en una rama o PR remoto recuperable.
-- [x] ✅ COMPLETADO — implementación y criterios de aceptación verificados.
-- [ ] 🔁 REVALIDAR — existía evidencia, pero quedó obsoleta o perdió validez.
-- [ ] ⛔ BLOQUEADO — existe un bloqueo externo real con evidencia.
+- [ ] 🟡 EN CURSO — trabajo iniciado y preservado remotamente.
+- [x] ✅ COMPLETADO — implementación y aceptación verificadas.
+- [ ] 🔁 REVALIDAR — evidencia obsoleta o insuficiente.
+- [ ] ⛔ BLOQUEADO — bloqueo externo real con evidencia.
 ```
 
-Para un ítem completado usá siempre `[x]`. Para pendiente, en curso, revalidación o bloqueo usá `[ ]` junto con el marcador correspondiente. No representes un ítem incompleto como completado mediante texto ambiguo.
+Cada checkbox debe incluir, directamente o mediante subítems: identificador estable, descripción, justificación, dependencias, archivos o módulos, pasos, configuración, perfiles afectados, riesgos, fallback, pruebas, criterios de aceptación, evidencia, enlaces oficiales, branch/commit/PR/check, estado y siguiente acción.
 
-Cada unidad debe incluir, directamente o mediante subítems:
+Capítulos mínimos:
 
-- identificador estable;
-- nombre preciso;
-- descripción técnica;
-- justificación;
-- dependencias;
-- archivos o módulos previstos;
-- pasos de implementación;
-- configuración y opciones afectadas;
-- perfil o perfiles afectados;
-- riesgos técnicos;
-- estrategia de fallback;
-- pruebas requeridas;
-- criterios de aceptación objetivos;
-- evidencia actual;
-- enlaces a documentación oficial;
-- branch, commit, PR o check cuando exista;
-- estado actual;
-- siguiente acción concreta.
+1. Gobernanza, coordinación y fuente de verdad.
+2. Bootstrap, estructura, packaging y versiones.
+3. Auditoría completa de Iris y compatibilidad.
+4. Pipeline, programas, buffers, uniforms y propiedades.
+5. Materiales/PBR, iluminación, sombras y oclusión.
+6. Cielo, atmósfera, clima, agua, vidrio, translucencia y partículas.
+7. Reflejos, GI, screen-space, voxelización, temporal y postprocesado.
+8. Terreno, entidades, mano, block entities y dimensiones.
+9. Perfiles, rendimiento y seguridad CPU/GPU.
+10. Compilación, análisis estático, OpenGL, pruebas visuales y benchmarks.
+11. Integración Minecraft/Iris/Sodium, CI, workflows, recovery y releases.
+12. Documentación, soporte y definición de completitud.
 
-Descomponé las unidades hasta que cada checkbox represente trabajo que pueda completarse, validarse y actualizarse sin ocultar múltiples features independientes dentro de una sola línea.
+Agregá cualquier capítulo adicional exigido por la especificación o Iris.
 
-### Capítulos obligatorios del roadmap
+### Reconciliación probatoria
 
-El roadmap debe reflejar y expandir toda la especificación compuesta. Como mínimo debe contener capítulos exhaustivos para:
+Nunca marques `[x]` solo por nombres, comentarios, intención, commits o afirmaciones previas. Un ítem solo es `COMPLETADO` cuando la implementación remota existe, satisface todos sus criterios, tiene pruebas aprobadas o evidencia equivalente, no presenta checks fallidos relevantes y deja documentación/configuración actualizadas y evidencia enlazada.
 
-1. Gobernanza, fuente de verdad remota y coordinación.
-2. Bootstrap, estructura del repositorio y packaging.
-3. Matriz de versiones y entorno soportado.
-4. Auditoría completa de Iris y compatibilidad.
-5. Arquitectura del pipeline y contratos de render.
-6. Buffers, formatos, datos, uniforms y propiedades.
-7. Sistema de materiales y PBR.
-8. Iluminación, sombras y oclusión.
-9. Cielo, atmósfera, nubes, clima y niebla.
-10. Agua, vidrio, hielo, translucencia y partículas.
-11. Reflejos, GI, screen-space y voxelización.
-12. Acumulación temporal, TAA e historial.
-13. Postprocesado y gestión de color.
-14. Terreno, entidades, mano, block entities y dimensiones.
-15. Perfiles de calidad, escalabilidad y degradación.
-16. Rendimiento, presupuestos y seguridad CPU/GPU.
-17. Compilación, análisis estático y validación OpenGL.
-18. Pruebas visuales, métricas y benchmarks.
-19. Integración Minecraft/Iris/Sodium en CI.
-20. Workflows, automatización, recovery y releases.
-21. Documentación, troubleshooting y soporte.
-22. Criterios de release candidate y definición de completitud.
+Si es parcial, no validado, revertido, obsoleto o no demostrable, usá `EN CURSO`, `REVALIDAR` o `PENDIENTE`. Si roadmap y repositorio se contradicen, prevalece la evidencia remota y el roadmap se corrige. Desmarcá trabajo antes completado si una regresión, cambio de versión, eliminación o pérdida de evidencia invalida su estado.
 
-Si la especificación o la versión actual de Iris exige capítulos adicionales, agregalos. La lista anterior es un piso, no un techo.
-
-### Reconciliación con el repositorio
-
-Nunca marques `[x]` basándote solo en nombres de archivos, comentarios, intención, un commit existente o una afirmación previa.
-
-Un ítem solo puede marcarse `COMPLETADO` cuando:
-
-1. La implementación existe en el estado remoto inspeccionado.
-2. Está integrada o preservada en una rama o PR remoto claramente identificado.
-3. Satisface todos los criterios de aceptación del propio ítem.
-4. Las pruebas exigidas existen y pasaron, o hay evidencia equivalente autorizada.
-5. No existe un check fallido relevante.
-6. La documentación y configuración asociadas están actualizadas.
-7. La evidencia queda enlazada o identificada en el roadmap.
-
-Si la implementación es parcial, carece de validación, tiene checks fallidos, fue revertida, quedó obsoleta por una actualización de Iris o no puede demostrarse, mantenela `EN CURSO`, `REVALIDAR` o `PENDIENTE`.
-
-Si el repositorio y el roadmap se contradicen, la evidencia remota verificable tiene precedencia y el roadmap debe corregirse inmediatamente. También desmarcá ítems previamente completados cuando una regresión, cambio de versión, eliminación de código o pérdida de evidencia invalide su estado.
-
-### Selección de trabajo
+### Selección y cierre
 
 Solo después de publicar un roadmap válido:
 
-1. Elegí la siguiente unidad pendiente de mayor prioridad que sea compatible con dependencias, riesgo y presupuesto temporal.
-2. Marcala `🟡 EN CURSO`.
-3. Registrá branch o PR de trabajo cuando exista.
-4. Implementala siguiendo el proceso autónomo vigente.
-5. No trabajes en features que no estén representadas en el roadmap; agregalas primero con su desglose, documentación y aceptación.
+1. Elegí la unidad pendiente de mayor prioridad compatible con dependencias, riesgo y tiempo.
+2. Marcala `🟡 EN CURSO` y registrá branch o PR.
+3. Implementala mediante el proceso autónomo vigente.
+4. No trabajes en una feature ausente del roadmap; agregala primero.
 
-El roadmap controla el orden de trabajo, pero no reemplaza el razonamiento técnico. Reordená prioridades cuando aparezcan dependencias, regresiones, cambios de versión o riesgos nuevos, dejando la justificación registrada.
+Antes de finalizar, liberar la lease o emitir el informe, ejecutá `ROADMAP_RECONCILIATION`:
 
-### Auditoría obligatoria al cierre
+1. Releé diff remoto, branch/PR, código, documentación, tests y checks.
+2. Marcá `[x]` solo cuando la aceptación sea completa.
+3. Conservá `EN CURSO` únicamente para trabajo parcial preservado remotamente y enlazá el checkpoint.
+4. Devolvé a `PENDIENTE` lo no iniciado o no preservado; usá `REVALIDAR` cuando corresponda.
+5. Actualizá auditoría, baseline, versiones, commits, PRs, checks, evidencia y próxima unidad.
+6. Publicá la actualización final del roadmap como commit documental aislado.
+7. Verificá remotamente el documento publicado.
 
-Antes de finalizar cualquier ciclo, liberar la lease o emitir el informe terminal, ejecutá `ROADMAP_RECONCILIATION`:
-
-1. Volvé a leer el diff remoto y el estado final de la rama o PR.
-2. Volvé a comparar los ítems afectados con código, documentación, tests y checks.
-3. Marcá `[x] ✅ COMPLETADO` únicamente los ítems que cumplan íntegramente sus criterios.
-4. Mantené `🟡 EN CURSO` para trabajo parcial preservado de forma remota y enlazá el checkpoint.
-5. Devolvé a `⚪ PENDIENTE` cualquier trabajo no iniciado o no preservado.
-6. Usá `🔁 REVALIDAR` cuando la evidencia anterior ya no sea suficiente.
-7. Registrá bloqueos reales con evidencia y ruta de desbloqueo.
-8. Actualizá fecha de auditoría, baseline, ramas, commits, PRs, checks, evidencias y próxima unidad.
-9. Publicá la actualización final de `docs/ROADMAP.md` como commit documental aislado antes de liberar la lease.
-10. Verificá remotamente que el roadmap publicado contiene los estados correctos.
-
-No puede declararse `PASS` si el roadmap no fue reconciliado y publicado al cierre.
-
-### Informe terminal obligatorio del roadmap
+No declares `PASS` si el roadmap no fue reconciliado y publicado al cierre.
 
 Añadí al informe terminal:
 
@@ -292,15 +205,15 @@ Roadmap baseline main SHA:
 Roadmap commit inicial:
 Roadmap commit final:
 Fuentes oficiales de Iris auditadas:
-Ítems marcados COMPLETADO:
-Ítems mantenidos EN CURSO:
+Ítems COMPLETADOS:
+Ítems EN CURSO:
 Ítems devueltos a PENDIENTE:
-Ítems marcados REVALIDAR:
-Bloqueos reales registrados:
+Ítems REVALIDAR:
+Bloqueos reales:
 Próxima unidad prioritaria:
 ```
 
-La Capa 5 tiene precedencia sobre cualquier decisión táctica que permita comenzar implementación sin roadmap, omitir el inventario de Iris, conservar estados no demostrados o finalizar sin reconciliación.
+La Capa 5 tiene precedencia sobre cualquier decisión táctica que permita implementar sin roadmap, omitir el inventario de Iris, conservar estados no demostrados o finalizar sin reconciliación.
 
 ## Protocolo obligatorio de carga
 
@@ -339,7 +252,7 @@ La Capa 4 reemplaza expresamente cualquier regla anterior que exija modificar `a
 
 La Capa 3 reemplaza expresamente cualquier regla anterior que convierta una carencia interna implementable en un bloqueo o que permita terminar el ciclo limitándose a informar que falta CI, checks, runtime guard, workflows, herramientas, validadores, tests, schemas, fixtures, configuración o infraestructura propia del repositorio.
 
-La Capa 5 reemplaza expresamente cualquier regla anterior que permita implementar antes de crear o reconciliar el roadmap, tratar el roadmap como opcional, marcar trabajo sin evidencia o finalizar sin actualizar sus checkboxes y referencias remotas.
+La Capa 5 reemplaza expresamente cualquier regla anterior que permita implementar antes de crear o reconciliar el roadmap, tratarlo como opcional, marcar trabajo sin evidencia o finalizar sin actualizar sus checkboxes y referencias remotas.
 
 ## Mandato autónomo esencial
 
