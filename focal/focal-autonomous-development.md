@@ -2,7 +2,7 @@
 
 Este archivo es la única entrada canónica para cada ejecución programada de Focal.
 
-La instrucción completa está compuesta por cuatro capas obligatorias. Ninguna capa puede resumirse, omitirse, sustituirse por memoria ni interpretarse como opcional.
+La instrucción completa está compuesta por cinco capas obligatorias. Ninguna capa puede resumirse, omitirse, sustituirse por memoria ni interpretarse como opcional.
 
 ## Capa 1 — Especificación técnica completa
 
@@ -62,6 +62,159 @@ Esta política define el coordinador body-only basado en el issue #7 de `krestos
 
 La Capa 4 reemplaza completamente el almacenamiento del lock mediante commits o comentarios. La adquisición, heartbeat, cambio de fase y liberación se realizan reemplazando únicamente el bloque de comando dentro del cuerpo del issue y observando el resultado correlacionado dentro del bloque de estado del mismo cuerpo.
 
+## Capa 5 — Roadmap maestro vivo y auditoría integral de Iris
+
+Esta capa impone un gate documental obligatorio antes de cualquier implementación funcional. El roadmap es el registro canónico, exhaustivo, verificable y continuamente reconciliado de todo el trabajo necesario para completar Focal.
+
+### Archivo y gate obligatorio
+
+El roadmap debe existir en:
+
+```text
+docs/ROADMAP.md
+```
+
+Si no existe en la rama predeterminada actual de `krestosa/Focal`, crealo. Si existe, leelo íntegramente y auditá su exactitud contra el estado remoto real. No inicies cambios de shader, código, configuración, tests, workflows, tooling, packaging ni documentación funcional mientras el roadmap esté ausente, superficial, estructuralmente incompleto, desactualizado respecto del `main` remoto o no represente el trabajo ya existente.
+
+Después de cargar las cinco capas, verificar concurrencia, adquirir válidamente la lease y reconstruir el estado remoto, la primera fase de análisis debe ser `ROADMAP_AUDIT`:
+
+1. Resolvé el SHA exacto de `main`.
+2. Inspeccioná el árbol completo, archivos relevantes, ramas recuperables, PRs, commits, checks y workflows.
+3. Leé íntegramente `docs/ROADMAP.md` si existe.
+4. Consultá la documentación oficial y vigente de Iris aplicable a la combinación objetivo.
+5. Compará cada capacidad requerida con evidencia concreta del repositorio.
+6. Creá, expandí o corregí el roadmap hasta que represente exhaustivamente el estado real.
+7. Publicá el roadmap como commit documental aislado antes de iniciar implementación funcional.
+8. Si no puede completarse dentro del presupuesto temporal, dedicá el ciclo a terminarlo y publicarlo. No implementes features con un roadmap parcial.
+
+### Fuentes oficiales obligatorias
+
+El roadmap debe enlazar y auditar, como mínimo:
+
+- `https://shaders.properties/current/`;
+- `https://shaders.properties/current/reference/overview/`;
+- `https://shaders.properties/current/reference/programs/overview/`;
+- `https://shaders.properties/current/reference/shadersproperties/overview/`;
+- `https://shaders.properties/current/reference/shadersproperties/shader_settings/`;
+- `https://github.com/IrisShaders/Iris`;
+- `https://github.com/IrisShaders/docs`;
+- `https://github.com/IrisShaders/ShaderDoc`.
+
+Estas URL son puntos de entrada. Recorré subpáginas, documentación, notas de versión, código fuente público, issues técnicos relevantes y referencias oficiales necesarias para cubrir la versión objetivo. Registrá URL exacta, fecha UTC de consulta y, cuando exista, tag, versión, rama o commit. No uses memoria ni fuentes de terceros como fuente principal; una fuente secundaria debe identificarse y no puede contradecir a Iris.
+
+### Inventario integral obligatorio de Iris
+
+Auditá todas las capacidades expuestas, soportadas, limitadas, deprecadas o no soportadas por la versión objetivo. Descomponé cada categoría hasta unidades pequeñas, implementables y validables. Como mínimo cubrí:
+
+1. Matriz Minecraft, Fabric Loader/API, Iris, Sodium, Java, Gradle, Loom, drivers y OpenGL/GLSL.
+2. Estructura del pack, archivos, carpetas, includes, macros, preprocessado y descubrimiento.
+3. Todos los programas, pases, sufijos, orden de ejecución y etapas gráficas o de cómputo documentadas, incluyendo `setup`, `begin`, `shadow`, `shadowcomp`, `prepare`, `gbuffers_*`, `deferred`, `composite` y `final`.
+4. Compute, geometry, tessellation y demás etapas opcionales, con requisitos y fallback.
+5. Buffers de color, profundidad, sombra, historial y auxiliares; formatos, attachments, lectura/escritura, ping-pong, clear, mipmaps, escalado, viewport y vida útil.
+6. `DRAWBUFFERS`, `RENDERTARGETS`, constantes, directivas y comentarios especiales.
+7. Uniforms, atributos, vertex format extensions, varyings, built-ins, matrices, cámara, tiempo, clima, mundo, entidades, iluminación y estado de render.
+8. `shaders.properties`: feature flags, custom uniforms/textures/images, SSBO, buffers, orden de programas y toda directiva disponible.
+9. Opciones, defines, sliders, perfiles, pantallas, subscreens, columnas y `.lang`.
+10. Mapeos de bloques, ítems, entidades, block entities, biomas y dimensiones.
+11. Overworld, Nether, End y dimensiones modificadas, con pipeline y fallback.
+12. Sombras, culling, filtros, terreno, entidades, translucencia y estabilidad temporal.
+13. Materiales y PBR: normal/specular, labPBR cuando corresponda, emisión, roughness, metallic, porosidad, subsurface y AO.
+14. Iluminación directa/indirecta, skylight, block light, GI aproximada, SSAO, screen-space, voxelización y acumulación temporal.
+15. Agua, hielo, vidrio, partículas, clima, nubes, niebla, translucencia y hand rendering.
+16. Postprocesado: exposición, tonemapping, color grading, bloom, AA/TAA, sharpen, DOF y motion blur.
+17. Compatibilidad con Sodium, Distant Horizons e integraciones oficialmente documentadas, sin asumir soporte.
+18. Iris Patcher, transformación GLSL, nombres reservados, patched shaders y diagnóstico.
+19. Features exclusivas, extensiones, requisitos de hardware, limitaciones y funciones no soportadas.
+20. Debug mode, logs, errores de compilación y evidencia reproducible.
+21. Seguridad GPU/CPU, memoria, loops, watchdogs, aislamiento y recuperación.
+22. QA estático, compilación GLSL, harness OpenGL, pruebas visuales, benchmarks, drivers y Minecraft/Iris en CI.
+23. Packaging, metadata, licencias, releases, checksums, changelog, instalación y rollback.
+24. Perfiles `SAFE`, `BALANCED`, `HIGH` y `ULTRA`, con features, presupuestos, límites, fallback y aceptación cuantitativa.
+25. Automatización, Actions, concurrencia, lease, recovery, killswitch, presupuesto temporal y preservación remota.
+26. Documentación, troubleshooting, soporte y criterios de release.
+27. Toda feature nueva, renombrada o removida detectada en la versión objetivo.
+
+Mencionar una categoría no equivale a cubrirla. Debe existir desglose técnico, implementación prevista, pruebas y aceptación.
+
+### Estructura y estados de `docs/ROADMAP.md`
+
+El documento debe usar Markdown compatible con GitHub y contener: título, objetivo, leyenda, fecha UTC, SHA baseline, versiones verificadas, índice, fuentes consultadas, matriz de compatibilidad, resumen de cobertura, roadmap jerárquico, decisiones, dependencias, riesgos, bloqueos, evidencia, historial de auditorías y próxima unidad prioritaria.
+
+Semántica obligatoria:
+
+```markdown
+- [ ] ⚪ PENDIENTE — trabajo no iniciado.
+- [ ] 🟡 EN CURSO — trabajo iniciado y preservado remotamente.
+- [x] ✅ COMPLETADO — implementación y aceptación verificadas.
+- [ ] 🔁 REVALIDAR — evidencia obsoleta o insuficiente.
+- [ ] ⛔ BLOQUEADO — bloqueo externo real con evidencia.
+```
+
+Cada checkbox debe incluir, directamente o mediante subítems: identificador estable, descripción, justificación, dependencias, archivos o módulos, pasos, configuración, perfiles afectados, riesgos, fallback, pruebas, criterios de aceptación, evidencia, enlaces oficiales, branch/commit/PR/check, estado y siguiente acción.
+
+Capítulos mínimos:
+
+1. Gobernanza, coordinación y fuente de verdad.
+2. Bootstrap, estructura, packaging y versiones.
+3. Auditoría completa de Iris y compatibilidad.
+4. Pipeline, programas, buffers, uniforms y propiedades.
+5. Materiales/PBR, iluminación, sombras y oclusión.
+6. Cielo, atmósfera, clima, agua, vidrio, translucencia y partículas.
+7. Reflejos, GI, screen-space, voxelización, temporal y postprocesado.
+8. Terreno, entidades, mano, block entities y dimensiones.
+9. Perfiles, rendimiento y seguridad CPU/GPU.
+10. Compilación, análisis estático, OpenGL, pruebas visuales y benchmarks.
+11. Integración Minecraft/Iris/Sodium, CI, workflows, recovery y releases.
+12. Documentación, soporte y definición de completitud.
+
+Agregá cualquier capítulo adicional exigido por la especificación o Iris.
+
+### Reconciliación probatoria
+
+Nunca marques `[x]` solo por nombres, comentarios, intención, commits o afirmaciones previas. Un ítem solo es `COMPLETADO` cuando la implementación remota existe, satisface todos sus criterios, tiene pruebas aprobadas o evidencia equivalente, no presenta checks fallidos relevantes y deja documentación/configuración actualizadas y evidencia enlazada.
+
+Si es parcial, no validado, revertido, obsoleto o no demostrable, usá `EN CURSO`, `REVALIDAR` o `PENDIENTE`. Si roadmap y repositorio se contradicen, prevalece la evidencia remota y el roadmap se corrige. Desmarcá trabajo antes completado si una regresión, cambio de versión, eliminación o pérdida de evidencia invalida su estado.
+
+### Selección y cierre
+
+Solo después de publicar un roadmap válido:
+
+1. Elegí la unidad pendiente de mayor prioridad compatible con dependencias, riesgo y tiempo.
+2. Marcala `🟡 EN CURSO` y registrá branch o PR.
+3. Implementala mediante el proceso autónomo vigente.
+4. No trabajes en una feature ausente del roadmap; agregala primero.
+
+Antes de finalizar, liberar la lease o emitir el informe, ejecutá `ROADMAP_RECONCILIATION`:
+
+1. Releé diff remoto, branch/PR, código, documentación, tests y checks.
+2. Marcá `[x]` solo cuando la aceptación sea completa.
+3. Conservá `EN CURSO` únicamente para trabajo parcial preservado remotamente y enlazá el checkpoint.
+4. Devolvé a `PENDIENTE` lo no iniciado o no preservado; usá `REVALIDAR` cuando corresponda.
+5. Actualizá auditoría, baseline, versiones, commits, PRs, checks, evidencia y próxima unidad.
+6. Publicá la actualización final del roadmap como commit documental aislado.
+7. Verificá remotamente el documento publicado.
+
+No declares `PASS` si el roadmap no fue reconciliado y publicado al cierre.
+
+Añadí al informe terminal:
+
+```text
+Roadmap path: docs/ROADMAP.md
+Roadmap audit status: CREATED | UPDATED | VERIFIED | INCOMPLETE
+Roadmap baseline main SHA:
+Roadmap commit inicial:
+Roadmap commit final:
+Fuentes oficiales de Iris auditadas:
+Ítems COMPLETADOS:
+Ítems EN CURSO:
+Ítems devueltos a PENDIENTE:
+Ítems REVALIDAR:
+Bloqueos reales:
+Próxima unidad prioritaria:
+```
+
+La Capa 5 tiene precedencia sobre cualquier decisión táctica que permita implementar sin roadmap, omitir el inventario de Iris, conservar estados no demostrados o finalizar sin reconciliación.
+
 ## Protocolo obligatorio de carga
 
 Antes de inspeccionar el entorno local, analizar `krestosa/Focal`, adquirir el lock o realizar cualquier mutación:
@@ -71,12 +224,13 @@ Antes de inspeccionar el entorno local, analizar `krestosa/Focal`, adquirir el l
 3. Leé íntegramente la Capa 2 desde el commit exacto indicado.
 4. Leé íntegramente la Capa 3.
 5. Leé íntegramente la Capa 4.
-6. Verificá que las cuatro capas existen y pueden leerse completamente.
-7. Tratá las cuatro capas como un único prompt compuesto.
-8. No resumas, condenses, parafrasees ni omitas ninguna sección.
-9. No utilices copias locales, recordadas, cacheadas o provenientes de conversaciones anteriores.
-10. Aplicá después el orden de precedencia definido abajo.
-11. Ejecutá exactamente un ciclo autónomo sobre `krestosa/Focal`.
+6. Leé íntegramente la Capa 5.
+7. Verificá que las cinco capas existen y pueden leerse completamente.
+8. Tratá las cinco capas como un único prompt compuesto.
+9. No resumas, condenses, parafrasees ni omitas ninguna sección.
+10. No utilices copias locales, recordadas, cacheadas o provenientes de conversaciones anteriores.
+11. Aplicá después el orden de precedencia definido abajo.
+12. Ejecutá exactamente un ciclo autónomo sobre `krestosa/Focal`.
 
 Si una capa no puede leerse por un error transitorio, reintentá mediante otra operación remota autorizada antes de concluir que es inaccesible.
 
@@ -88,14 +242,17 @@ Cuando exista una diferencia entre las capas, aplicá este orden:
 2. Hard killswitch y límite temporal absoluto.
 3. Coordinación, propiedad de lease y protocolo body-only de la Capa 4.
 4. Política de autonomía y bootstrap de la Capa 3.
-5. Correcciones vinculantes de este archivo.
-6. Correcciones operativas consolidadas de la Capa 2 que no hayan sido reemplazadas.
-7. Especificación técnica completa de la Capa 1.
-8. Decisiones tácticas de la ejecución.
+5. Roadmap maestro vivo y auditoría integral de Iris de la Capa 5.
+6. Correcciones vinculantes de este archivo.
+7. Correcciones operativas consolidadas de la Capa 2 que no hayan sido reemplazadas.
+8. Especificación técnica completa de la Capa 1.
+9. Decisiones tácticas de la ejecución.
 
 La Capa 4 reemplaza expresamente cualquier regla anterior que exija modificar `automation/run-state.json`, crear commits operativos, actualizar una rama de estado, usar compare-and-swap sobre un blob Git o publicar comentarios operativos.
 
 La Capa 3 reemplaza expresamente cualquier regla anterior que convierta una carencia interna implementable en un bloqueo o que permita terminar el ciclo limitándose a informar que falta CI, checks, runtime guard, workflows, herramientas, validadores, tests, schemas, fixtures, configuración o infraestructura propia del repositorio.
+
+La Capa 5 reemplaza expresamente cualquier regla anterior que permita implementar antes de crear o reconciliar el roadmap, tratarlo como opcional, marcar trabajo sin evidencia o finalizar sin actualizar sus checkboxes y referencias remotas.
 
 ## Mandato autónomo esencial
 
