@@ -249,23 +249,24 @@ class DynamicToolingTests(unittest.TestCase):
             validate_inventory(self.fixture.model())
 
     def _write_fixture_workflow(self, action_ref: str, *, declare: bool) -> Path:
-    workflow = self.fixture.root / ".github/workflows/fixture.yml"
-    workflow.parent.mkdir(parents=True, exist_ok=True)
-    workflow.write_text(
-        "name: Fixture\n\n"
-        "on:\n  pull_request:\n\n"
-        "permissions:\n  contents: read\n\n"
-        "jobs:\n  validate:\n    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    steps:\n"
-        f"      - uses: actions/checkout@{action_ref}\n",
-        encoding="utf-8",
-    )
-    if declare:
-        config_path = self.fixture.root / "shared/manifests/tooling.json"
-        config = json.loads(config_path.read_text(encoding="utf-8"))
-        config.setdefault("workflowFiles", []).append(".github/workflows/fixture.yml")
-        config.setdefault("declaredFiles", []).append(".github/workflows/fixture.yml")
-        write_json(config_path, config)
-    return workflow
+        workflow = self.fixture.root / ".github/workflows/fixture.yml"
+        workflow.parent.mkdir(parents=True, exist_ok=True)
+        workflow.write_text(
+            "name: Fixture\n\n"
+            "on:\n  pull_request:\n\n"
+            "permissions:\n  contents: read\n\n"
+            "jobs:\n  validate:\n    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    steps:\n"
+            "      - name: Checkout\n"
+            f"        uses: actions/checkout@{action_ref}\n",
+            encoding="utf-8",
+        )
+        if declare:
+            config_path = self.fixture.root / "shared/manifests/tooling.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config.setdefault("workflowFiles", []).append(".github/workflows/fixture.yml")
+            config.setdefault("declaredFiles", []).append(".github/workflows/fixture.yml")
+            write_json(config_path, config)
+        return workflow
 
     def test_declared_pinned_workflow_is_allowed(self) -> None:
         self._write_fixture_workflow("a" * 40, declare=True)

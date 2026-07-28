@@ -566,7 +566,7 @@ def load_repository_model(root: Path | None = None, *, verify_sources: bool = Tr
             raise issue("WORKFLOW_TIMEOUT_MISSING", relative(root, workflow_path), "timeout-minutes", "missing", "every workflow must declare a positive job timeout")
         if re.search(r"(?m)^\s*pull_request_target\s*:", workflow_text):
             raise issue("WORKFLOW_TRIGGER_PROHIBITED", relative(root, workflow_path), "trigger", "pull_request_target", "privileged pull_request_target workflows are prohibited")
-        for action_spec in re.findall(r"(?m)^\s*-\s*uses:\s*([^\s#]+)", workflow_text):
+        for action_spec in re.findall(r"(?m)^\s*(?:-\s*)?uses:\s*([^\s#]+)", workflow_text):
             if action_spec.startswith("./"):
                 continue
             action, separator, action_ref = action_spec.rpartition("@")
