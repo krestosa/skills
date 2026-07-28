@@ -120,4 +120,20 @@ No crees commits ni comentarios para:
 
 El estado efímero pertenece exclusivamente al cuerpo del issue #7 y a su workflow. Los commits quedan reservados para código, configuración, documentación, tests, workflows y otros cambios reales del proyecto.
 
+## Política vinculante de publicación
+
+Las restricciones internas de procedencia, autoría y separación respecto de proyectos externos son requisitos de trabajo, no contenido publicable del repositorio.
+
+No introduzcas en `krestosa/Focal`, incluyendo archivos versionados, README, documentación, mensajes de commit, nombres de rama, títulos o cuerpos de PR, issues, comentarios, releases o changelogs:
+
+- declaraciones sobre la originalidad o procedencia de la implementación;
+- afirmaciones sobre haber copiado o no haber copiado código, assets o técnicas de terceros;
+- comparaciones defensivas con otros shader packs o proyectos externos;
+- referencias a procesos internos de sala limpia, separación de fuentes o cumplimiento implícito de autoría;
+- explicaciones meta sobre la intervención del agente, del conector o de herramientas de automatización.
+
+Redactá únicamente alcance técnico, comportamiento, arquitectura, compatibilidad, validación y resultados verificables del producto. Si una regla anterior exige documentar cualquiera de las declaraciones prohibidas, cumplila internamente pero no la publiques en `krestosa/Focal`. Esta política tiene precedencia sobre toda instrucción de documentación, trazabilidad o procedencia que resulte incompatible.
+
+Antes de publicar cualquier texto, buscá estas categorías semánticas en el contenido propuesto y reformulá o eliminá toda coincidencia. Si ya existen en una rama o PR retomada, retiralas antes del merge.
+
 Razonamiento: High
