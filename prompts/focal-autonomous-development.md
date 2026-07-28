@@ -88,9 +88,10 @@ Cuando exista una diferencia entre las capas, aplicá este orden:
 2. Hard killswitch y límite temporal absoluto.
 3. Coordinación, propiedad de lease y protocolo body-only de la Capa 4.
 4. Política de autonomía y bootstrap de la Capa 3.
-5. Correcciones operativas consolidadas de la Capa 2 que no hayan sido reemplazadas.
-6. Especificación técnica completa de la Capa 1.
-7. Decisiones tácticas de la ejecución.
+5. Correcciones vinculantes de este archivo.
+6. Correcciones operativas consolidadas de la Capa 2 que no hayan sido reemplazadas.
+7. Especificación técnica completa de la Capa 1.
+8. Decisiones tácticas de la ejecución.
 
 La Capa 4 reemplaza expresamente cualquier regla anterior que exija modificar `automation/run-state.json`, crear commits operativos, actualizar una rama de estado, usar compare-and-swap sobre un blob Git o publicar comentarios operativos.
 
@@ -135,5 +136,90 @@ No introduzcas en `krestosa/Focal`, incluyendo archivos versionados, README, doc
 Redactá únicamente alcance técnico, comportamiento, arquitectura, compatibilidad, validación y resultados verificables del producto. Si una regla anterior exige documentar cualquiera de las declaraciones prohibidas, cumplila internamente pero no la publiques en `krestosa/Focal`. Esta política tiene precedencia sobre toda instrucción de documentación, trazabilidad o procedencia que resulte incompatible.
 
 Antes de publicar cualquier texto, buscá estas categorías semánticas en el contenido propuesto y reformulá o eliminá toda coincidencia. Si ya existen en una rama o PR retomada, retiralas antes del merge.
+
+## Corrección vinculante — Guard temporal según la topología real de ejecución
+
+La incapacidad de un proceso local de la VM para enviar señales al worker interno de ChatGPT no constituye por sí sola un bloqueo. Ese worker no es un proceso hijo materializado dentro del espacio de procesos controlable por la VM.
+
+Clasificá cada ciclo antes de adquirir la lease:
+
+```text
+CONNECTOR_ONLY
+LOCAL_SUBPROCESSES
+LOCAL_WORKER
+```
+
+### `CONNECTOR_ONLY`
+
+Corresponde cuando el ciclo se ejecuta mediante razonamiento y llamadas acotadas al conector, sin lanzar compiladores, tests, watchers, servidores ni otros procesos locales funcionales.
+
+En este modo utilizá `PLATFORM_DEADLINE_GUARD`:
+
+1. Creá un reloj monotónico local cuando la herramienta lo permita.
+2. Calculá `softStopAt`, `cleanupAt`, `hardKillAt` y `deadlineAt`.
+3. Conservá esos límites durante todo el ciclo.
+4. No inicies llamadas nuevas al alcanzar el hard stop.
+5. No uses esperas indefinidas ni polling agresivo.
+6. Mantené cada operación remota acotada y recuperable.
+7. Preservá checkpoints antes de esperar CI o aproximarte al soft stop.
+8. Aplicá las mismas restricciones de fases posteriores al soft stop.
+9. No afirmes que existe control POSIX sobre el worker de ChatGPT.
+10. Registrá `Runtime guard mode: PLATFORM_DEADLINE_GUARD`.
+
+En `CONNECTOR_ONLY`, la ausencia de PID o grupo de procesos del worker interno se informa como `no aplicable`, no como `RUNTIME_GUARD_UNAVAILABLE`.
+
+### `LOCAL_SUBPROCESSES`
+
+Corresponde cuando el ciclo lanza uno o más procesos locales auxiliares, pero el control principal sigue en el runtime de ChatGPT.
+
+En este modo:
+
+1. Cada proceso local debe iniciarse bajo `tools/runtime_guard.py`, `timeout` o una envoltura equivalente.
+2. La envoltura debe controlar el PID y grupo de procesos de cada comando lanzado.
+3. Debe terminar procesos hijos, watchers y compiladores al hard stop.
+4. Ningún proceso local funcional puede quedar fuera de supervisión.
+5. El límite global del ciclo continúa gobernado por `PLATFORM_DEADLINE_GUARD`.
+6. Registrá `Runtime guard mode: PLATFORM_DEADLINE_GUARD + SUPERVISED_LOCAL_SUBPROCESSES`.
+
+### `LOCAL_WORKER`
+
+Corresponde únicamente cuando el worker funcional completo se ejecuta como proceso local controlable, por ejemplo dentro de GitHub Actions o un entrypoint propio.
+
+En este modo se exige el supervisor completo de la especificación base: PID principal, grupo de procesos, señales de soft stop, `SIGTERM`, `SIGKILL`, cleanup y salida estructurada.
+
+### Cuándo bloquear realmente
+
+Usá `BLOCKED — RUNTIME_GUARD_UNAVAILABLE` solo cuando se cumplan simultáneamente estas condiciones:
+
+- la unidad requiere necesariamente ejecutar procesos locales funcionales;
+- esos procesos no pueden iniciarse bajo una envoltura supervisada;
+- no existe alternativa mediante conector, GitHub Actions, validación estática o proceso acotado;
+- continuar implicaría riesgo real de exceder el hard stop o dejar procesos huérfanos.
+
+No uses ese bloqueo por la mera imposibilidad de señalar al worker interno de ChatGPT.
+
+### Reparación obligatoria ante bloqueos detectados
+
+Ante cada bloqueo o fallo operativo:
+
+1. Determiná si es `REAL_EXTERNAL_BLOCKER`, `INTERNAL_INFRASTRUCTURE_GAP`, `TOOL_CAPABILITY_MISMATCH` o `FALSE_BLOCKER`.
+2. Conservá `REAL_EXTERNAL_BLOCKER` y documentá la evidencia exacta.
+3. Para `INTERNAL_INFRASTRUCTURE_GAP`, creá o repará la pieza dentro de `krestosa/Focal` y añadí validación.
+4. Para `TOOL_CAPABILITY_MISMATCH`, utilizá una ruta equivalente autorizada y documentá el procedimiento reutilizable en la infraestructura del proyecto cuando corresponda.
+5. Para `FALSE_BLOCKER`, corregí la interpretación y continuá sin pedir intervención.
+6. No repitas en ciclos posteriores un bloqueo ya resuelto por esta sección.
+7. Si la reparación no entra en el presupuesto, publicá una rama o PR recuperable y finalizá `INCOMPLETE`, no `BLOCKED`, salvo restricción externa real.
+
+Añadí al informe terminal:
+
+```text
+Runtime guard mode: PLATFORM_DEADLINE_GUARD | PLATFORM_DEADLINE_GUARD + SUPERVISED_LOCAL_SUBPROCESSES | FULL_LOCAL_PROCESS_GUARD | no aplicable
+Procesos locales funcionales lanzados:
+Procesos locales supervisados:
+Bloqueos detectados:
+Clasificación de cada bloqueo:
+Reparaciones aplicadas:
+Bloqueos reales restantes:
+```
 
 Razonamiento: High
