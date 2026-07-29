@@ -37,12 +37,12 @@ Después de cargar íntegramente estas instrucciones, aplicá este gate antes de
    - `lastCommandAccepted == true`;
    - `lastCommandReason == LEASE_ACQUIRED` o `LEASE_RECOVERED`;
    - `leaseExpiresAt` futuro.
-5. Si aparece otro propietario, terminá `NO-OP`. Si el issue permanece `idle` después de una adquisición procesada y rechazada, terminá `BLOCKED` o `NO-OP`. Si un comando `inspect` nuevo no se correlaciona mientras el issue continúa `idle`, aplicá exclusivamente `10-coordinator-repair.md`; no continúes con análisis funcional.
+5. Si aparece otro propietario, terminá `NO-OP`. Si el issue permanece `idle` después de una adquisición procesada y rechazada, terminá `BLOCKED` o `NO-OP`. Si un comando `inspect` nuevo no se correlaciona, cumplí primero la ventana real de observación de `10-coordinator-repair.md`; solo después, mientras el issue continúe inequívocamente `idle`, evaluá esa reparación bootstrap. No continúes con análisis funcional.
 6. Antes de cada mutación posterior en `krestosa/Focal`, releé el issue y confirmá propiedad y vigencia. Si faltan menos de cinco minutos para expirar, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` antes de mutar.
 7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
 8. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
 
-`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
+`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
 
 ## Modo de ejecución
 
@@ -73,7 +73,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 
 1. Carga de instrucciones.
 2. Primera lectura obligatoria del issue `#7`.
-3. Reloj, identidad, SHA mínimo de `main`, `inspect` y adquisición confirmada; si el coordinador no procesa `inspect`, excepción acotada `COORDINATOR_REPAIR`.
+3. Reloj, identidad, SHA mínimo de `main`, `inspect`, ventana real de polling y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
 4. Resolución del resto del estado remoto y reconstrucción desde GitHub.
 5. `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`.
 6. Selección de una unidad coherente.
@@ -83,7 +83,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 10. Finalización de todas las mutaciones del proyecto.
 11. `release` como última mutación, confirmación read-only y reporte terminal único.
 
-No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5. La única lectura y mutación anterior adicional es la reparación estrictamente limitada definida en `10-coordinator-repair.md`.
+No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5. La única lectura y mutación anterior adicional es la reparación estrictamente limitada definida en `10-coordinator-repair.md` después de satisfacer su ventana de observación.
 
 ## Precedencia
 
@@ -106,6 +106,7 @@ Detenete sin iniciar nuevo trabajo cuando:
 
 - otra ejecución posee una lease válida;
 - no podés verificar o adquirir la exclusión mutua y no se cumplen todas las condiciones de `COORDINATOR_REPAIR`;
+- no podés medir o completar la ventana real de observación de comandos;
 - el issue sigue `idle` después del intento de adquisición procesado;
 - perdés la propiedad de la lease;
 - el estado remoto necesario es ambiguo después de los fallbacks permitidos;
