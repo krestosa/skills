@@ -44,6 +44,9 @@ En este modo:
 - Sin dependencias circulares.
 - Sin negaciones superpuestas para reemplazar reglas legacy.
 - Sin requerir releer contenido no relacionado en cada ciclo.
+- El gate de lease debe incluir una ruta bootstrap acotada para reparar el coordinador cuando `inspect` no se procesa y el issue está inequívocamente `idle`.
+- Los workflows de coordinación deben ser compatibles con ediciones de GitHub Apps instaladas; no deben depender de una allowlist fija de `sender.login`.
+- La reparación bootstrap nunca debe ampliar su alcance a desarrollo funcional sin lease.
 
 ## Migración compatible
 
@@ -59,6 +62,9 @@ Antes de finalizar, verificá:
 - evidencia para completado;
 - pruebas obligatorias;
 - exclusión mutua y recuperación de lock;
+- `COORDINATOR_REPAIR` cargado y limitado a infraestructura de coordinación;
+- compatibilidad con comandos emitidos por GitHub Apps autorizadas;
+- ausencia de allowlists fijas de sender que bloqueen conectores autorizados;
 - reporte terminal único;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
