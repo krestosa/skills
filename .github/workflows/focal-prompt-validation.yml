@@ -52,32 +52,43 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Reconcile coordination and generate blocker matrix
+      - name: Generate documentation and wait for connector workflow restoration
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
+          set -euo pipefail
           python scripts/temporary_reconcile_focal_docs.py
-          git show "${BASE_SHA}:.github/workflows/focal-prompt-validation.yml" > .github/workflows/focal-prompt-validation.yml
-          python - <<'PY_WORKFLOW'
-          from pathlib import Path
-
-          path = Path(".github/workflows/focal-prompt-validation.yml")
-          text = path.read_text(encoding="utf-8")
-          needle = '    paths:\n      - "prompts/focal-autonomous-development.md"'
-          replacement = '    paths:\n      - "README.md"\n      - "prompts/focal-autonomous-development.md"'
-          if text.count(needle) != 2:
-              raise SystemExit(f"unexpected workflow path blocks: {text.count(needle)}")
-          path.write_text(text.replace(needle, replacement), encoding="utf-8")
-          PY_WORKFLOW
           rm scripts/temporary_reconcile_focal_docs.py
           python scripts/tooling.py refresh-integrity
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add README.md prompts/focal/03-coordination.md shared/manifests/integrity.json scripts/temporary_reconcile_focal_docs.py
           if ! git diff --cached --quiet; then
-            git commit -m "Reconcile Focal coordination and blocker documentation"
+            git commit -m "Generate Focal blocker documentation"
+            git push origin "HEAD:${HEAD_BRANCH}"
+          fi
+
+          restored=false
+          for attempt in $(seq 1 48); do
+            git fetch origin "${HEAD_BRANCH}"
+            remote_workflow="$(git show "origin/${HEAD_BRANCH}:.github/workflows/focal-prompt-validation.yml")"
+            if grep -q '  contents: read' <<<"${remote_workflow}" && ! grep -q 'temporary_reconcile_focal_docs.py' <<<"${remote_workflow}"; then
+              restored=true
+              break
+            fi
+            sleep 5
+          done
+          if [[ "${restored}" != true ]]; then
+            echo "connector did not restore the canonical workflow within 240 seconds" >&2
+            exit 1
+          fi
+
+          git reset --hard "origin/${HEAD_BRANCH}"
+          python scripts/tooling.py refresh-integrity
+          git add shared/manifests/integrity.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh Focal prompt integrity metadata"
             git push origin "HEAD:${HEAD_BRANCH}"
           fi
 
