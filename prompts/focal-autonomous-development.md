@@ -32,18 +32,20 @@ Después de cargar íntegramente estas instrucciones, aplicá este gate antes de
 1. La **PRIMERA lectura remota de `krestosa/Focal`** debe ser el cuerpo completo del issue `#7`, `[automation-state] Focal execution state`.
 2. Antes de leer roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows o releases, generá el `runId`, resolvé únicamente el SHA de `main` necesario para el comando y ejecutá `inspect` seguido de `acquire` o `recover` según `03-coordination.md`.
 3. La primera mutación remota del ciclo debe afectar exclusivamente el bloque `focal-command:v3` del issue `#7`; el bloque `focal-state:v3` solo lo modifica GitHub Actions.
-4. No existe ejecución activa por el hecho de que un chat esté razonando, ejecutando herramientas, creando código local o anunciando que comenzó. La ejecución existe únicamente cuando el issue confirma simultáneamente:
+4. Los comandos y el estado operativo usan únicamente `commandId` y `runId` opacos. No escribas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación en el issue, logs, ramas, commits, PRs, notas, reportes ni artefactos del proyecto. Los campos legacy `owner`, `executionSource` y equivalentes deben omitirse y depurarse. No implementes esta prohibición mediante listas de nombres explícitos, fragmentados, concatenados, ofuscados, codificados o reconstruidos en tiempo de ejecución: esos nombres tampoco pueden formar parte del árbol, los tests, los validadores ni los workflows del repositorio.
+5. No existe ejecución activa por el hecho de que un proceso esté razonando, ejecutando herramientas, creando código local o anunciando que comenzó. La ejecución existe únicamente cuando el issue confirma simultáneamente:
    - `status == working`;
    - `runId` propio;
    - `lastCommandAccepted == true`;
    - `lastCommandReason == LEASE_ACQUIRED` o `LEASE_RECOVERED`;
    - `leaseExpiresAt` futuro.
-5. Si aparece otro propietario, terminá `NO-OP`. Si el issue permanece `idle` después de una adquisición procesada y rechazada, terminá `BLOCKED` o `NO-OP`. Si un comando `inspect` nuevo no se correlaciona, cumplí primero la ventana real de observación de `10-coordinator-repair.md`; solo después, mientras el issue continúe inequívocamente `idle`, evaluá esa reparación bootstrap. No continúes con análisis funcional.
-6. Antes de cada mutación posterior en `krestosa/Focal`, releé el issue y confirmá propiedad y vigencia. Si faltan menos de cinco minutos para expirar, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` antes de mutar.
-7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
-8. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
+6. Si aparece otro `runId` con lease futura, terminá `NO-OP`. Si el issue permanece `idle`, completá primero el polling de 45 segundos reales, el reenvío acotado con `commandId` nuevo y el fallback programado del coordinador definidos en `03-coordination.md`. No declares fallo ni termines por una demora mientras alguno de esos mecanismos siga disponible dentro del presupuesto.
+7. Si una adquisición se correlaciona después de que el llamador ya finalizó, tratala como lease huérfana: no inicies trabajo retrospectivo; liberala con el mismo `runId` y una nota neutral antes de cualquier mantenimiento.
+8. Antes de cada mutación posterior en `krestosa/Focal`, releé el issue y confirmá propiedad y vigencia. Si faltan menos de cinco minutos para expirar, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` antes de mutar.
+9. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
+10. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
 
-`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
+`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ninguna ejecución autorizada trabajando sobre Focal.
 
 ## Modo de ejecución
 
@@ -75,7 +77,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 
 1. Carga de instrucciones.
 2. Primera lectura obligatoria del issue `#7`.
-3. Reloj, identidad, SHA mínimo de `main`, `inspect`, ventana real de polling y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
+3. Reloj, identidad opaca, SHA mínimo de `main`, `inspect`, polling real, reenvío acotado, fallback programado y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
 4. Resolución del resto del estado remoto y reconstrucción desde GitHub.
 5. `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`.
 6. Selección de una unidad coherente.
@@ -85,7 +87,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 10. Finalización de todas las mutaciones del proyecto.
 11. `release` como última mutación, confirmación read-only y reporte terminal único.
 
-No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5. La única lectura y mutación anterior adicional es la reparación estrictamente limitada definida en `10-coordinator-repair.md` después de satisfacer su ventana de observación.
+No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5. La única lectura y mutación anterior adicional es la reparación estrictamente limitada definida en `10-coordinator-repair.md` después de satisfacer su protocolo de observación y fallback.
 
 ## Precedencia
 
@@ -108,9 +110,9 @@ La precedencia no debe usarse para conservar contradicciones evitables. Si dos m
 Detenete sin iniciar nuevo trabajo cuando:
 
 - otra ejecución posee una lease válida;
-- no podés verificar o adquirir la exclusión mutua y no se cumplen todas las condiciones de `COORDINATOR_REPAIR`;
+- no podés verificar o adquirir la exclusión mutua después de agotar polling, reenvío y fallback disponibles, y no se cumplen las condiciones de `COORDINATOR_REPAIR`;
 - no podés medir o completar la ventana real de observación de comandos;
-- el issue sigue `idle` después del intento de adquisición procesado;
+- una adquisición fue procesada y rechazada con una razón final válida;
 - perdés la propiedad de la lease;
 - el estado remoto necesario es ambiguo después de los fallbacks permitidos;
 - falta una autorización indispensable;
