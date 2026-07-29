@@ -10,6 +10,9 @@ from pathlib import Path
 ENTRYPOINT = Path("prompts/focal-autonomous-development.md")
 OPERATING_CYCLE = Path("prompts/focal/01-operating-cycle.md")
 COORDINATION = Path("prompts/focal/03-coordination.md")
+COORDINATOR_REPAIR = Path("prompts/focal/10-coordinator-repair.md")
+FLOWCHART = Path("prompts/focal/11-process-flowchart.md")
+README = Path("README.md")
 REQUIRED_MODULES = (
     OPERATING_CYCLE,
     Path("prompts/focal/02-autonomy-and-scope.md"),
@@ -20,6 +23,8 @@ REQUIRED_MODULES = (
     Path("prompts/focal/07-validation-and-acceptance.md"),
     Path("prompts/focal/08-terminal-report.md"),
     Path("prompts/focal/09-skills-maintenance.md"),
+    COORDINATOR_REPAIR,
+    FLOWCHART,
 )
 RETIRED_ACTIVE_FILES = (
     Path("prompts/focal-autonomous-development.base.md"),
@@ -56,6 +61,10 @@ REQUIRED_TEXT = (
     "campo `Iris docs`",
     "https://shaders.properties/current/reference/",
     "Resultado: PASS | PARTIAL | BLOCKED | NO-OP",
+    "45 segundos",
+    "conector de GitHub o GitHub Actions",
+    "commits de reparación alcanzables",
+    "prompts/focal/11-process-flowchart.md",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -63,6 +72,29 @@ FORBIDDEN_ACTIVE_PATTERNS = (
     r"rama\s+`automation/runtime-state`",
     r"issue\s+#2",
     r"issue\s+#5",
+)
+README_MARKERS = (
+    "<!-- focal-autonomous-blockers:start -->",
+    "<!-- focal-autonomous-blockers:end -->",
+    "## Focal autonomous work blockers",
+    "Evidence required",
+    "Recovery procedure",
+    "Resume condition",
+)
+FLOWCHART_NODES = (
+    "flowchart TD",
+    "SKILLS_MAINTENANCE",
+    "FOCAL_CYCLE",
+    "COORDINATOR_REPAIR",
+    "ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT",
+    "OPENGL_RUNTIME_HARNESS",
+    "ROADMAP_RECONCILIATION",
+    "LEASE_ACQUIRED",
+    "LEASE_RELEASED",
+    "BLOCKED",
+    "NO-OP",
+    "PARTIAL",
+    "PASS",
 )
 
 
@@ -74,7 +106,7 @@ def main() -> int:
     repo = Path.cwd()
     errors: list[str] = []
 
-    required_paths = (ENTRYPOINT,) + REQUIRED_MODULES
+    required_paths = (ENTRYPOINT,) + REQUIRED_MODULES + (README,)
     for path in required_paths:
         if not (repo / path).is_file():
             fail(errors, f"missing required file: {path}")
@@ -88,10 +120,14 @@ def main() -> int:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    texts = {path: (repo / path).read_text(encoding="utf-8") for path in required_paths}
+    prompt_paths = (ENTRYPOINT,) + REQUIRED_MODULES
+    texts = {path: (repo / path).read_text(encoding="utf-8") for path in prompt_paths}
     entry = texts[ENTRYPOINT]
     operating = texts[OPERATING_CYCLE]
     coordination = texts[COORDINATION]
+    repair = texts[COORDINATOR_REPAIR]
+    flowchart = texts[FLOWCHART]
+    readme = (repo / README).read_text(encoding="utf-8")
 
     for module in REQUIRED_MODULES:
         if f"`{module.as_posix()}`" not in entry:
@@ -120,10 +156,40 @@ def main() -> int:
         "## Guardia previa a cada mutación",
         "Después de enviarlo, no vuelvas a editar el issue ni ningún otro recurso",
         "`cleanup_branches` es una operación administrativa independiente",
+        "45 segundos reales",
+        "`COORDINATOR_REPAIR`",
     )
     for required in coordination_requirements:
         if required not in coordination:
             fail(errors, f"coordination boundary missing: {required}")
+
+    repair_requirements = (
+        "Toda lectura y mutación de `krestosa/Focal`",
+        "conector de GitHub",
+        "GitHub Actions",
+        "no debe conservar commits",
+        "force-with-lease",
+        "árbol final validado",
+        "autor",
+        "committer",
+        "workflow temporal",
+    )
+    for required in repair_requirements:
+        if required not in repair:
+            fail(errors, f"coordinator repair contract missing: {required}")
+
+    for marker in FLOWCHART_NODES:
+        if marker not in flowchart:
+            fail(errors, f"flowchart missing required node or state: {marker}")
+    if flowchart.count("```mermaid") != 1 or flowchart.count("```") < 2:
+        fail(errors, "flowchart does not contain exactly one Mermaid block")
+
+    for marker in README_MARKERS:
+        if marker not in readme:
+            fail(errors, f"README troubleshooting section missing: {marker}")
+    blocker_rows = len(re.findall(r"^\| `[^`]+` \|", readme, flags=re.MULTILINE))
+    if blocker_rows < 20:
+        fail(errors, f"README blocker matrix is incomplete: {blocker_rows} rows")
 
     active_without_coordination = "\n".join(
         text for path, text in texts.items() if path != COORDINATION
@@ -142,12 +208,12 @@ def main() -> int:
     for ref in missing_refs:
         fail(errors, f"broken prompt reference: {ref}")
 
-    if combined.count("ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT") < 2:
-        fail(errors, "initial roadmap phase is not defined and invoked")
-    if combined.count("ROADMAP_RECONCILIATION") < 2:
-        fail(errors, "final roadmap phase is not defined and invoked")
-    if combined.count("OPENGL_RUNTIME_HARNESS") < 3:
-        fail(errors, "OpenGL runtime harness is not defined across roadmap, technical and validation contracts")
+    if combined.count("ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT") < 3:
+        fail(errors, "initial roadmap phase is not defined, invoked, and diagrammed")
+    if combined.count("ROADMAP_RECONCILIATION") < 3:
+        fail(errors, "final roadmap phase is not defined, invoked, and diagrammed")
+    if combined.count("OPENGL_RUNTIME_HARNESS") < 4:
+        fail(errors, "OpenGL runtime harness is not defined across roadmap, technical, validation, and flowchart contracts")
     if combined.count("https://shaders.properties/current/reference/") < 2:
         fail(errors, "official Iris documentation links are not required across roadmap and research contracts")
     if combined.count("status == working") < 4:
@@ -160,7 +226,7 @@ def main() -> int:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    print(f"Validated {len(required_paths)} active Focal prompt files.")
+    print(f"Validated {len(prompt_paths)} active Focal prompt files and README troubleshooting.")
     return 0
 
 
