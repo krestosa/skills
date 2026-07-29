@@ -22,7 +22,8 @@
     "prompts/focal/07-validation-and-acceptance.md",
     "prompts/focal/08-terminal-report.md",
     "prompts/focal/09-skills-maintenance.md",
-    "prompts/focal/10-coordinator-repair.md"
+    "prompts/focal/10-coordinator-repair.md",
+    "prompts/focal/11-process-flowchart.md"
   ],
   "inventoryCollections": [
     "catalogs",

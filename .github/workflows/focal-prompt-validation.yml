@@ -3,6 +3,7 @@ name: Focal Prompt Validation
 on:
   pull_request:
     paths:
+      - "README.md"
       - "prompts/focal-autonomous-development.md"
       - "prompts/focal/**"
       - "scripts/repository_tooling.py"
@@ -17,6 +18,7 @@ on:
     branches:
       - main
     paths:
+      - "README.md"
       - "prompts/focal-autonomous-development.md"
       - "prompts/focal/**"
       - "scripts/repository_tooling.py"
