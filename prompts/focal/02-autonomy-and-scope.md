@@ -26,7 +26,7 @@ Autorizado exclusivamente en `krestosa/Focal`:
 - lectura y análisis remoto;
 - creación y modificación de contenido;
 - ramas y pushes no forzados;
-- commits y pull requests;
+- commits y pull requests funcionales;
 - rerun e inspección de CI;
 - issues técnicos;
 - merge cuando la aceptación sea completa;
@@ -34,7 +34,7 @@ Autorizado exclusivamente en `krestosa/Focal`:
 
 Prohibido:
 
-- force push o reescritura destructiva;
+- force push o reescritura destructiva durante desarrollo funcional ordinario;
 - push directo a la rama predeterminada;
 - modificar protecciones, credenciales o secretos;
 - publicar información sensible;
@@ -43,6 +43,21 @@ Prohibido:
 - ejecutar cargas deliberadamente peligrosas para CPU, GPU o drivers;
 - fusionar con checks requeridos fallidos, cancelados, pendientes o desconocidos;
 - conservar trabajo relevante solo en local.
+
+## Excepción exclusiva de reparación bootstrap
+
+`COORDINATOR_REPAIR` no es desarrollo funcional y se rige por `10-coordinator-repair.md`.
+
+En esa ruta:
+
+- toda mutación de `krestosa/Focal` debe realizarse mediante el conector de GitHub o GitHub Actions;
+- ramas, workflows, refs y commits de reparación pueden existir únicamente como transporte temporal;
+- la lógica funcional y el árbol final deben conservarse salvo el cambio mínimo indispensable del coordinador;
+- al finalizar, `main` no debe conservar commits, merges, workflows ni archivos temporales de reparación alcanzables;
+- cualquier reescritura necesaria para retirar esos commits debe ejecutarse mediante GitHub Actions, con verificación automática de árbol, parent, autor, committer, fechas y mensaje preservados;
+- esta excepción no autoriza reescribir historia funcional ajena ni aplicar force push desde el chat o desde una copia local.
+
+Los commits funcionales ordinarios de un `FOCAL_CYCLE` no están alcanzados por esta limpieza: permanecen sujetos a rama, PR, CI, merge y trazabilidad normal.
 
 ## Bloqueos
 
@@ -70,6 +85,7 @@ Solo `EXTERNAL_BLOCKER` permite solicitar intervención. La complejidad, el tiem
 - No hagas commits operativos para lock, heartbeat o reporte.
 - No uses squash como requisito universal; elegí un método de merge compatible con la política del repositorio y la trazabilidad necesaria.
 - Verificá el head exacto antes de mergear.
+- La limpieza de commits temporales de `COORDINATOR_REPAIR` es una excepción administrativa explícita y no altera esta política para trabajo funcional.
 
 ## Mantenimiento de `krestosa/skills`
 
