@@ -25,6 +25,19 @@ En cada ejecución:
 
 No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10`.
 
+## Safeguard de fallos transitorios del conector
+
+Un error aislado del conector no es una condición terminal ni autoriza abandonar la tarea.
+
+1. Clasificá como transitorio un timeout, desconexión, respuesta `429`, error `5xx`, indisponibilidad temporal, fallo de transporte o excepción interna sin rechazo autoritativo de GitHub.
+2. Reintentá la misma tarea y la misma operación hasta cuatro intentos totales, con esperas reales de 2, 5, 10 y 20 segundos; respetá `Retry-After` cuando exista y el presupuesto temporal del ciclo.
+3. Para una lectura, repetí la misma lectura desde la fuente remota canónica.
+4. Para una mutación cuya llamada devolvió error, tratá el resultado como desconocido: ejecutá verificación `read-after-write` antes de decidir si debe repetirse.
+5. Si el efecto remoto ya existe, considerá la mutación aplicada y continuá. Si no existe y las guardas siguen vigentes, repetí la misma operación con el mismo payload, `commandId`, SHA esperado o clave de idempotencia; no generes una mutación lógica distinta para compensar un resultado incierto.
+6. Mientras se recupera el conector, no avances a una fase que dependa de la operación fallida, no liberes una lease propia por el primer error y no declares `BLOCKED`.
+7. Solo podés detener el ciclo después de agotar reintentos, verificación remota y fallbacks autorizados, o cuando ya no quede tiempo seguro para preservar checkpoint, reconciliar y liberar. Clasificá ese caso como `CONNECTOR_RETRY_EXHAUSTED`.
+8. Si el proceso de ejecución desaparece por completo y ya no puede hacer llamadas, la siguiente ejecución independiente debe reconstruir y reintentar la misma tarea desde el estado remoto; nunca debe iniciar una unidad funcional paralela.
+
 ## Gate cero obligatorio de `FOCAL_CYCLE`
 
 Después de cargar íntegramente estas instrucciones, aplicá este gate antes de cualquier análisis del proyecto:
@@ -114,7 +127,7 @@ Detenete sin iniciar nuevo trabajo cuando:
 - no podés medir o completar la ventana real de observación de comandos;
 - una adquisición fue procesada y rechazada con una razón final válida;
 - perdés la propiedad de la lease;
-- el estado remoto necesario es ambiguo después de los fallbacks permitidos;
+- el estado remoto necesario es ambiguo después de agotar el safeguard de reintentos y los fallbacks permitidos;
 - falta una autorización indispensable;
 - una operación requeriría secretos o alcance no autorizado;
 - el tiempo restante no permite implementar, validar, publicar, reconciliar el roadmap y liberar la lease;

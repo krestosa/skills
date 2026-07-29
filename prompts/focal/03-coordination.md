@@ -87,6 +87,19 @@ Parámetros canónicos:
 
 Editar el issue no equivale a adquirir o renovar. Escribir un comando sin observar la respuesta tampoco.
 
+## Fallos del conector y mutaciones de resultado desconocido
+
+Los errores del canal de herramientas no cambian por sí mismos el estado remoto.
+
+1. Aplicá hasta cuatro intentos totales con backoff de 2, 5, 10 y 20 segundos a timeouts, desconexiones, `429`, `5xx`, indisponibilidad temporal y excepciones internas sin rechazo autoritativo.
+2. Una lectura fallida se repite contra la misma fuente canónica; no se sustituye por memoria ni por una copia local.
+3. Una mutación que devuelve error queda en estado `CONNECTOR_MUTATION_OUTCOME_UNKNOWN` (`OUTCOME_UNKNOWN`). Antes de repetirla, ejecutá `read-after-write` sobre issue, archivo, ref, commit, PR, merge, check o release afectado.
+4. Si el efecto remoto coincide con la intención, registrá la operación como aplicada y continuá. Si no coincide y las precondiciones siguen vigentes, reintentá exactamente la misma operación con el mismo payload e identificador idempotente.
+5. Para escribir `focal-command:v3`, conservá el mismo `commandId` mientras la propia escritura no esté confirmada. Generá un `commandId` nuevo solo cuando la escritura fue observada pero el coordinador no la procesó durante la ventana definida en Entrega resiliente de comandos.
+6. Durante una interrupción no confirmes ni niegues propiedad por inferencia. Pausá mutaciones funcionales y reintentá la lectura del issue hasta recuperar una observación autoritativa o agotar el presupuesto.
+7. El primer error no permite liberar la lease, cerrar la PR, descartar la rama ni terminar la tarea. Si el proceso completo desaparece, la siguiente ejecución retoma desde issue, rama, PR y checkpoint remotos.
+8. Solo después de agotar reintentos, `read-after-write` y fallbacks aplicables puede clasificarse `CONNECTOR_RETRY_EXHAUSTED`; si existe checkpoint útil, el resultado es `PARTIAL`, no `BLOCKED`.
+
 ## Preservación del cuerpo
 
 Para cada comando:
