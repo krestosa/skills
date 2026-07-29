@@ -37,6 +37,14 @@ REQUIRED_TEXT = (
     "Issue: #7",
     "focal-command:v3",
     "focal-state:v3",
+    "OPENGL_RUNTIME_HARNESS",
+    "focal-gl probe",
+    "focal-gl compile",
+    "focal-gl render",
+    "focal-gl suite",
+    "GL_RENDER_READBACK",
+    "campo `Iris docs`",
+    "https://shaders.properties/current/reference/",
     "Resultado: PASS | PARTIAL | BLOCKED | NO-OP",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
@@ -82,7 +90,6 @@ def main() -> int:
         if required not in combined:
             fail(errors, f"missing required contract text: {required}")
 
-    # Legacy names may appear only in the explicit retired-state section of coordination.
     active_without_coordination = "\n".join(
         text for path, text in texts.items() if path != Path("prompts/focal/03-coordination.md")
     )
@@ -104,6 +111,10 @@ def main() -> int:
         fail(errors, "initial roadmap phase is not defined and invoked")
     if combined.count("ROADMAP_RECONCILIATION") < 2:
         fail(errors, "final roadmap phase is not defined and invoked")
+    if combined.count("OPENGL_RUNTIME_HARNESS") < 3:
+        fail(errors, "OpenGL runtime harness is not defined across roadmap, technical and validation contracts")
+    if combined.count("https://shaders.properties/current/reference/") < 2:
+        fail(errors, "official Iris documentation links are not required across roadmap and research contracts")
 
     if errors:
         for error in errors:

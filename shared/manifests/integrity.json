@@ -92,23 +92,23 @@
       },
       {
         "path": "prompts/focal/04-roadmap.md",
-        "sha256": "c2320c29f7d75304539bfe1d59eb10ef4d4bdf7ad459eed1e6764fa73bfc190d",
-        "bytes": 6410
+        "sha256": "c1815d07584d60b70d24680926e5829ee2143649110ceea1708d5170dde9903a",
+        "bytes": 10754
       },
       {
         "path": "prompts/focal/05-iris-capability-research.md",
-        "sha256": "43858330a5e7de34c25f3a1ec8a7d781cd0117232a3fb06e260dc3f4b7a392ca",
-        "bytes": 4367
+        "sha256": "3c4cd57eb06918f5b9c33616d64139315b931a9c85917e6981aea377130d52d9",
+        "bytes": 7530
       },
       {
         "path": "prompts/focal/06-technical-requirements.md",
-        "sha256": "ca8f88e4d06717bec21af20e689ff29770a65f7ebe2d44eb81232c0dba31c6e1",
-        "bytes": 4999
+        "sha256": "52843ac1f5d5e0f29929069f9a23acb7dd318c0ea2f9a11804ec92aae9691cf6",
+        "bytes": 11053
       },
       {
         "path": "prompts/focal/07-validation-and-acceptance.md",
-        "sha256": "51345e2bde3db96491a3f815ff57682c3a7bb102aa9961ebb102e969bd58ab80",
-        "bytes": 4230
+        "sha256": "1777553159461f6a3cc26fe1df2ec279b1166d0f4c9b510a2f9cfff135639a99",
+        "bytes": 8694
       },
       {
         "path": "prompts/focal/08-terminal-report.md",
@@ -147,8 +147,8 @@
       },
       {
         "path": "scripts/validate_focal_prompt_stack.py",
-        "sha256": "d374d400b991ca4ec57531cc3858f8fc5f295416bc4d3367b988b40eefac899f",
-        "bytes": 3892
+        "sha256": "b18ebd6d536b3deba8fbb5129707eba9f0335ab7d65bef088a8821bf9f47de8e",
+        "bytes": 4382
       },
       {
         "path": "scripts/validate_gpt56.py",
