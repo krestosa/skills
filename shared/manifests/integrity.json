@@ -27,8 +27,8 @@
     "flatOutputs": 25
   },
   "inventory": {
-    "count": 105,
-    "sha256": "7cf016847834716528713e6bb40faf5c2f1b5419f04f5ee990bbfbee4ba5d597",
+    "count": 106,
+    "sha256": "ebcc70f407d91afec2eb29d791512ca10060bbb1cad3bd6f59397117870ca320",
     "files": [
       {
         "path": ".gitattributes",
@@ -72,13 +72,13 @@
       },
       {
         "path": "prompts/focal-autonomous-development.md",
-        "sha256": "0e9ec49ead2eb3b789049e88fbf011acf556f174694cc9e113bb23909c273dfb",
-        "bytes": 6947
+        "sha256": "4df00a4893ecb5b953c1f84867f498e6fbe4975a6aa16de63bebba26d7ccda35",
+        "bytes": 8023
       },
       {
         "path": "prompts/focal/01-operating-cycle.md",
-        "sha256": "f6fb2625060b1e19511ddf336a338c9004448f50ef9f80490266f509bc848364",
-        "bytes": 7654
+        "sha256": "85210e163fb23194e82993ba9892cd7c3a2ef3b61b86dd8329ab43c7fefe3d00",
+        "bytes": 9263
       },
       {
         "path": "prompts/focal/02-autonomy-and-scope.md",
@@ -117,8 +117,13 @@
       },
       {
         "path": "prompts/focal/09-skills-maintenance.md",
-        "sha256": "58cdd5d44b6e247adede07a7a373b79856670ac4723d77255f343aa1edabdb58",
-        "bytes": 3206
+        "sha256": "b0b2cc709f8d4393bc3478b4b44c1fe8f541804c0c1c386050f08b67dbe12c77",
+        "bytes": 4418
+      },
+      {
+        "path": "prompts/focal/10-coordinator-repair.md",
+        "sha256": "d4509be4fce29a8140da0cc4d7aaf594cc6a5db4a43c3cb13380b2c61323a817",
+        "bytes": 6241
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -307,8 +312,8 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "6acd18d7a1dcb29c99b4b3c0a535bb82c29e053024778b0b0813106270a7b393",
-        "bytes": 5070
+        "sha256": "469f53fa0c148d0583698952708a2ba0e920d2470ac2be237c7c47d4df3f0eb4",
+        "bytes": 5115
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
