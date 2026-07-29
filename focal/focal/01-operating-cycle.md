@@ -20,6 +20,19 @@ Este módulo define el procedimiento de `FOCAL_CYCLE`. No define el producto, el
 8. No leas todavía roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows ni releases.
 9. No registres proveedor, modelo, aplicación, cliente, conector, actor ni plataforma de conversación. `runId` y `commandId` son las únicas identidades operativas.
 
+## 1.1 Safeguard transversal del conector
+
+Este protocolo aplica a toda lectura o mutación remota del ciclo, antes y después de adquirir la lease.
+
+1. Un primer error de transporte, timeout, `429`, `5xx`, indisponibilidad temporal o excepción interna no termina el ciclo.
+2. Reintentá la misma operación hasta cuatro intentos totales con backoff real de 2, 5, 10 y 20 segundos, respetando `Retry-After` y el hard stop.
+3. En lecturas, repetí la consulta contra el mismo repositorio, ref, issue, PR, run o archivo.
+4. En mutaciones con respuesta de error, marcá el resultado como desconocido y hacé `read-after-write` sobre el recurso autoritativo.
+5. Si el efecto ya está aplicado, continuá sin duplicarlo. Si no está aplicado y la guarda de lease, SHA o head sigue vigente, reintentá la misma mutación con el mismo payload e identificador idempotente.
+6. No cambies de `commandId` por un error de transporte. Un `commandId` nuevo corresponde únicamente al reenvío posterior a una escritura confirmada pero no procesada durante la ventana de coordinación.
+7. Mientras el conector no permita confirmar propiedad, pausá nuevas mutaciones funcionales, conservá el checkpoint remoto existente y seguí reintentando; no asumas que la lease se perdió ni que la mutación falló.
+8. Solo emití `CONNECTOR_RETRY_EXHAUSTED` cuando se agotaron los cuatro intentos, la verificación remota y cualquier fallback aplicable, o cuando el tiempo restante ya no permite un cierre seguro.
+
 ## 2. Adquisición obligatoria antes del análisis
 
 Después de la primera lectura del issue:
@@ -156,7 +169,7 @@ En un bloque de finalización equivalente a `finally`:
 4. Releé el issue y confirmá por última vez que seguís siendo propietario.
 5. Enviá `release`. Este comando debe ser la **última mutación remota** de todo el ciclo.
 6. Después de `release`, no actualices archivos, ramas, PRs, comentarios, labels, releases ni el bloque de comando nuevamente.
-7. Releé el issue en modo solo lectura, con demoras reales, hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
+7. Si la llamada de `release` devuelve error, no asumas que falló: aplicá `read-after-write`; si el mismo `commandId` no aparece y seguís siendo propietario, reintentá únicamente ese mismo `release` bajo el safeguard. Luego releé el issue en modo solo lectura, con demoras reales, hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
 8. Emití únicamente la plantilla de `08-terminal-report.md`.
 
 No ejecutes `cleanup_branches` como parte del cierre. Esa operación es mantenimiento administrativo independiente y solo puede comenzar cuando no existe ninguna ejecución de desarrollo activa.

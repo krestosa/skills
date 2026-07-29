@@ -15,6 +15,17 @@ En este modo:
 - no se adquiere la lease de Focal si no habrá mutaciones en Focal;
 - no se heredan permisos de merge, release o mantenimiento hacia otros repositorios.
 
+## Safeguard del conector en mantenimiento
+
+`SKILLS_MAINTENANCE` no termina ante el primer fallo del conector.
+
+- Reintentá lecturas y mutaciones transitorias hasta cuatro intentos totales con backoff de 2, 5, 10 y 20 segundos.
+- Ante una mutación con respuesta de error, ejecutá `read-after-write` sobre la rama, archivo, commit o PR antes de repetirla.
+- Si el efecto existe, continuá; si no existe y el SHA o head esperado sigue vigente, repetí exactamente la misma operación.
+- No abras otra rama ni otra PR para compensar una operación de resultado desconocido.
+- Solo detené el mantenimiento como `CONNECTOR_RETRY_EXHAUSTED` cuando los reintentos y verificaciones fueron agotados o el presupuesto ya no permite validar y publicar con seguridad.
+- Una ejecución posterior debe retomar la misma rama o PR remota incompleta en vez de duplicar el trabajo.
+
 ## Procedimiento
 
 1. Obtené rama predeterminada y SHA remoto actual de `krestosa/skills`.
@@ -82,7 +93,8 @@ Antes de finalizar, verificá:
 - reporte terminal único;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
-- ausencia de contradicciones activas.
+- ausencia de contradicciones activas;
+- safeguard de reintentos, `read-after-write` y continuidad de la misma tarea ante fallos transitorios del conector.
 
 ## Pull request
 
