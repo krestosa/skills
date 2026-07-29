@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - maintenance/connector-retry-safeguard
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
