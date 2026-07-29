@@ -75,6 +75,16 @@ REQUIRED_TEXT = (
     "CONNECTOR_MUTATION_OUTCOME_UNKNOWN",
     "CONNECTOR_RETRY_EXHAUSTED",
     "Reintentos del conector:",
+    "Safeguard de saneamiento histórico sin huellas",
+    "NOOP_COMMIT",
+    "EMPTY_ARTIFACT_COMMIT",
+    "FAILED_TRANSPORT_COMMIT",
+    "GIT_AUTHOR_DATE",
+    "GIT_COMMITTER_DATE",
+    "git commit-tree",
+    "refs/heads/*",
+    "refs/tags/*",
+    "Commit o merge de limpieza presente:",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -113,6 +123,13 @@ FLOWCHART_NODES = (
     "READ_AFTER_WRITE",
     "RETRY_SAME_OPERATION",
     "CONNECTOR_RETRY_EXHAUSTED",
+    "HISTORY_SCAN",
+    "HISTORY_CLASSIFY",
+    "HISTORY_REPLAY",
+    "HISTORY_DATES",
+    "HISTORY_FORCE_LEASE",
+    "HISTORY_DELETE_REFS",
+    "HISTORY_REACHABILITY",
 )
 
 
@@ -200,6 +217,14 @@ def main() -> int:
         "workflow temporal",
         "fallback programado",
         "procedencia",
+        "NOOP_COMMIT",
+        "EMPTY_ARTIFACT_COMMIT",
+        "FAILED_TRANSPORT_COMMIT",
+        "GIT_AUTHOR_DATE",
+        "GIT_COMMITTER_DATE",
+        "git commit-tree",
+        "refs/heads/*",
+        "refs/tags/*",
     )
     for required in repair_requirements:
         if required not in repair:
@@ -254,6 +279,14 @@ def main() -> int:
         fail(errors, "connector unknown-outcome reconciliation is not reinforced across the prompt stack")
     if combined.count("cuatro intentos") + combined.count("four total attempts") < 3:
         fail(errors, "connector retry budget is not reinforced across the prompt stack")
+    if combined.count("NOOP_COMMIT") < 4 or combined.count("EMPTY_ARTIFACT_COMMIT") < 4 or combined.count("FAILED_TRANSPORT_COMMIT") < 4:
+        fail(errors, "history artifact classification is not reinforced across the prompt stack")
+    if combined.count("GIT_AUTHOR_DATE") < 3 or combined.count("GIT_COMMITTER_DATE") < 3:
+        fail(errors, "later-commit timestamp preservation is not reinforced across the prompt stack")
+    if combined.count("refs/heads/*") < 3 or combined.count("refs/tags/*") < 3:
+        fail(errors, "history sanitation reachability verification is not reinforced")
+    if "mensaje" not in repair or "nunca bastan solos" not in repair:
+        fail(errors, "history candidates can be classified without sufficient evidence")
 
     if errors:
         for error in errors:

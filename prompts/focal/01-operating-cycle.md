@@ -33,6 +33,18 @@ Este protocolo aplica a toda lectura o mutación remota del ciclo, antes y despu
 7. Mientras el conector no permita confirmar propiedad, pausá nuevas mutaciones funcionales, conservá el checkpoint remoto existente y seguí reintentando; no asumas que la lease se perdió ni que la mutación falló.
 8. Solo emití `CONNECTOR_RETRY_EXHAUSTED` cuando se agotaron los cuatro intentos, la verificación remota y cualquier fallback aplicable, o cuando el tiempo restante ya no permite un cierre seguro.
 
+## 1.2 Safeguard de saneamiento histórico
+
+Este protocolo se aplica antes de mergear y antes de `release` cuando el ciclo creó o detectó commits o refs de transporte sin valor funcional.
+
+1. Detectá `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` y `FAILED_TRANSPORT_COMMIT` por árbol, diff, runs y reachability; nunca por nombre o mensaje solamente.
+2. En una rama de trabajo propia, saneá únicamente el tramo creado por la ejecución. En `main`, actuá solo por la ruta excepcional autorizada y exclusivamente mediante GitHub Actions.
+3. La Action reconstruye desde el último parent limpio, omite candidatos y reaplica cada diff posterior. Conserva para cada commit posterior su autor, committer, `authorDate`, `committerDate`, timezone y mensaje originales; la hora de limpieza no reemplaza la cronología existente.
+4. No atravieses merges salvo que todos los parents puedan mapearse y la topología equivalente quede demostrada. No toques tags, releases, ramas protegidas u otros PRs.
+5. Verificá árbol final, diffs de commits conservados y ausencia de candidatos en `refs/heads/*` y `refs/tags/*` antes de continuar.
+6. La actualización de ref usa `--force-with-lease` contra el head exacto. El workflow, scripts, ramas y tags temporales se eliminan; no se crea un commit de limpieza.
+7. Si la Action falla antes del cambio de ref, no continúes con merge ni cierre. La ref objetivo debe quedar intacta y la rama temporal debe eliminarse mediante cleanup incondicional.
+
 ## 2. Adquisición obligatoria antes del análisis
 
 Después de la primera lectura del issue:
@@ -166,11 +178,12 @@ En un bloque de finalización equivalente a `finally`:
 1. Detené procesos locales propios.
 2. Verificá que todo trabajo preservable esté en GitHub.
 3. Completá antes de liberar cualquier mutación pendiente de archivos, ramas, PRs, merges, roadmap, matriz o checkpoints.
-4. Releé el issue y confirmá por última vez que seguís siendo propietario.
-5. Enviá `release`. Este comando debe ser la **última mutación remota** de todo el ciclo.
-6. Después de `release`, no actualices archivos, ramas, PRs, comentarios, labels, releases ni el bloque de comando nuevamente.
-7. Si la llamada de `release` devuelve error, no asumas que falló: aplicá `read-after-write`; si el mismo `commandId` no aparece y seguís siendo propietario, reintentá únicamente ese mismo `release` bajo el safeguard. Luego releé el issue en modo solo lectura, con demoras reales, hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
-8. Emití únicamente la plantilla de `08-terminal-report.md`.
+4. Auditá la historia y las refs creadas por el ciclo. Si existe un candidato `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` o `FAILED_TRANSPORT_COMMIT`, completá el saneamiento por GitHub Actions y verificá ausencia de artefactos alcanzables antes de liberar.
+5. Releé el issue y confirmá por última vez que seguís siendo propietario.
+6. Enviá `release`. Este comando debe ser la **última mutación remota** de todo el ciclo.
+7. Después de `release`, no actualices archivos, ramas, PRs, comentarios, labels, releases ni el bloque de comando nuevamente.
+8. Si la llamada de `release` devuelve error, no asumas que falló: aplicá `read-after-write`; si el mismo `commandId` no aparece y seguís siendo propietario, reintentá únicamente ese mismo `release` bajo el safeguard. Luego releé el issue en modo solo lectura, con demoras reales, hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
+9. Emití únicamente la plantilla de `08-terminal-report.md`.
 
 No ejecutes `cleanup_branches` como parte del cierre. Esa operación es mantenimiento administrativo independiente y solo puede comenzar cuando no existe ninguna ejecución de desarrollo activa.
 

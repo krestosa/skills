@@ -102,27 +102,48 @@ Queda prohibido durante este modo:
 
 ## Contrato de historia final sin commits de reparación
 
-Los commits de reparación son transporte temporal, no parte del historial canónico.
+Los commits de reparación, transporte, archivos vacíos y no-op no forman parte del historial canónico. La limpieza es una reescritura probada, no una eliminación por heurística.
+
+### Clasificación obligatoria
+
+Antes de excluir un SHA, reuní evidencia suficiente:
+
+- `NOOP_COMMIT`: commit de un solo parent y `tree(commit) == tree(parent)`;
+- `EMPTY_ARTIFACT_COMMIT`: el diff se limita a archivos de cero bytes en rutas temporales o de transporte, sin contenido funcional, cambios de modo, renames, submódulos ni efectos laterales;
+- `FAILED_TRANSPORT_COMMIT`: existe un run fallido correlacionado, el diff está limitado a infraestructura temporal y el replay sin ese commit produce el árbol funcional esperado;
+- commits que no cumplen exactamente una clase permanecen intactos.
+
+El mensaje, el autor, la hora, el nombre de rama o el estado del run nunca bastan solos. No excluyas commits firmados, asociados a una release, alcanzables por tags, compartidos por ramas protegidas, usados por otro PR o funcionalmente necesarios. No atravieses un merge sin mapear todos sus parents y demostrar topología equivalente.
+
+### Reescritura mediante GitHub Actions
 
 Antes de finalizar `COORDINATOR_REPAIR`:
 
-1. determiná el commit funcional previo cuyos metadatos deben preservarse;
-2. determiná el árbol final validado que contiene el fix mínimo;
-3. ejecutá mediante GitHub Actions una reescritura con `commit-tree` o mecanismo equivalente que:
-   - use el árbol final validado;
-   - conserve el parent funcional esperado;
-   - conserve exactamente nombre y correo de autor;
-   - conserve exactamente fecha de autor;
-   - conserve exactamente nombre y correo de committer;
-   - conserve exactamente fecha de committer;
-   - conserve exactamente el mensaje del commit funcional elegido;
-4. actualizá `main` mediante GitHub Actions con `--force-with-lease` contra el head temporal exacto;
-5. verificá automáticamente que el árbol anterior validado y el árbol reescrito sean idénticos;
-6. verificá que los commits y merges temporales de reparación ya no sean alcanzables desde `main`;
-7. verificá que el workflow temporal no exista en el árbol final;
-8. cerrá el issue disparador y eliminá ramas temporales cuando la operación disponible lo permita.
+1. fijá `expectedOldHead`, el último parent limpio, el árbol funcional validado y la lista cerrada de candidatos con evidencia;
+2. ejecutá exclusivamente mediante GitHub Actions; no uses force push local ni una mutación directa del conector;
+3. trabajá en un checkout completo y reconstruí la cadena en orden topológico:
+   - omití los candidatos;
+   - para cada commit posterior conservado, reaplicá su diff exacto contra el nuevo parent y calculá un árbol nuevo;
+   - conservá exactamente nombre y correo de autor mediante `GIT_AUTHOR_NAME` y `GIT_AUTHOR_EMAIL`;
+   - conservá exactamente fecha y timezone de autor mediante `GIT_AUTHOR_DATE` tomada del commit original;
+   - conservá exactamente nombre y correo de committer mediante `GIT_COMMITTER_NAME` y `GIT_COMMITTER_EMAIL`;
+   - conservá exactamente fecha y timezone de committer mediante `GIT_COMMITTER_DATE` tomada del commit original;
+   - conservá exactamente el mensaje y, cuando esté soportado, la topología de parents;
+   - creá cada commit reconstruido con `git commit-tree` o un mecanismo equivalente que permita fijar esos metadatos;
+4. no asignes a commits posteriores la hora del workflow o de la limpieza: su cronología debe ser la misma que tenían antes de retirar los candidatos;
+5. verificá para cada commit conservado que su diff semántico respecto del nuevo parent equivale al diff original y que el árbol final coincide con el árbol funcional validado;
+6. si el tramo contiene merges y no puede reconstruirse cada parent, abortá antes de cambiar refs;
+7. actualizá la ref objetivo con `--force-with-lease` contra `expectedOldHead`; si cambió, abortá y reconstruí desde el nuevo estado en otra ejecución;
+8. no crees una rama remota de backup ni un tag de backup. La evidencia vive en el run y en los SHAs observados, no en refs persistentes;
+9. retirá del árbol final el workflow y los scripts temporales antes de calcular el commit final;
+10. eliminá mediante la misma Action todas las ramas y tags temporales creados para el transporte. El paso de eliminación debe ejecutarse con `if: always()` cuando sea seguro, incluso si la validación o el push fallan;
+11. verificá que ningún candidato ni commit temporal sea alcanzable desde `refs/heads/*` o `refs/tags/*`, que no exista workflow temporal y que no haya un commit o merge de limpieza en la cadena final;
+12. verificá parent, árbol, autor, committer, `authorDate`, `committerDate`, timezone y mensaje de cada commit posterior reconstruido;
+13. solo entonces continuá con el smoke test y el retorno al ciclo normal.
 
-Esta reescritura es la única excepción al veto de force push y solo puede ejecutarse desde GitHub Actions para retirar infraestructura temporal. No autoriza a la ejecución a hacer force push mediante el conector ni a modificar la historia de features ordinarias.
+Si el candidato está en el tip y no hay commits posteriores, la Action puede mover la ref al último parent limpio únicamente cuando ese árbol sea exactamente el árbol final validado. Si la Action falla antes del cambio de ref, la ref objetivo debe permanecer intacta y toda rama temporal debe eliminarse; no publiques un commit compensatorio.
+
+Esta reescritura es la única excepción al veto de force push y solo puede ejecutarse desde GitHub Actions para retirar artefactos probados. No autoriza reescribir features ordinarias ni ocultar cambios funcionales. La auditoría interna de la plataforma puede conservar eventos u objetos no alcanzables; el criterio verificable es ausencia desde las refs visibles y el árbol controlado por el repositorio.
 
 ## Compatibilidad con GitHub Apps y entrega de eventos
 
@@ -177,8 +198,11 @@ La reparación exige:
 7. checks verdes del árbol y head temporales exactos;
 8. publicación del árbol reparado y limpieza de toda historia temporal alcanzable;
 9. verificación de árbol, parent, autor, committer, fechas, mensaje y ausencia del workflow temporal;
-10. comando `inspect` nuevo observado durante la ventana obligatoria y correlacionado con `STATE_OBSERVED`;
-11. cuando sea seguro, ciclo diagnóstico `acquire` → `heartbeat` → `release` que termine en `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`.
+10. tests o aserciones para `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` y `FAILED_TRANSPORT_COMMIT`, incluida la prohibición de clasificar por mensaje solamente;
+11. prueba de replay que conserve `GIT_AUTHOR_DATE` y `GIT_COMMITTER_DATE` de todos los commits posteriores y produzca el árbol esperado;
+12. prueba de `--force-with-lease`, ausencia de candidatos en `refs/heads/*` y `refs/tags/*`, eliminación de ramas temporales y ausencia de commit de limpieza;
+13. comando `inspect` nuevo observado durante la ventana obligatoria y correlacionado con `STATE_OBSERVED`;
+14. cuando sea seguro, ciclo diagnóstico `acquire` → `heartbeat` → `release` que termine en `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`.
 
 Si el smoke test post-publicación falla, conservá únicamente las referencias remotas indispensables para recuperar la reparación y reportá `BLOCKED` por coordinador todavía inoperable. No inicies trabajo funcional.
 
