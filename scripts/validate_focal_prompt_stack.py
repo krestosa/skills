@@ -49,7 +49,6 @@ REQUIRED_TEXT = (
     "status == working",
     "runId` propio",
     "HEARTBEAT_ACCEPTED",
-    "Si el issue permanece `idle`",
     "Antes de cada mutación",
     "cleanup_branches` no forma parte de un ciclo de desarrollo",
     "OPENGL_RUNTIME_HARNESS",
@@ -65,6 +64,11 @@ REQUIRED_TEXT = (
     "conector de GitHub o GitHub Actions",
     "commits de reparación alcanzables",
     "prompts/focal/11-process-flowchart.md",
+    "Minimización obligatoria de procedencia",
+    "Entrega resiliente de comandos",
+    "workflow_dispatch",
+    "schedule",
+    "lease huérfana",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -72,6 +76,15 @@ FORBIDDEN_ACTIVE_PATTERNS = (
     r"rama\s+`automation/runtime-state`",
     r"issue\s+#2",
     r"issue\s+#5",
+)
+FORBIDDEN_OPERATIONAL_PROVENANCE = (
+    r'"owner"\s*:',
+    r'"executionSource"\s*:',
+    r"chatgpt",
+    r"openai",
+    r"scheduled-chat",
+    r"github-connector",
+    r"agot á",
 )
 README_MARKERS = (
     "<!-- focal-autonomous-blockers:start -->",
@@ -158,6 +171,10 @@ def main() -> int:
         "`cleanup_branches` es una operación administrativa independiente",
         "45 segundos reales",
         "`COORDINATOR_REPAIR`",
+        "reenviá exactamente una vez",
+        "schedule` cada cinco minutos",
+        "workflow_dispatch",
+        "No incluyas campos `owner`",
     )
     for required in coordination_requirements:
         if required not in coordination:
@@ -173,6 +190,8 @@ def main() -> int:
         "autor",
         "committer",
         "workflow temporal",
+        "fallback programado",
+        "procedencia",
     )
     for required in repair_requirements:
         if required not in repair:
@@ -198,11 +217,14 @@ def main() -> int:
         if re.search(pattern, active_without_coordination, flags=re.IGNORECASE):
             fail(errors, f"forbidden active legacy reference outside coordination: {pattern}")
 
+    for pattern in FORBIDDEN_OPERATIONAL_PROVENANCE:
+        if re.search(pattern, combined, flags=re.IGNORECASE):
+            fail(errors, f"forbidden operational provenance in Focal prompt stack: {pattern}")
+
     references = set()
     for text in texts.values():
         references.update(
-            match
-            for match in re.findall(r"`(prompts/focal/[^`]+\.md)`", text)
+            match for match in re.findall(r"`(prompts/focal/[^`]+\.md)`", text)
         )
     missing_refs = sorted(ref for ref in references if not (repo / ref).is_file())
     for ref in missing_refs:
