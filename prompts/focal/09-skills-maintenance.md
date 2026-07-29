@@ -24,13 +24,14 @@ En este modo:
 5. Realizá cambios cohesivos y eliminá contradicciones en lugar de ocultarlas mediante precedencia.
 6. No mantengas dos sistemas ejecutables en paralelo.
 7. Conservá `prompts/focal-autonomous-development.md` como entrypoint estable.
-8. Si retirás contenido, preferí el historial Git. Archivá solo cuando tenga valor operativo y marcá el archivo como no canónico y no ejecutable.
-9. Actualizá todas las referencias.
-10. Validá Markdown, rutas, términos canónicos, fases, estados y ausencia de referencias legacy activas.
-11. Revisá el diff completo.
-12. Publicá la rama y abrí una pull request.
-13. Ejecutá o verificá CI disponible y corregí fallos causados.
-14. No mergees con validaciones requeridas fallidas.
+8. Conservá `prompts/focal/11-process-flowchart.md` como representación derivada integral, nunca como fuente normativa paralela.
+9. Si retirás contenido, preferí el historial Git. Archivá solo cuando tenga valor operativo y marcá el archivo como no canónico y no ejecutable.
+10. Actualizá todas las referencias, el manifest, la integridad, el flowchart y la sección de troubleshooting del README.
+11. Validá Markdown, Mermaid, rutas, términos canónicos, fases, estados y ausencia de referencias legacy activas.
+12. Revisá el diff completo.
+13. Publicá la rama y abrí una pull request.
+14. Ejecutá o verificá CI disponible y corregí fallos causados.
+15. No mergees con validaciones requeridas fallidas.
 
 ## Reglas de diseño del sistema
 
@@ -49,7 +50,11 @@ En este modo:
 - El gate de lease debe incluir una ruta bootstrap acotada para reparar el coordinador cuando `inspect` no se procesa y el issue está inequívocamente `idle`.
 - Los workflows de coordinación deben ser compatibles con ediciones de GitHub Apps instaladas; no deben depender de una allowlist fija de `sender.login` incompatible con conectores autorizados.
 - La reparación bootstrap nunca debe ampliar su alcance a desarrollo funcional sin lease.
+- Toda reparación de Focal previa a la lease usa exclusivamente el conector de GitHub o GitHub Actions.
+- Los commits, merges, workflows y refs temporales de `COORDINATOR_REPAIR` deben desaparecer de la historia alcanzable de `main` sin alterar el árbol funcional validado ni los metadatos que el contrato exige preservar.
 - El workflow debe probar el modo real de invocación del coordinador, incluidos imports, checkout y `PYTHONPATH` cuando correspondan.
+- El flowchart debe incluir carga de prompts, issue #7, inspect, polling, active lease, acquire, recover, coordinator repair, roadmap, Iris, implementación, OpenGL, CI, merge, reconciliación, release y todos los estados terminales.
+- El README debe listar cada clase de bloqueo autónomo definida por el stack, evidencia mínima, solución y condición de reanudación.
 
 ## Migración compatible
 
@@ -58,6 +63,7 @@ Una tarea programada que lea `prompts/focal-autonomous-development.md` debe reci
 Antes de finalizar, verificá:
 
 - entrypoint existente y legible;
+- módulos `01` a `11` existentes y cargados en orden;
 - todas las referencias resueltas;
 - `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`;
 - `ROADMAP_RECONCILIATION`;
@@ -70,6 +76,9 @@ Antes de finalizar, verificá:
 - compatibilidad con comandos emitidos por GitHub Apps autorizadas;
 - ausencia de allowlists fijas de sender que bloqueen conectores autorizados;
 - validación del modo real de ejecución del coordinador;
+- limpieza obligatoria de commits temporales de reparación en Focal;
+- flowchart Mermaid completo y consistente;
+- sección de bloqueos y recuperación en `README.md`;
 - reporte terminal único;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
@@ -79,10 +88,12 @@ Antes de finalizar, verificá:
 
 El cuerpo debe explicar:
 
-- problemas corregidos;
+- problemas y contradicciones corregidos;
 - arquitectura anterior y nueva;
 - módulos creados, retirados o archivados;
 - mecanismo de coordinación;
+- política de historia temporal de Focal;
 - comportamiento del roadmap y matriz de Iris;
+- flowchart y troubleshooting;
 - validaciones;
 - riesgos de migración.
