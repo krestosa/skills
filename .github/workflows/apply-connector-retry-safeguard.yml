@@ -27,17 +27,21 @@ jobs:
           fetch-depth: 0
           ref: maintenance/connector-retry-safeguard
 
-      - name: Repair transformer anchor
+      - name: Repair transformer anchors
         run: |
           python - <<'PY'
           from pathlib import Path
           path = Path("scripts/apply_connector_retry_safeguard.py")
           text = path.read_text(encoding="utf-8")
-          old = r'    "lease huérfana",\n)'
-          new = r'    "lease huérfana",\n    "No implementes esta prohibición mediante listas de nombres explícitos",\n)'
-          if old not in text:
-              raise SystemExit("transformer anchor not found")
-          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          replacements = {
+              r'    "lease huérfana",\n)': r'    "lease huérfana",\n    "No implementes esta prohibición mediante listas de nombres explícitos",\n)',
+              "3. Una mutación que devuelve error queda en estado `OUTCOME_UNKNOWN`.": "3. Una mutación que devuelve error queda en estado `CONNECTOR_MUTATION_OUTCOME_UNKNOWN` (`OUTCOME_UNKNOWN`).",
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f"transformer anchor not found: {old}")
+              text = text.replace(old, new, 1)
+          path.write_text(text, encoding="utf-8")
           PY
 
       - name: Apply prompt safeguard
