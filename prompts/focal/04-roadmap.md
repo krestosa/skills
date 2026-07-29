@@ -39,32 +39,98 @@ Después de adquirir la lease y antes de elegir trabajo funcional:
 9. Desmarcá o mové a `REVALIDAR` cualquier completado sin evidencia suficiente.
 10. Ejecutá la auditoría de Iris de `05-iris-capability-research.md`.
 11. Verificá los vínculos entre roadmap y matriz de Iris.
-12. Publicá el bootstrap o corrección documental si cambió.
-13. Solo entonces seleccioná una unidad.
+12. Verificá que cada feature tenga alcance, aceptación, pruebas y enlaces oficiales de Iris.
+13. Verificá que exista la unidad obligatoria `OPENGL_RUNTIME_HARNESS` y que no esté absorbida por una tarea genérica de QA.
+14. Publicá el bootstrap o corrección documental si cambió.
+15. Solo entonces seleccioná una unidad.
 
 La ausencia o invalidez grave del roadmap es bloqueante para desarrollo funcional y constituye la unidad prioritaria del ciclo.
 
-## Estructura de cada ítem
+## Granularidad obligatoria por feature
 
-Cada ítem debe tener un identificador estable, por ejemplo `FOCAL-LIGHT-001`, y conservarlo al reordenarse.
+El roadmap debe describir **cada feature técnica o visual como una unidad identificable y verificable**. No alcanza con una línea como “sombras”, “agua”, “materiales”, “OpenGL harness” o “compatibilidad”.
 
-Incluí, cuando corresponda:
+Una feature puede agrupar trabajo interno inseparable, pero debe separarse cuando cambien cualquiera de estos factores:
 
-- estado y prioridad;
-- clasificación: obligatorio, deseable, experimental, descartado con fundamento o condicionado;
-- título, alcance y resultado observable;
+- resultado observable;
+- pass o familia de programas;
+- capacidad o restricción de Iris;
+- perfil o fallback;
+- estrategia de prueba;
+- dependencia arquitectónica;
+- riesgo de rendimiento o compatibilidad;
+- criterio de aceptación.
+
+No atomices en tareas microscópicas, pero tampoco ocultes múltiples features independientes dentro de un único ítem amplio.
+
+## Estructura obligatoria de cada ítem
+
+Cada ítem debe tener un identificador estable, por ejemplo `FOCAL-LIGHT-001`, y conservarlo al reordenarse. Puede representarse como subsección o fila de tabla siempre que todos los campos permanezcan explícitos y legibles.
+
+Incluí:
+
+- estado canónico, prioridad y clasificación;
+- título inequívoco;
+- alcance y resultado observable;
+- exclusiones o límites;
 - dependencias;
-- criterios de aceptación;
-- pruebas requeridas;
+- criterios de aceptación medibles;
+- pruebas estáticas, unitarias, OpenGL, visuales, de integración y de rendimiento aplicables;
+- comando o procedimiento de prueba;
 - evidencia remota;
 - capacidades de Iris relacionadas;
-- passes, buffers, perfiles y fallbacks;
-- archivos o subsistemas afectados;
+- **campo `Iris docs` con uno o más enlaces clickeables a documentación primaria oficial**;
+- passes, buffers, uniforms, atributos, propiedades, perfiles y fallbacks afectados;
+- archivos o subsistemas previstos;
 - riesgos y presupuesto;
 - siguiente acción concreta;
-- motivo y evidencia del bloqueo.
+- motivo y evidencia del bloqueo cuando corresponda.
 
-No atomices en tareas microscópicas. Un ítem debe representar una unidad arquitectónica o funcional verificable.
+Quedan prohibidos los ítems activos de una sola frase que omitan aceptación, pruebas o documentación.
+
+## Política de enlaces oficiales de Iris
+
+Cada feature debe enlazar directamente la página oficial más específica disponible, preferentemente bajo:
+
+- `https://shaders.properties/current/reference/`;
+- `https://github.com/IrisShaders/Iris`;
+- `https://github.com/IrisShaders/docs`;
+- `https://github.com/IrisShaders/ShaderDoc`.
+
+Reglas:
+
+1. El enlace debe estar dentro del propio ítem del roadmap; una referencia a la matriz sin enlace directo no es suficiente.
+2. Usá la página específica de programas, buffers, uniforms, attributes, constants, `shaders.properties`, patcher, debugging o limitaciones cuando exista.
+3. No uses una homepage genérica si hay una página más precisa.
+4. Registrá `Revisado UTC` para el conjunto de enlaces o para el ítem.
+5. Verificá que el enlace responda y siga sosteniendo la afirmación antes de marcar `COMPLETADO`.
+6. Si no existe documentación específica, enlazá código, issue o PR oficial y explicá la ausencia.
+7. Un enlace secundario puede orientar, pero no reemplaza la fuente primaria.
+8. Las referencias Markdown reutilizables son válidas si resuelven a URLs clickeables dentro de `docs/ROADMAP.md`.
+
+## Unidad obligatoria `OPENGL_RUNTIME_HARNESS`
+
+El roadmap debe contener una familia propia, priorizada y detallada para construir un programa ejecutable por terminal que cree un contexto OpenGL real y renderice fixtures de Focal fuera de Minecraft.
+
+Como mínimo debe separar:
+
+- CLI y contrato de comandos;
+- detección de plataforma, backend, versión, extensiones y límites;
+- creación de contexto OpenGL offscreen;
+- preprocessado o consumo de shaders transformados;
+- compilación y link por stage/programa;
+- creación de buffers, texturas, samplers, framebuffer y attachments;
+- render determinista de geometría y fullscreen passes;
+- inyección de uniforms, atributos, defines y recursos de fixture;
+- ejecución de secuencias multipass y ping-pong;
+- lectura de color/depth y generación de artefactos;
+- invariantes de píxeles, NaN/Inf, errores OpenGL y determinismo;
+- aislamiento de proceso, watchdog y timeout;
+- reporte JSON, logs, imágenes y códigos de salida;
+- ejecución con Mesa software en CI y validación diferenciada sobre GPU/driver real;
+- adaptación a Iris Patcher y evidencia de cliente, sin confundir el harness standalone con compatibilidad completa de Iris.
+
+La falta de este harness impide declarar aceptación runtime general de shaders, buffers, attachments, temporal, postproceso o perfiles avanzados.
 
 ## Cobertura mínima obligatoria
 
@@ -81,7 +147,7 @@ El roadmap debe cubrir, adaptado a la evidencia real:
 9. **Dimensiones:** Overworld, Nether, End y dimensiones modificadas con fallback.
 10. **Compatibilidad:** Iris, Sodium, resource packs con y sin materiales, integraciones confirmadas, GPU, drivers y degradación por hardware.
 11. **Configuración:** perfiles de rendimiento, opciones, pantallas, traducciones, límites y defaults seguros.
-12. **Calidad:** depuración, logs, análisis estático, compilación, capturas comparativas, benchmarks, pruebas visuales, regresiones y documentación técnica y de usuario.
+12. **Calidad:** depuración, logs, análisis estático, compilación, `OPENGL_RUNTIME_HARNESS`, capturas comparativas, benchmarks, pruebas visuales, regresiones y documentación técnica y de usuario.
 
 Cada capacidad debe clasificarse; no presupongas que todas son obligatorias ni viables.
 
@@ -94,10 +160,13 @@ Cada capacidad debe clasificarse; no presupongas que todas son obligatorias ni v
 - pruebas requeridas aprobadas;
 - workflow remoto exitoso cuando sea aplicable;
 - documentación actualizada;
+- enlaces oficiales de Iris revisados;
 - evidencia enlazada;
 - ausencia de bloqueo conocido que invalide el resultado.
 
 No alcanza con código local, rama, commit sin merge, PR abierta, revisión parcial o impresión subjetiva.
+
+Una feature que requiere ejecución OpenGL no puede quedar `COMPLETADO` solo por parsing, análisis estático o compilación sintáctica. Debe incluir evidencia del harness o permanecer `REVALIDAR`.
 
 ## Prioridad de selección
 
@@ -105,12 +174,13 @@ Después de la fase inicial:
 
 1. restaurar compilación, validación o estabilidad;
 2. resolver bloqueos;
-3. completar infraestructura compartida;
-4. continuar `EN PROGRESO`;
-5. revisar `REVALIDAR`;
-6. implementar prioridad alta;
-7. investigar documentación necesaria;
-8. mejorar visual o rendimiento con medición.
+3. construir o completar `OPENGL_RUNTIME_HARNESS` hasta disponer de compile/link/render/readback mínimo;
+4. completar infraestructura compartida;
+5. continuar `EN PROGRESO`;
+6. revisar `REVALIDAR`;
+7. implementar prioridad alta;
+8. investigar documentación necesaria;
+9. mejorar visual o rendimiento con medición.
 
 No selecciones una unidad ausente del roadmap.
 
@@ -127,10 +197,11 @@ Después de implementación, pruebas, publicación, PR y merge disponible:
 7. Volvé a `PENDIENTE` lo no iniciado.
 8. Usá `REVALIDAR` para implementación sin validación suficiente o evidencia obsoleta.
 9. Usá `BLOQUEADO` solo para restricción externa comprobada.
-10. Agregá enlaces de evidencia y siguiente acción.
+10. Agregá enlaces de evidencia, enlaces oficiales de Iris y siguiente acción.
 11. Actualizá la matriz de Iris cuando haya nueva evidencia.
 12. Eliminá afirmaciones no respaldadas.
 13. Confirmá coherencia con la rama predeterminada.
+14. Confirmá que ninguna feature runtime se marcó completa sin la clase de prueba OpenGL o cliente que exige.
 
 Si una implementación solo existe en una PR no mergeada, no puede figurar como completada.
 
