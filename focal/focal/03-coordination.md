@@ -16,6 +16,19 @@ State block: <!-- focal-state:v3 -->
 
 El cuerpo del issue es la única fuente de lease. El historial Git, ramas operativas, archivos JSON y comentarios no son estado activo. El workflow serializa comandos mediante `concurrency.group: focal-automation-state` y `cancel-in-progress: false`.
 
+## Invariantes de borde obligatorias
+
+1. Después de cargar el prompt, la **PRIMERA lectura remota de `krestosa/Focal`** debe ser el issue `#7` completo.
+2. Antes de adquirir la lease solo se permite, además de esa lectura, resolver la rama predeterminada y el SHA de `main` requerido por `baseMainSha`.
+3. La primera mutación remota debe reemplazar exclusivamente el JSON de `focal-command:v3` para `inspect`, `acquire` o `recover`.
+4. Nunca edites directamente `focal-state:v3`; únicamente `Automation State Coordinator` puede modificarlo.
+5. No leas en profundidad ni mutes roadmap, matriz, archivos, ramas, PRs, commits, checks, workflows o releases hasta que el estado confirme propiedad.
+6. Antes de cada mutación posterior, releé el issue y confirmá `status == working`, `runId` propio y lease futura.
+7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en `focal-command:v3`.
+8. Después de `release` solo se permiten lecturas del issue para confirmar el estado y emitir el reporte.
+9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.
+10. `cleanup_branches` es una operación administrativa independiente. No puede formar parte del inicio, cuerpo o cierre de un `FOCAL_CYCLE`.
+
 ## Estado legacy retirado
 
 No leas, crees, actualices ni recuperes coordinación desde:
@@ -55,12 +68,13 @@ Cada ciclo crea un `runId` UUID v4 y un `commandId` único por operación.
 Parámetros canónicos:
 
 - lease inicial: 30 minutos;
-- heartbeat: antes de 10 minutos desde el anterior;
-- renovación adicional: antes de publicación, espera de CI, merge y cleanup;
+- heartbeat operativo: en cada cambio de fase y como máximo cada cinco minutos;
+- renovación adicional: antes de publicación, espera de CI, merge y cleanup interno;
+- margen previo a cualquier mutación: si restan menos de cinco minutos, renovar primero;
 - todos los timestamps: UTC ISO-8601;
 - la lease solo existe cuando el bloque de estado confirma el mismo `commandId`, aceptación, razón esperada, `runId` propio y expiración futura.
 
-Editar el issue no equivale a adquirir o renovar.
+Editar el issue no equivale a adquirir o renovar. Escribir un comando sin observar la respuesta tampoco.
 
 ## Preservación del cuerpo
 
@@ -76,6 +90,7 @@ Para cada comando:
 8. Correlacioná por `lastCommandId`.
 9. Usá polling acotado; no busy-wait ni esperas indefinidas.
 10. No crees comentarios operativos.
+11. Si otro actor reemplazó el comando antes de ser procesado, no asumas éxito: releé estado, verificá propiedad y reenviá únicamente con un `commandId` nuevo si sigue siendo seguro.
 
 ## Comandos canónicos
 
@@ -119,7 +134,7 @@ Exigí `lastCommandAccepted == true` y `lastCommandReason == STATE_OBSERVED`.
 }
 ```
 
-La adquisición exige `LEASE_ACQUIRED`, `status == working`, `runId` propio y expiración futura.
+La adquisición exige `LEASE_ACQUIRED`, `status == working`, `runId` propio y expiración futura. Mientras el issue no muestre esos valores, el ciclo sigue sin comenzar.
 
 ### Recuperación
 
@@ -153,7 +168,7 @@ La recuperación exige `LEASE_RECOVERED`.
 }
 ```
 
-Exigí `HEARTBEAT_ACCEPTED`, `runId` propio y expiración futura.
+Exigí `HEARTBEAT_ACCEPTED`, `status == working`, `runId` propio y expiración futura.
 
 ### Liberación
 
@@ -172,18 +187,36 @@ Exigí `HEARTBEAT_ACCEPTED`, `runId` propio y expiración futura.
 
 La liberación exige `LEASE_RELEASED`, `status == idle`, `runId == null` y `lastRunId` propio.
 
+El comando `release` se envía solamente después de terminar todas las demás mutaciones remotas. Después de enviarlo, no vuelvas a editar el issue ni ningún otro recurso de `krestosa/Focal`.
+
 ## Adquisición y ejecución activa
 
-Antes de mutar `krestosa/Focal`:
+Antes de analizar o mutar funcionalmente `krestosa/Focal`:
 
-1. Ejecutá `inspect`.
-2. Si existe una lease ajena futura, no envíes `acquire`:
+1. Leé primero el issue #7.
+2. Ejecutá `inspect`.
+3. Si existe una lease ajena futura, no envíes `acquire`:
    - terminá `NO-OP`;
    - no duermas esperando que finalice;
+   - no inspecciones el trabajo funcional;
    - no crees rama, PR, comentario ni commit.
-3. Si el estado está `idle`, enviá `acquire`.
-4. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.
-5. Solo comenzá mutaciones después de confirmar propiedad.
+4. Si el estado está `idle`, enviá `acquire`.
+5. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.
+6. Solo comenzá otras lecturas y mutaciones después de confirmar propiedad.
+7. Inmediatamente después de adquirir, enviá un heartbeat de fase `REMOTE_STATE_AUDIT` antes de comenzar el análisis profundo.
+
+## Guardia previa a cada mutación
+
+Antes de toda llamada mutadora al conector o a GitHub:
+
+1. Releé el issue #7.
+2. Verificá `status == working`.
+3. Verificá que `runId` coincida exactamente con el propio.
+4. Verificá que `leaseExpiresAt` sea futura y tenga al menos cinco minutos de margen.
+5. Si el margen es menor, renová y esperá `HEARTBEAT_ACCEPTED`.
+6. Si aparece `idle`, otro `runId`, `NOT_LEASE_OWNER` o una expiración insegura, detené la mutación.
+
+Esta guarda aplica a archivos, ramas, commits, PRs, reviews, labels, merges, releases, documentación, roadmap y matriz.
 
 ## Recuperación de lock abandonado
 
@@ -207,14 +240,26 @@ La recuperación no autoriza descartar trabajo. La primera unidad debe reconcili
 
 ## Pérdida de propiedad
 
-Si recibís `NOT_LEASE_OWNER`, si el estado cambia a otro `runId` o si no podés confirmar renovación antes de una expiración insegura:
+Si recibís `NOT_LEASE_OWNER`, si el estado cambia a otro `runId`, si el issue aparece `idle` durante trabajo o si no podés confirmar renovación antes de una expiración insegura:
 
-- detené nuevas mutaciones;
+- detené inmediatamente nuevas lecturas funcionales y mutaciones;
 - no mergees;
-- publicá únicamente un checkpoint ya preparado si puede hacerse sin riesgo;
+- no crees una lease ficticia para representar retrospectivamente trabajo ya iniciado;
 - no liberes una lease ajena;
-- ejecutá reconciliación con la evidencia disponible;
+- conservá únicamente evidencia remota que ya exista;
 - reportá `PARTIAL` o `BLOCKED` según exista trabajo remoto útil.
+
+## Operación administrativa `cleanup_branches`
+
+`cleanup_branches` mantiene la lógica de GitHub Actions y solo es válido cuando:
+
+- el usuario lo autorizó expresamente;
+- el issue ya muestra `idle`;
+- no existe ningún chat o workflow de desarrollo autorizado trabajando;
+- no forma parte de un `FOCAL_CYCLE`;
+- la lista de ramas fue revisada y `main` se preserva.
+
+Si existe `status == working`, el workflow debe responder `ACTIVE_LEASE`. Un chat de desarrollo no puede liberar y luego ejecutar limpieza: `release` debe seguir siendo su última mutación.
 
 ## Workflow ausente o corrupto
 
@@ -224,7 +269,7 @@ Si el issue o el workflow falta o es inválido:
 - tratá la reparación como infraestructura prioritaria de `krestosa/Focal`;
 - repará mediante rama y PR si no existe lease activa verificable;
 - validá el workflow y ejecutá un `inspect`;
-- continuá solo después de `STATE_OBSERVED`.
+- continuá solo después de `STATE_OBSERVED` y una adquisición confirmada.
 
 ## GitHub Actions mutadoras
 
@@ -233,6 +278,8 @@ Todo workflow capaz de modificar código, ramas, PRs, releases o documentación 
 - declarar `concurrency.group: focal-autonomous-development`;
 - usar `cancel-in-progress: false`;
 - adquirir la misma lease del issue #7 antes de mutar;
-- liberar mediante un finalizador si conserva propiedad.
+- releer y confirmar propiedad antes de cada fase mutadora;
+- liberar mediante un finalizador si conserva propiedad;
+- no realizar mutaciones después de `release`.
 
 El coordinador `Automation State Coordinator` es la única excepción: procesa comandos y no adquiere su propia lease.
