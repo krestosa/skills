@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+from pathlib import Path
+from textwrap import dedent
+
+
+def replace_required(text: str, old: str, new: str, label: str) -> str:
+    if old not in text:
+        raise SystemExit(f"missing expected coordination text: {label}")
+    return text.replace(old, new, 1)
+
+
+def patch_coordination() -> None:
+    path = Path("prompts/focal/03-coordination.md")
+    text = path.read_text(encoding="utf-8")
+    replacements = [
+        (
+            "2. Antes de adquirir la lease solo se permite, además de esa lectura, resolver la rama predeterminada y el SHA de `main` requerido por `baseMainSha`.",
+            "2. Antes de adquirir la lease solo se permite, además de esa lectura, resolver la rama predeterminada y el SHA de `main` requerido por `baseMainSha`. Se exceptúan únicamente las lecturas limitadas exigidas para evaluar una lease vencida recuperable y las operaciones estrictas de `COORDINATOR_REPAIR` definidas en `10-coordinator-repair.md`.",
+            "pre-lease read scope",
+        ),
+        (
+            "5. No leas en profundidad ni mutes roadmap, matriz, archivos, ramas, PRs, commits, checks, workflows o releases hasta que el estado confirme propiedad.",
+            "5. No leas en profundidad ni mutes roadmap, matriz, archivos, ramas, PRs, commits, checks, workflows o releases hasta que el estado confirme propiedad. Solo se permiten la inspección limitada previa a `recover` y la reparación bootstrap acotada de `10-coordinator-repair.md`.",
+            "pre-lease mutation boundary",
+        ),
+        (
+            "9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.",
+            "9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. La única excepción es `COORDINATOR_REPAIR`, que no autoriza trabajo funcional y se limita al coordinador. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.",
+            "idle exception",
+        ),
+        (
+            "7. Esperá de 3 a 10 segundos y releé.",
+            "7. Esperá entre 5 y 10 segundos reales antes de cada relectura.",
+            "poll interval",
+        ),
+        (
+            "9. Usá polling acotado; no busy-wait ni esperas indefinidas.",
+            "9. Mantené polling acotado durante al menos 45 segundos reales antes de clasificar el comando como no procesado; no busy-wait ni esperas indefinidas. Un run terminal fallido permite abreviar la ventana.",
+            "poll duration",
+        ),
+        (
+            "5. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.",
+            "5. Si el comando no se correlaciona después de la ventana temporal real, releé el estado y los runs del coordinador permitidos. No reenvíes a ciegas ni asumas propiedad; evaluá `COORDINATOR_REPAIR` solo si se cumplen todas sus condiciones.",
+            "acquisition timeout",
+        ),
+    ]
+    for old, new, label in replacements:
+        text = replace_required(text, old, new, label)
+
+    old_section = dedent(
+        """
+        ## Workflow ausente o corrupto
+
+        Si el issue o el workflow falta o es inválido:
+
+        - no inicies desarrollo funcional;
+        - tratá la reparación como infraestructura prioritaria de `krestosa/Focal`;
+        - repará mediante rama y PR si no existe lease activa verificable;
+        - validá el workflow y ejecutá un `inspect`;
+        - continuá solo después de `STATE_OBSERVED` y una adquisición confirmada.
+        """
+    ).lstrip()
+    new_section = dedent(
+        """
+        ## Workflow ausente o corrupto
+
+        Si el issue o el workflow falta o es inválido:
+
+        - no inicies desarrollo funcional;
+        - tratá la reparación como infraestructura prioritaria de `krestosa/Focal`;
+        - aplicá `COORDINATOR_REPAIR` únicamente cuando no exista lease activa verificable;
+        - realizá todas las lecturas y mutaciones mediante el conector de GitHub o GitHub Actions;
+        - usá ramas, PRs, workflows y commits de reparación solo como transporte temporal;
+        - no cambies lógica funcional ajena al defecto mínimo del coordinador;
+        - validá el árbol temporal, ejecutá la limpieza de historia mediante GitHub Actions y verificá que `main` no conserve commits, merges, workflows ni refs temporales alcanzables;
+        - ejecutá un `inspect` con polling temporal real;
+        - continuá solo después de `STATE_OBSERVED` y una adquisición confirmada.
+        """
+    ).lstrip()
+    text = replace_required(text, old_section, new_section, "workflow repair section")
+    path.write_text(text, encoding="utf-8")
+
+
+def blocker_section() -> str:
+    return dedent(
+        """
+        <!-- focal-autonomous-blockers:start -->
+        ## Focal autonomous work blockers
+
+        This matrix covers every blocking class defined by the active Focal prompt stack. An unexpected condition must be classified under `REMOTE_STATE_AMBIGUOUS`, `EXTERNAL_BLOCKER`, or `UNSAFE_OPERATION`; the process must not invent a new success path.
+
+        | Code | Blocking condition | Evidence required | Recovery procedure | Resume condition |
+        |---|---|---|---|---|
+        | `PROMPT_FILE_MISSING` | The entrypoint or a required module does not exist. | Repository, SHA, exact path, and 404 or missing-file result. | Do not touch Focal. Restore the file in `krestosa/skills` through `SKILLS_MAINTENANCE`, update references and integrity, then validate. | Every module listed by the entrypoint exists at one stable SHA. |
+        | `PROMPT_FILE_EMPTY` | A required prompt file is empty. | Path, SHA, and observed zero-length content. | Restore canonical content through `SKILLS_MAINTENANCE`; never use a remembered copy. | The complete file is readable and validation passes. |
+        | `PROMPT_READ_INCOMPLETE` | A file cannot be read through its last line. | Last confirmed line, path, SHA, and connector error. | Retry the connector read once; if still incomplete, stop and repair the retrieval route or file. | All files are read completely from the same SHA. |
+        | `PROMPT_SHA_CHANGED` | `krestosa/skills` changes during loading. | Initial SHA, changed SHA, and timestamps. | Restart loading once from the new SHA. Stop if it changes again. | One complete load finishes against one stable SHA. |
+        | `PROMPT_REFERENCE_BROKEN` | The entrypoint or a module references a missing active module. | Referencing path, target path, and validation output. | Correct the reference or restore the target; update manifest, flowchart, and integrity. | No broken prompt references remain. |
+        | `PROMPT_CONTRADICTION` | Two active modules impose incompatible rules. | Exact paths and conflicting passages. | Use `SKILLS_MAINTENANCE`; remove the contradiction rather than relying on precedence permanently. | Validators and manual review confirm one rule per concept. |
+        | `ISSUE_7_MISSING` | The canonical coordination issue does not exist. | Repository and issue lookup result. | Enter `COORDINATOR_REPAIR` only when no active execution evidence exists; recreate the exact issue contract through the connector. | Issue #7 exists with the expected title and both v3 blocks. |
+        | `ISSUE_TITLE_MISMATCH` | Issue #7 has the wrong title. | Observed and expected titles. | Correct only the title while preserving both blocks and body content. | The exact canonical title is observed. |
+        | `COMMAND_BLOCK_INVALID` | `focal-command:v3` is missing, duplicated, malformed, or not a JSON object. | Full issue body and parser error. | Repair the command block through the connector without altering valid state data. | Exactly one valid command block with schema version 3 exists. |
+        | `STATE_BLOCK_INVALID` | `focal-state:v3` is missing, duplicated, malformed, or not a JSON object. | Full issue body and parser error. | Repair coordinator infrastructure; do not manually invent an active lease. | Exactly one valid state block exists and the coordinator can update it. |
+        | `STATE_SCHEMA_UNSUPPORTED` | Either block uses an unsupported schema version. | Observed schema versions. | Migrate the coordinator and issue contract together under `COORDINATOR_REPAIR`. | Both blocks use the active schema and tests pass. |
+        | `STATE_REPOSITORY_MISMATCH` | The state names a repository other than `krestosa/Focal`. | Observed repository field. | Repair the state contract through the coordinator; do not continue functional work. | The repository field matches exactly. |
+        | `STATE_INVALID_COMBINATION` | State fields are internally inconsistent, such as `idle` with a run owner or `working` without expiry. | Full state block and violated invariant. | Diagnose coordinator or stale-state failure; use repair or watchdog logic without discarding remote work. | State satisfies all idle or working invariants. |
+        | `INSPECT_LATENCY_NOT_OBSERVED` | The run declares failure before 45 seconds of real polling. | Command write time and read timestamps. | Continue polling every 5–10 seconds; do not diagnose a coordinator fault from immediate reads. | `STATE_OBSERVED` arrives or a terminal failed run is proven. |
+        | `INSPECT_NOT_PROCESSED` | A new inspect command remains uncorrelated after the full window. | Command ID, 45-second timeline, state reads, and associated runs. | Enter `COORDINATOR_REPAIR` only if the issue is idle and no active work exists. | A fresh inspect returns `STATE_OBSERVED`. |
+        | `COORDINATOR_RUN_FAILED` | The coordinator workflow or job ends in failure or cancellation. | Run ID, job ID, failing step, and logs. | Repair the smallest verified cause through connector or Actions; test the real invocation path. | A new run succeeds and correlates the command. |
+        | `COORDINATOR_WORKFLOW_MISSING` | `.github/workflows/automation-state.yml` is absent or unreadable. | Default-branch SHA and missing path. | Restore it under `COORDINATOR_REPAIR`, validate, clean temporary history, then smoke-test. | The workflow exists on main and processes inspect. |
+        | `COORDINATOR_PERMISSION_DENIED` | The workflow cannot read or update issue #7 or required refs. | Workflow permissions and API error. | Grant only the repository permissions declared by the workflow; never modify secrets or protections without authorization. | The coordinator updates state successfully with least privilege. |
+        | `COORDINATOR_SENDER_REJECTED` | An authorized GitHub App edit is discarded by a fixed sender allowlist. | Event sender and rejection path or logs. | Remove fixed login gating; rely on issue scope, permissions, schema, command correlation, lease invariants, concurrency, and idempotence. | Connector-issued inspect succeeds. |
+        | `COORDINATOR_IMPORT_FAILED` | Python cannot import the coordinator or a dependency. | Traceback, checkout path, command, and `PYTHONPATH`. | Execute as an importable module and set repository-root `PYTHONPATH`; add a workflow contract test. | The exact workflow invocation imports and runs. |
+        | `COORDINATOR_RECURSION` | The workflow repeatedly processes its own issue edit. | Repeated runs and unchanged command IDs. | Enforce idempotence when `lastCommandId == commandId` and serialized concurrency. | One command causes one effective state transition. |
+        | `ACTIVE_LEASE` | Another run owns a future lease. | Owner, run ID, phase, heartbeat, and expiry. | Return `NO-OP`; do not inspect functional work, wait, cancel, overwrite, or release it. | A later independent execution observes idle or a safely expired lease. |
+        | `EXPIRED_LEASE_WITH_ACTIVE_WORK` | Lease time passed but workflows, branch, or PR activity shows the owner may still be active. | Expiry, workflow status, and recent remote activity. | Preserve ownership; do not recover until positive activity is absent under the configured grace rules. | Expired lease plus no active mutating workflow or recent branch/PR activity. |
+        | `ACQUIRE_REJECTED` | Acquire is processed but does not return `LEASE_ACQUIRED`. | Command ID, reason, state, and expiry. | Re-read state; classify active lease, invalid command, or coordinator fault. Never assume ownership. | State confirms working, own run ID, accepted command, expected reason, and future expiry. |
+        | `RECOVER_REJECTED` | Recover is processed but does not return `LEASE_RECOVERED`. | Command ID, prior state, remote activity evidence, and reason. | Preserve prior work, correct recovery preconditions, or stop. | Recovery is explicitly accepted for the new run ID. |
+        | `HEARTBEAT_REJECTED` | Heartbeat returns `NOT_LEASE_OWNER`, error, or remains unprocessed. | Command ID, run ID, state, expiry, and workflow evidence. | Stop mutations immediately; do not fabricate or reacquire retrospectively. | Ownership is safely re-established by a new valid cycle, not by continuing the old one. |
+        | `LEASE_MARGIN_UNSAFE` | Less than five minutes remain before a mutation. | Current UTC and `leaseExpiresAt`. | Send heartbeat and wait for `HEARTBEAT_ACCEPTED` before mutating. | A future lease with at least five minutes of margin is confirmed. |
+        | `LEASE_OWNERSHIP_LOST` | State becomes idle, changes run ID, or expires unsafely during work. | Last owned state and first conflicting state. | Stop reads and writes, preserve existing remote evidence, and report `PARTIAL` or `BLOCKED`. | A new independent cycle acquires or recovers the lease. |
+        | `REMOTE_HEAD_CHANGED` | Main changes after the baseline or before merge. | Old and new SHAs and compare result. | Rebase or reconstruct from the new remote state without force; repeat relevant validation. | Branch and acceptance evidence target the current main. |
+        | `REMOTE_STATE_AMBIGUOUS` | Available refs, PRs, checks, or issue data do not determine a safe next action. | Conflicting observations and unavailable evidence. | Use allowed fallbacks once; preserve work and stop rather than guess. | One authoritative remote state is verified. |
+        | `RECOVERY_REF_MISSING` | The state points to a branch, PR, or checkpoint that no longer exists. | State fields and missing-ref results. | Search remaining remote refs and PR history; mark affected roadmap items `REVALIDAR`. | A valid remote checkpoint is found or the missing work is explicitly re-planned. |
+        | `BRANCH_DIVERGED` | Work branch no longer has a safe, known relationship to main. | Compare metadata and head SHAs. | Preserve the branch, create a reconciled branch from current main, and port only verified changes. | The new branch has a reviewed diff and valid baseline. |
+        | `PR_HEAD_CHANGED` | The PR head changes after validation. | Expected and observed head SHA. | Re-run diff review and all invalidated checks; never merge stale evidence. | CI and review apply to the exact current head. |
+        | `CI_PENDING` | Required checks are queued, waiting, or in progress. | Check names, run IDs, statuses, and head SHA. | Preserve checkpoint and PR; do not merge or mark complete. | Every required check reaches an accepted terminal state. |
+        | `CI_FAILED` | A required check fails. | Failing check, logs, and head SHA. | Fix failures caused by the change; classify unrelated infrastructure failure separately. | Required checks pass on the corrected exact head. |
+        | `CI_UNAVAILABLE` | Actions, logs, or checks cannot be queried or started. | Connector error and affected run/check. | Use another authorized read route or preserve a `PARTIAL` checkpoint; do not claim validation. | CI evidence becomes observable or an explicitly approved equivalent gate exists. |
+        | `VALIDATION_HARNESS_MISSING` | A required validator, fixture, schema, or script is absent. | Required contract and missing path. | Classify as `INTERNAL_WORK_REQUIRED`; implement it as a bounded unit. | The harness exists and proves the acceptance criteria. |
+        | `OPENGL_RUNTIME_UNAVAILABLE` | `focal-gl` cannot create a context, compile, render, or read back. | Probe output, platform, GL version, driver, and failing command. | Repair the runtime harness or use a documented compatible backend; do not mark graphical work complete. | `probe`, `compile`, `render`, and `suite` pass as required. |
+        | `OPENGL_DRIVER_UNSTABLE` | The driver crashes, resets, hangs, or produces unsafe behavior. | Exit status, logs, driver/GPU data, and reproducible minimal case. | Stop dangerous loads, reduce to a safe diagnostic, document the external limitation, and avoid repeated stress. | A safe supported environment completes required validation. |
+        | `IRIS_PRIMARY_DOCS_UNAVAILABLE` | Primary Iris documentation required for a capability decision cannot be accessed. | Exact documentation URL and retrieval failure. | Keep the capability pending or `REVALIDAR`; do not substitute memory or secondary claims as proof. | Primary evidence is available and recorded in the matrix. |
+        | `ROADMAP_MISSING` | `docs/ROADMAP.md` is absent. | Main SHA and missing path. | Create it during `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT` before feature selection. | Roadmap exists with canonical states, dependencies, acceptance, evidence, and Iris links. |
+        | `IRIS_MATRIX_MISSING` | `docs/IRIS-CAPABILITY-MATRIX.md` is absent. | Main SHA and missing path. | Create it and link it bidirectionally with the roadmap. | The matrix covers the decisions needed for the cycle. |
+        | `ROADMAP_EVIDENCE_INSUFFICIENT` | An item is marked complete without proof in main and accepted checks. | Item, claimed evidence, and missing proof. | Downgrade to `REVALIDAR`, `EN PROGRESO`, or `PENDIENTE`; collect evidence. | Completion criteria and evidence are both satisfied. |
+        | `TIME_BUDGET_EXHAUSTED` | Remaining time cannot cover implementation, validation, publication, reconciliation, and release. | Elapsed time and remaining mandatory phases. | Stop new work, publish a recoverable checkpoint, reconcile documentation, and release if owned. | A future cycle starts from the remote checkpoint with a fresh budget. |
+        | `CHECKPOINT_NOT_PUBLISHED` | Relevant work exists only locally or in an unreferenced state. | Missing remote branch, commit, PR, or checkpoint SHA. | Publish a coherent remote checkpoint before waiting, soft stop, CI, or merge. | The state issue references a valid remote checkpoint. |
+        | `MERGE_BLOCKED` | Required checks, review, permissions, branch policy, or head verification prevents merge. | PR number, head SHA, mergeability, reviews, and checks. | Correct actionable causes or leave a `PARTIAL` PR; never bypass required gates. | The exact head satisfies every merge gate. |
+        | `RELEASE_NOT_PROCESSED` | The final release command does not correlate. | Release command ID, polling timeline, state, and coordinator run. | After release, perform no new mutation; continue read-only polling and report incomplete confirmation. | State shows idle, null run ID, own `lastRunId`, and `LEASE_RELEASED`. |
+        | `STALE_LEASE` | A working lease is expired and no owner activity remains. | Expiry, command correlation, workflows, branch activity, and PR activity. | Use the watchdog or `recover` path while preserving checkpoint and abandonment audit fields. | The state is safely idle or `LEASE_RECOVERED` by a new run. |
+        | `TEMP_REPAIR_HISTORY_PRESENT` | Coordinator repair commits or merges remain reachable from main. | Main ancestry and temporary SHAs. | Use the approved GitHub Actions tree-preserving rewrite; never clean it from a local clone or chat force push. | Main has the validated tree and no temporary repair commit is reachable. |
+        | `TEMP_WORKFLOW_PRESENT` | A workflow used only to perform repair or history cleanup remains in the final tree. | Final tree and workflow path. | Rebuild the final tree without the workflow and re-verify before smoke testing. | The temporary workflow path is absent from main. |
+        | `TREE_MISMATCH_AFTER_REWRITE` | The rewritten main tree differs from the validated repair tree. | Both tree SHAs and diff. | Abort or restore the expected ref; rebuild the commit with the exact validated tree. | Tree SHAs are identical and the diff is empty. |
+        | `METADATA_MISMATCH_AFTER_REWRITE` | Parent, author, committer, dates, or message changed unexpectedly. | Old and new commit metadata. | Recreate the commit through Actions with exact preserved metadata and verify each field. | Every required metadata field matches exactly. |
+        | `AUTHORIZATION_MISSING` | The requested mutation exceeds the current repository or mode authorization. | Requested action and active authorization boundary. | Stop and request only the indispensable authorization. | Explicit authorization covers the exact action and repository. |
+        | `CREDENTIAL_MISSING` | A required GitHub permission or credential is unavailable and no connector route works. | Failed operation and permission error without secrets. | Use the installed connector or Actions token; request intervention only when no authorized alternative exists. | The required least-privilege operation succeeds. |
+        | `GITHUB_SERVICE_UNAVAILABLE` | GitHub API, Actions, or repository service is unavailable. | Time, endpoint or operation, and service error. | Preserve remote state already created and stop as `PARTIAL` or `BLOCKED`; never simulate results. | The service is reachable and state can be revalidated. |
+        | `UNSAFE_OPERATION` | Completion would require unauthorized secrets, destructive local force push, dangerous GPU load, or illegal action. | Required operation and violated safety rule. | Refuse that path and use a safe authorized alternative; otherwise stop. | A safe legal route satisfies the same acceptance criteria. |
+        | `NO_VALID_WORK` | No executable roadmap unit remains or only speculative work lacks acceptance criteria. | Audited roadmap and matrix. | Reconcile documents and finish without inventing scope. | A concrete unit with dependencies and acceptance exists. |
+
+        Result mapping: an active foreign lease is `NO-OP`; an internal implementable deficiency is `INTERNAL_WORK_REQUIRED`; preserved incomplete work is `PARTIAL`; only a genuine external or unrecoverable coordination condition is `BLOCKED`. Every recovery must be followed by a fresh remote-state read before resuming.
+        <!-- focal-autonomous-blockers:end -->
+        """
+    ).strip()
+
+
+def patch_readme() -> None:
+    path = Path("README.md")
+    text = path.read_text(encoding="utf-8")
+    section = blocker_section()
+    start = "<!-- focal-autonomous-blockers:start -->"
+    end = "<!-- focal-autonomous-blockers:end -->"
+    if start in text or end in text:
+        if start not in text or end not in text:
+            raise SystemExit("README blocker markers are unbalanced")
+        before, rest = text.split(start, 1)
+        _, after = rest.split(end, 1)
+        text = before.rstrip() + "\n\n" + section + after
+    else:
+        anchor = "\n## Validate\n"
+        if anchor not in text:
+            raise SystemExit("README Validate anchor not found")
+        text = text.replace(anchor, "\n\n" + section + "\n\n## Validate\n", 1)
+    path.write_text(text, encoding="utf-8")
+
+
+def main() -> None:
+    patch_coordination()
+    patch_readme()
+
+
+if __name__ == "__main__":
+    main()
