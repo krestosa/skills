@@ -18,11 +18,12 @@ En cada ejecución:
    8. `prompts/focal/08-terminal-report.md`
    9. `prompts/focal/09-skills-maintenance.md`
    10. `prompts/focal/10-coordinator-repair.md`
+   11. `prompts/focal/11-process-flowchart.md`
 3. Verificá que todas las rutas existan y sean legibles hasta la última línea.
 4. No uses memoria, conversaciones anteriores, copias locales persistentes, caches ni snapshots históricos como fuente de instrucciones.
 5. Si el SHA de `krestosa/skills` cambia durante la carga, reiniciá la carga una sola vez desde el nuevo SHA. Si vuelve a cambiar, terminá `BLOCKED` por instrucciones inestables.
 
-No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable.
+No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10`.
 
 ## Gate cero obligatorio de `FOCAL_CYCLE`
 
@@ -42,7 +43,7 @@ Después de cargar íntegramente estas instrucciones, aplicá este gate antes de
 7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
 8. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
 
-`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
+`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
 
 ## Modo de ejecución
 
@@ -68,6 +69,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 | Reporte terminal | `08-terminal-report.md` |
 | Mantenimiento de prompts | `09-skills-maintenance.md` |
 | Reparación bootstrap del coordinador | `10-coordinator-repair.md` |
+| Flowchart integral derivado | `11-process-flowchart.md` |
 
 ## Orden global del ciclo `FOCAL_CYCLE`
 
@@ -97,6 +99,7 @@ Cuando exista una incompatibilidad real, aplicá:
 6. Roadmap y evidencia de Iris.
 7. Requisitos técnicos y gráficos.
 8. Decisiones tácticas del ciclo.
+9. Flowchart derivado.
 
 La precedencia no debe usarse para conservar contradicciones evitables. Si dos módulos activos se contradicen, corregí el sistema de prompts en una ejecución `SKILLS_MAINTENANCE`; no inventes una conciliación permanente.
 
@@ -111,7 +114,7 @@ Detenete sin iniciar nuevo trabajo cuando:
 - perdés la propiedad de la lease;
 - el estado remoto necesario es ambiguo después de los fallbacks permitidos;
 - falta una autorización indispensable;
-- una operación requeriría force push, reescritura destructiva, secretos o alcance no autorizado;
+- una operación requeriría secretos o alcance no autorizado;
 - el tiempo restante no permite implementar, validar, publicar, reconciliar el roadmap y liberar la lease;
 - no existe una unidad válida de trabajo;
 - solo quedan mejoras especulativas sin criterios de aceptación.
