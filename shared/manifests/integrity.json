@@ -72,13 +72,13 @@
       },
       {
         "path": "prompts/focal-autonomous-development.md",
-        "sha256": "474e264c43c3480f7a4280268cc3bf022a3fe5f784206e1aaec4760fcf17e6fa",
-        "bytes": 4461
+        "sha256": "0e9ec49ead2eb3b789049e88fbf011acf556f174694cc9e113bb23909c273dfb",
+        "bytes": 6947
       },
       {
         "path": "prompts/focal/01-operating-cycle.md",
-        "sha256": "92251fdae056433c2e8f0b7d62a0349c86e13cd20b300fea265d9e2969c28b5f",
-        "bytes": 5231
+        "sha256": "f6fb2625060b1e19511ddf336a338c9004448f50ef9f80490266f509bc848364",
+        "bytes": 7654
       },
       {
         "path": "prompts/focal/02-autonomy-and-scope.md",
@@ -87,8 +87,8 @@
       },
       {
         "path": "prompts/focal/03-coordination.md",
-        "sha256": "e89eefd32318458210d1a293d922786d96196dc528d00123033b15c16d56f257",
-        "bytes": 7319
+        "sha256": "6d7ae64fbce26d272fedb1569f49c0cc406ce600205692fb59a58837f28a60ce",
+        "bytes": 10962
       },
       {
         "path": "prompts/focal/04-roadmap.md",
@@ -147,8 +147,8 @@
       },
       {
         "path": "scripts/validate_focal_prompt_stack.py",
-        "sha256": "b18ebd6d536b3deba8fbb5129707eba9f0335ab7d65bef088a8821bf9f47de8e",
-        "bytes": 4382
+        "sha256": "a8989ea7def3ee7dbfcf2c4cb4e95a3f64599a48a26d322ae44e3c329f873f46",
+        "bytes": 6460
       },
       {
         "path": "scripts/validate_gpt56.py",
