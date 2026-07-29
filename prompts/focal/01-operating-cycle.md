@@ -29,8 +29,21 @@ Después de la primera lectura del issue:
 4. Si hay una lease ajena válida, terminá `NO-OP` sin otras lecturas ni mutaciones.
 5. Si el estado está `idle`, enviá `acquire`; si existe una lease vencida recuperable, aplicá `recover` conforme a `03-coordination.md`.
 6. Esperá y releé hasta confirmar `status == working`, `runId` propio, razón esperada y expiración futura.
-7. Si el issue continúa `idle`, no interpretes que el chat está trabajando: la ejecución no comenzó. Terminá `BLOCKED` o `NO-OP`.
-8. No crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de esta confirmación.
+7. Si `inspect` fue procesado pero la adquisición no produce propiedad, la ejecución no comenzó: terminá `BLOCKED` o `NO-OP`.
+8. Si `inspect` no se correlaciona y el issue permanece `idle`, no termines todavía por defecto: evaluá y, solo si cumple todas sus condiciones, ejecutá `COORDINATOR_REPAIR` conforme a `10-coordinator-repair.md`.
+9. Fuera de esa excepción bootstrap, no crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de la confirmación de lease.
+
+### 2.1 Retorno después de `COORDINATOR_REPAIR`
+
+Cuando el coordinador haya sido reparado y el smoke test confirme `STATE_OBSERVED`:
+
+1. descartá el `runId` previo al fallo y cualquier run diagnóstico;
+2. releé el issue completo;
+3. generá identidad y tiempos nuevos para el ciclo funcional;
+4. reiniciá esta sección desde el paso 1;
+5. no reutilices ramas ni commits de reparación como rama funcional del shader.
+
+Si la reparación no queda mergeada o el smoke test sigue sin correlacionarse, terminá `BLOCKED` sin analizar roadmap ni código funcional.
 
 ## 3. Estado remoto autorizado
 
@@ -90,7 +103,7 @@ Antes de cualquier mutación en `krestosa/Focal`, incluyendo crear o actualizar 
 4. Si restan menos de cinco minutos de lease, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED`.
 5. Si no podés confirmar propiedad, no ejecutes la mutación.
 
-Un chat que sigue trabajando mientras el issue está `idle` está fuera del protocolo y debe detenerse inmediatamente.
+Un chat que sigue trabajando mientras el issue está `idle` está fuera del protocolo y debe detenerse inmediatamente, excepto durante las operaciones estrictamente limitadas de `COORDINATOR_REPAIR`.
 
 ## 8. Rama, implementación y checkpoints
 
