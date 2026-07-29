@@ -4,7 +4,7 @@ Este módulo define el procedimiento de `FOCAL_CYCLE`. No define el producto, el
 
 ## 1. Preflight local y primera lectura remota
 
-1. Generá un `runId` UUID v4.
+1. Generá un `runId` UUID v4 y un `commandId` UUID v4 por comando.
 2. Registrá `startedAt` en UTC y un reloj monotónico cuando el entorno lo permita.
 3. Clasificá la topología:
    - `CONNECTOR_ONLY`;
@@ -18,6 +18,7 @@ Este módulo define el procedimiento de `FOCAL_CYCLE`. No define el producto, el
 6. No afirmes control POSIX sobre un worker que no sea un proceso local controlable.
 7. La **primera llamada remota contra `krestosa/Focal`** debe leer íntegramente el issue `#7`.
 8. No leas todavía roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows ni releases.
+9. No registres proveedor, modelo, aplicación, cliente, conector, actor ni plataforma de conversación. `runId` y `commandId` son las únicas identidades operativas.
 
 ## 2. Adquisición obligatoria antes del análisis
 
@@ -29,12 +30,18 @@ Después de la primera lectura del issue:
 4. Esperá `STATE_OBSERVED` mediante polling con demora real: releé cada 5 a 10 segundos durante al menos 45 segundos antes de clasificar el comando como no procesado. Las lecturas consecutivas sin tiempo transcurrido no cuentan.
 5. Si hay una lease ajena válida, terminá `NO-OP` sin otras lecturas ni mutaciones.
 6. Si el estado está `idle`, enviá `acquire`; si existe una lease vencida recuperable, aplicá `recover` conforme a `03-coordination.md`.
-7. Para `acquire`, `recover`, `heartbeat` y `release`, aplicá la misma disciplina temporal: polling con demora real, correlación por `commandId` y observación del run cuando esté disponible.
-8. Esperá y releé hasta confirmar `status == working`, `runId` propio, razón esperada y expiración futura.
-9. Si `inspect` fue procesado pero la adquisición no produce propiedad, la ejecución no comenzó: terminá `BLOCKED` o `NO-OP`.
-10. Si `inspect` no se correlaciona después de la ventana real o un run terminal falla antes, evaluá y, solo si cumple todas sus condiciones, ejecutá `COORDINATOR_REPAIR` conforme a `10-coordinator-repair.md`.
-11. Si el entorno no permite esperar o medir tiempo transcurrido, terminá `BLOCKED` por observación insuficiente; no declares que el coordinador está roto.
-12. Fuera de esa excepción bootstrap, no crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de la confirmación de lease.
+7. Para `acquire`, `recover`, `heartbeat` y `release`, aplicá la misma disciplina temporal: polling real, correlación por `commandId` y observación del run cuando esté disponible.
+8. Si un comando no se correlaciona después de 45 segundos reales y el issue continúa inequívocamente `idle`, sin otro `runId` ni workflow mutador activo:
+   - releé el comando y el estado completos;
+   - generá un `commandId` nuevo;
+   - reenviá una sola vez la misma operación con timestamps y expiración recalculados;
+   - esperá otra ventana de 45 segundos reales.
+9. Si el segundo comando tampoco se correlaciona, comprobá el fallback programado de `Automation State Coordinator`. Cuando exista y resten al menos diez minutos de presupuesto, observá hasta seis minutos desde el segundo envío para permitir el run `schedule`; no declares fallo mientras ese fallback siga pendiente o ejecutándose.
+10. Esperá y releé hasta confirmar `status == working`, `runId` propio, razón esperada y expiración futura.
+11. Una adquisición tardía que se correlaciona después de que la ejecución ya emitió un resultado es una lease huérfana. No retomes trabajo retrospectivamente: liberala con el mismo `runId`, resultado factual y nota neutral antes de cualquier mantenimiento.
+12. Solo terminá `BLOCKED` por coordinación cuando se agotaron el polling inicial, el reenvío único, el fallback programado aplicable y la evaluación de `COORDINATOR_REPAIR`, o cuando un comando fue procesado y rechazado con una razón final válida.
+13. Si el entorno no permite esperar o medir tiempo transcurrido, terminá `BLOCKED` por observación insuficiente; no declares que el coordinador está roto.
+14. Fuera de `COORDINATOR_REPAIR`, no crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de la confirmación de lease.
 
 ### 2.1 Retorno después de `COORDINATOR_REPAIR`
 
@@ -42,11 +49,11 @@ Cuando el coordinador haya sido reparado y el smoke test confirme `STATE_OBSERVE
 
 1. descartá el `runId` previo al fallo y cualquier run diagnóstico;
 2. releé el issue completo;
-3. generá identidad y tiempos nuevos para el ciclo funcional;
+3. generá identidad opaca y tiempos nuevos para el ciclo funcional;
 4. reiniciá esta sección desde el paso 1;
 5. no reutilices ramas ni commits de reparación como rama funcional del shader.
 
-Si la reparación no queda mergeada o el smoke test sigue sin correlacionarse después de la ventana obligatoria, terminá `BLOCKED` sin analizar roadmap ni código funcional.
+Si la reparación no queda publicada o el smoke test sigue sin correlacionarse después de agotar el reenvío y fallback obligatorios, terminá `BLOCKED` sin analizar roadmap ni código funcional.
 
 ## 3. Estado remoto autorizado
 
@@ -121,7 +128,7 @@ Un chat que sigue trabajando mientras el issue está `idle` está fuera del prot
    - alcanzar el soft stop;
    - realizar una operación de merge.
 7. Enviá heartbeat en cada cambio de fase y como máximo cada cinco minutos mientras continúe el trabajo.
-8. Cada heartbeat debe registrar fase, rama, head, PR y checkpoint actuales.
+8. Cada heartbeat debe registrar fase, rama, head, PR y checkpoint actuales, sin procedencia del cliente de ejecución.
 
 ## 9. Validación y publicación
 

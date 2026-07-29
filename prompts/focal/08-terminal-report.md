@@ -51,8 +51,11 @@ Reglas:
 
 - Usá SHA, números de PR, runs y rutas verificables.
 - No declares que un archivo o cambio existe si no fue observado remotamente.
+- No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
+- `runId` y `commandId` son identificadores opacos; no intentes derivar ni explicar la herramienta que los originó.
 - `PASS` requiere publicación, aceptación, reconciliación y liberación completas.
-- En `NO-OP` por lease activa, indicá el propietario, fase y expiración observados sin modificar el estado.
+- En `NO-OP` por lease activa, indicá únicamente `runId`, fase y expiración observados sin modificar el estado.
 - En `SKILLS_MAINTENANCE`, reemplazá las rutas de roadmap y matriz por `no aplicable` salvo que la tarea también autorice Focal.
 - En `COORDINATOR_REPAIR`, distinguí commits temporales observados de commits alcanzables al final. `PASS` requiere que ningún commit, merge, workflow o ref temporal de reparación permanezca alcanzable desde `main`.
 - Si se reescribió el commit final de Focal mediante GitHub Actions, informá el árbol preservado, parent, autor, committer, fechas y mensaje verificados.
+- La imposibilidad de borrar auditoría interna de GitHub o del proveedor es una limitación de plataforma; no la confundas con contenido controlado por el repositorio.

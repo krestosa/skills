@@ -16,13 +16,31 @@ Antes de diagnosticar que un comando no fue procesado:
 
 La latencia normal de GitHub Actions no activa `COORDINATOR_REPAIR`.
 
+## Reenvío y fallback previos a la reparación
+
+Antes de entrar en reparación por un comando no correlacionado:
+
+1. confirmá que el issue sigue `idle`, `runId == null` y que el comando no fue procesado;
+2. reenviá una sola vez la misma operación con `commandId` nuevo y timestamps recalculados;
+3. completá otra ventana de 45 segundos reales;
+4. verificá que `.github/workflows/automation-state.yml` admita:
+   - `issues: types: [edited]`;
+   - `schedule` cada cinco minutos;
+   - `workflow_dispatch`;
+   - ejecución para eventos sin `github.event.issue`;
+5. si el fallback programado existe y quedan al menos diez minutos, observá hasta seis minutos desde el segundo envío;
+6. si el comando se procesa dentro de esa ventana, continuá normalmente y no clasifiques el retraso como avería;
+7. si la adquisición se procesa después de que el llamador ya terminó, liberá la lease huérfana con el mismo `runId` y una nota neutral; no inicies trabajo retrospectivo.
+
+No entres en reparación mientras el reenvío o el fallback aplicable sigan pendientes.
+
 ## Activación estricta
 
 Entrá en `COORDINATOR_REPAIR` únicamente cuando se cumplan simultáneamente:
 
 1. el issue canónico `#7` existe, conserva ambos bloques `v3` válidos y muestra `status == idle` con `runId == null`, o el issue/workflow falta y no existe evidencia positiva de una ejecución activa;
-2. se escribió un comando `inspect` nuevo preservando el cuerpo cuando el issue era utilizable;
-3. se completó la ventana de observación obligatoria y `lastCommandId` no se correlacionó, o existe un run o job terminal fallido asociado al comando, o el coordinador es estructuralmente ilegible;
+2. se escribió un comando nuevo preservando el cuerpo cuando el issue era utilizable;
+3. se agotaron la ventana inicial, el reenvío único y el fallback programado aplicable sin correlación, o existe un run o job terminal fallido asociado al comando, o el coordinador es estructuralmente ilegible;
 4. no existe evidencia positiva de una lease activa, un workflow mutador activo o trabajo funcional concurrente;
 5. la instrucción actual autoriza modificar `krestosa/Focal`.
 
@@ -36,6 +54,16 @@ Toda lectura y mutación de `krestosa/Focal` durante `COORDINATOR_REPAIR` debe e
 - GitHub Actions instalado en el propio repositorio.
 
 No uses clon local, Git local, API directa fuera del conector, shell remoto externo, proxy ni workspace persistente para modificar Focal.
+
+## Privacidad operativa
+
+La reparación no debe registrar el cliente que emitió los comandos.
+
+- No leas ni imprimas `sender.login` salvo que sea indispensable para demostrar un filtro defectuoso; si se inspecciona, no lo copies a archivos, logs nuevos, PRs, notas ni reportes.
+- No agregues campos `owner`, `executionSource`, `client`, `provider`, `model`, `agent`, `actor` o `sender` al contrato.
+- Eliminá campos legacy de procedencia del estado en la siguiente transición válida.
+- Los tests deben usar valores neutrales y comprobar ausencia de nombres de proveedor, modelo, aplicación, conector y plataforma de conversación.
+- La auditoría interna de GitHub no es contenido controlado por el repositorio y no puede prometerse su eliminación.
 
 ## Alcance permitido sin lease
 
@@ -56,8 +84,8 @@ Queda prohibido durante este modo:
 - seleccionar una feature;
 - representar el trabajo como un `FOCAL_CYCLE` adquirido;
 - editar directamente `focal-state:v3`;
-- liberar una lease que no fue adquirida;
-- continuar si aparece `status == working` o un propietario ajeno;
+- liberar una lease que no fue adquirida, salvo la lease huérfana tardía identificada inequívocamente por el mismo `runId` de la ejecución ya terminada;
+- continuar si aparece `status == working` con un `runId` ajeno;
 - dejar en `main` commits, merges, archivos, workflows, ramas o refs temporales de reparación alcanzables;
 - cambiar la lógica funcional fuera del defecto mínimo verificado del coordinador;
 - reescribir historia funcional no relacionada.
@@ -84,9 +112,9 @@ Antes de finalizar `COORDINATOR_REPAIR`:
 7. verificá que el workflow temporal no exista en el árbol final;
 8. cerrá el issue disparador y eliminá ramas temporales cuando la operación disponible lo permita.
 
-Esta reescritura es la única excepción al veto de force push y solo puede ejecutarse desde GitHub Actions para retirar infraestructura temporal. No autoriza al chat a ejecutar force push mediante el conector ni a modificar la historia de features ordinarias.
+Esta reescritura es la única excepción al veto de force push y solo puede ejecutarse desde GitHub Actions para retirar infraestructura temporal. No autoriza a la ejecución a hacer force push mediante el conector ni a modificar la historia de features ordinarias.
 
-## Compatibilidad con GitHub Apps
+## Compatibilidad con GitHub Apps y entrega de eventos
 
 El coordinador debe aceptar comandos emitidos mediante usuarios autorizados y GitHub Apps instaladas con permiso para editar el issue.
 
@@ -95,6 +123,8 @@ No hardcodees una allowlist de `sender.login` limitada al propietario o a `githu
 La frontera de confianza debe basarse en:
 
 - evento `issues.edited` del issue exacto `#7`;
+- fallback `schedule` cada cinco minutos;
+- fallback manual `workflow_dispatch`;
 - capacidad otorgada por GitHub para editar ese issue;
 - esquema y operación permitidos;
 - correlación por `commandId`;
@@ -102,14 +132,16 @@ La frontera de confianza debe basarse en:
 - `concurrency.group: focal-automation-state` con `cancel-in-progress: false`;
 - idempotencia cuando `lastCommandId == commandId`.
 
-Registrar el sender para auditoría es válido; rechazar por un conjunto fijo de logins no lo es salvo que exista una fuente de identidad dinámica, verificable y compatible con las GitHub Apps autorizadas.
+No registres el sender dentro de los artefactos del repositorio. GitHub conserva su propia auditoría de eventos.
 
 ## Diagnóstico obligatorio
 
 Determiná una causa verificable antes de editar. Revisá, según disponibilidad:
 
 - tiempo real entre la escritura del comando y las lecturas posteriores;
+- si el comando terminó procesándose con retraso;
 - run, job y logs asociados al evento `issues.edited`;
+- presencia y funcionamiento del run programado de fallback;
 - trigger `issues: types: [edited]`;
 - condición exacta del issue `#7`;
 - permisos `issues: write` y los permisos adicionales realmente usados;
@@ -128,13 +160,15 @@ La reparación exige:
 
 1. tests unitarios para `inspect`, `acquire`, lease ajena, `heartbeat`, `release` e idempotencia;
 2. test o aserción que impida reintroducir una allowlist fija de sender incompatible con conectores autorizados;
-3. test del modo real de invocación del script o módulo, incluidos imports y `PYTHONPATH` cuando correspondan;
-4. validación YAML y del repositorio;
-5. checks verdes del árbol y head temporales exactos;
-6. publicación del árbol reparado y limpieza de toda historia temporal alcanzable;
-7. verificación de árbol, parent, autor, committer, fechas, mensaje y ausencia del workflow temporal;
-8. comando `inspect` nuevo observado durante la ventana obligatoria y correlacionado con `STATE_OBSERVED`;
-9. cuando sea seguro, ciclo diagnóstico `acquire` → `heartbeat` → `release` que termine en `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`.
+3. test que rechace campos de procedencia y depure campos legacy del estado;
+4. test del modo real de invocación del script o módulo, incluidos imports y `PYTHONPATH` cuando correspondan;
+5. test del fallback `schedule` y `workflow_dispatch`;
+6. validación YAML y del repositorio;
+7. checks verdes del árbol y head temporales exactos;
+8. publicación del árbol reparado y limpieza de toda historia temporal alcanzable;
+9. verificación de árbol, parent, autor, committer, fechas, mensaje y ausencia del workflow temporal;
+10. comando `inspect` nuevo observado durante la ventana obligatoria y correlacionado con `STATE_OBSERVED`;
+11. cuando sea seguro, ciclo diagnóstico `acquire` → `heartbeat` → `release` que termine en `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`.
 
 Si el smoke test post-publicación falla, conservá únicamente las referencias remotas indispensables para recuperar la reparación y reportá `BLOCKED` por coordinador todavía inoperable. No inicies trabajo funcional.
 
@@ -148,4 +182,4 @@ Una vez confirmado `STATE_OBSERVED` y verificada la limpieza de historia:
 4. retomá desde el gate cero normal;
 5. no reutilices el run diagnóstico como ejecución funcional.
 
-La reparación bootstrap no emite `release` salvo que haya adquirido explícitamente una lease de diagnóstico. Si nunca adquirió lease, el reporte debe indicar `Lock liberado: no adquirido`.
+La reparación bootstrap no emite `release` salvo que haya adquirido explícitamente una lease de diagnóstico o deba sanear una adquisición tardía inequívoca. Si nunca adquirió lease, el reporte debe indicar `Lock liberado: no adquirido`.

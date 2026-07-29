@@ -26,8 +26,19 @@ El cuerpo del issue es la única fuente de lease. El historial Git, ramas operat
 6. Antes de cada mutación posterior, releé el issue y confirmá `status == working`, `runId` propio y lease futura.
 7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en `focal-command:v3`.
 8. Después de `release` solo se permiten lecturas del issue para confirmar el estado y emitir el reporte.
-9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. La única excepción es `COORDINATOR_REPAIR`, que no autoriza trabajo funcional y se limita al coordinador. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.
-10. `cleanup_branches` es una operación administrativa independiente. No puede formar parte del inicio, cuerpo o cierre de un `FOCAL_CYCLE`.
+9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. La única excepción es `COORDINATOR_REPAIR`, que no autoriza trabajo funcional y se limita al coordinador.
+10. `cleanup_branches` es una operación administrativa independiente. No puede formar parte del inicio, cuerpo o cierre de un `FOCAL_CYCLE`; `cleanup_branches` no forma parte de un ciclo de desarrollo.
+
+## Minimización obligatoria de procedencia
+
+La coordinación necesita identificar una ejecución, no la herramienta que la ejecuta.
+
+- `commandId` y `runId` son los únicos identificadores operativos permitidos.
+- No incluyas campos `owner`, `executionSource`, `client`, `provider`, `model`, `agent`, `actor`, `sender` ni equivalentes en comandos nuevos.
+- No escribas nombres de proveedor, modelo, aplicación, cliente, conector, producto o plataforma de conversación en el issue, notas, logs, ramas, commits, PRs, checks, reportes o artefactos de Focal.
+- Los campos legacy de procedencia que existan en `focal-state:v3` deben ser eliminados por el coordinador en la siguiente transición válida; mientras tanto no se consideran parte de la propiedad.
+- No registres el login del emisor en la salida del workflow. La auditoría de GitHub permanece en la plataforma y no debe duplicarse dentro de los artefactos del repositorio.
+- No prometas borrar auditoría interna de GitHub o del proveedor: el contrato cubre únicamente contenido y metadatos controlados por los repositorios.
 
 ## Estado legacy retirado
 
@@ -50,14 +61,14 @@ Interpretá como estado operativo:
 - `status`: `idle` o `working`;
 - `mode`: `normal` o `recovery`;
 - `phase`: fase vigente;
-- `runId`, `owner` y `executionSource`: propietario;
+- `runId`: único propietario operativo;
 - `startedAt`, `heartbeatAt` y `leaseExpiresAt`: vigencia;
 - `softStopAt`, `cleanupAt`, `hardKillAt` y `deadlineAt`: límites;
 - `baseMainSha`: baseline observado;
 - `workBranch`, `workBranchHeadSha`, `pullRequest` y `checkpointSha`: continuidad remota;
 - `lastCompletedAt`, `lastResult` y `lastRunId`: último ciclo finalizado;
 - `lastCommandId`, `lastCommandAccepted`, `lastCommandReason` y `lastCommandProcessedAt`: correlación del comando;
-- campos adicionales desconocidos: conservarlos sin reinterpretarlos ni eliminarlos.
+- campos adicionales desconocidos: conservarlos salvo que sean campos de procedencia prohibidos.
 
 `status == working`, un `runId` ajeno y `leaseExpiresAt` futuro representan una ejecución activa. `status == idle` y `runId == null` representan ausencia de propietario.
 
@@ -83,7 +94,7 @@ Para cada comando:
 1. Releé el issue #7.
 2. Validá ambos bloques y `schemaVersion: 3`.
 3. Conservá exactamente todo el cuerpo fuera del JSON del bloque de comando.
-4. Conservá intacto el bloque de estado observado y cualquier campo desconocido.
+4. Conservá intacto el bloque de estado observado; no copies campos de procedencia legacy a comandos nuevos.
 5. Reemplazá solo el JSON del bloque de comando.
 6. Actualizá el cuerpo completo.
 7. Esperá entre 5 y 10 segundos reales antes de cada relectura.
@@ -91,6 +102,23 @@ Para cada comando:
 9. Mantené polling acotado durante al menos 45 segundos reales antes de clasificar el comando como no procesado; no busy-wait ni esperas indefinidas. Un run terminal fallido permite abreviar la ventana.
 10. No crees comentarios operativos.
 11. Si otro actor reemplazó el comando antes de ser procesado, no asumas éxito: releé estado, verificá propiedad y reenviá únicamente con un `commandId` nuevo si sigue siendo seguro.
+
+## Entrega resiliente de comandos
+
+La pérdida o demora de un evento `issues.edited` no debe producir un bloqueo prematuro.
+
+1. Para cada operación, completá primero una ventana de 45 segundos reales.
+2. Si `lastCommandId` no correlaciona, el issue sigue `idle`, `runId == null` y no hay evidencia positiva de un workflow mutador activo, reenviá exactamente una vez la misma operación con:
+   - `commandId` nuevo;
+   - timestamps recalculados;
+   - `leaseExpiresAt`, soft stop, cleanup y hard stop coherentes con el tiempo restante;
+   - el mismo `runId` solo si la ejecución todavía no terminó.
+3. Esperá otra ventana de 45 segundos reales.
+4. Si continúa sin correlación, verificá el fallback programado de `.github/workflows/automation-state.yml`. El workflow debe admitir `schedule` cada cinco minutos y `workflow_dispatch` además de `issues.edited`.
+5. Cuando el fallback programado exista y resten al menos diez minutos del ciclo, esperá hasta seis minutos desde el segundo envío, observando runs cuando estén disponibles.
+6. No termines `BLOCKED`, no actives reparación y no emitas un resultado mientras el reenvío o el fallback aplicable sigan pendientes dentro del presupuesto.
+7. Si el comando se correlaciona tarde después de que el llamador terminó, no inicies trabajo retrospectivo. Enviá `release` con el mismo `runId` y una nota neutral; esa liberación sanea una lease huérfana.
+8. Solo después de agotar estas rutas evaluá `COORDINATOR_REPAIR`.
 
 ## Comandos canónicos
 
@@ -114,8 +142,6 @@ Exigí `lastCommandAccepted == true` y `lastCommandReason == STATE_OBSERVED`.
   "commandId": "<único>",
   "operation": "acquire",
   "runId": "<UUID v4>",
-  "owner": "<identidad no secreta>",
-  "executionSource": "<scheduled-chat|github-actions|manual>",
   "mode": "normal",
   "phase": "LOCK_ACQUISITION",
   "startedAt": "<UTC>",
@@ -181,7 +207,7 @@ Exigí `HEARTBEAT_ACCEPTED`, `status == working`, `runId` propio y expiración f
   "completedAt": "<UTC>",
   "result": "PASS | PARTIAL | BLOCKED | NO-OP",
   "checkpointSha": "<último SHA remoto o null>",
-  "note": "<resultado conciso>"
+  "note": "<resultado conciso y neutral>"
 }
 ```
 
@@ -201,7 +227,7 @@ Antes de analizar o mutar funcionalmente `krestosa/Focal`:
    - no inspecciones el trabajo funcional;
    - no crees rama, PR, comentario ni commit.
 4. Si el estado está `idle`, enviá `acquire`.
-5. Si el comando no se correlaciona después de la ventana temporal real, releé el estado y los runs del coordinador permitidos. No reenvíes a ciegas ni asumas propiedad; evaluá `COORDINATOR_REPAIR` solo si se cumplen todas sus condiciones.
+5. Si el comando no se correlaciona, completá el protocolo de entrega resiliente. No reenvíes más de una vez ni asumas propiedad.
 6. Solo comenzá otras lecturas y mutaciones después de confirmar propiedad.
 7. Inmediatamente después de adquirir, enviá un heartbeat de fase `REMOTE_STATE_AUDIT` antes de comenzar el análisis profundo.
 
@@ -255,11 +281,11 @@ Si recibís `NOT_LEASE_OWNER`, si el estado cambia a otro `runId`, si el issue a
 
 - el usuario lo autorizó expresamente;
 - el issue ya muestra `idle`;
-- no existe ningún chat o workflow de desarrollo autorizado trabajando;
+- no existe ninguna ejecución de desarrollo autorizada trabajando;
 - no forma parte de un `FOCAL_CYCLE`;
 - la lista de ramas fue revisada y `main` se preserva.
 
-Si existe `status == working`, el workflow debe responder `ACTIVE_LEASE`. Un chat de desarrollo no puede liberar y luego ejecutar limpieza: `release` debe seguir siendo su última mutación.
+Si existe `status == working`, el workflow debe responder `ACTIVE_LEASE`. Una ejecución de desarrollo no puede liberar y luego ejecutar limpieza: `release` debe seguir siendo su última mutación.
 
 ## Workflow ausente o corrupto
 
@@ -271,8 +297,7 @@ Si el issue o el workflow falta o es inválido:
 - realizá todas las lecturas y mutaciones mediante el conector de GitHub o GitHub Actions;
 - usá ramas, PRs, workflows y commits de reparación solo como transporte temporal;
 - no cambies lógica funcional ajena al defecto mínimo del coordinador;
-- validá el árbol temporal, ejecutá la limpieza de historia mediante GitHub Actions y verificá que `main` no conserve commits, merges, workflows ni refs temporales alcanzables;
-- ejecutá un `inspect` con polling temporal real;
+- validá el árbol temporal, ejecutá la limpieza de historia mediante GitHub Actions y verificá que `main` no conserve commits de reparación alcanzables;
 - continuá solo después de `STATE_OBSERVED` y una adquisición confirmada.
 
 ## GitHub Actions mutadoras
@@ -286,4 +311,4 @@ Todo workflow capaz de modificar código, ramas, PRs, releases o documentación 
 - liberar mediante un finalizador si conserva propiedad;
 - no realizar mutaciones después de `release`.
 
-El coordinador `Automation State Coordinator` es la única excepción: procesa comandos y no adquiere su propia lease.
+El coordinador `Automation State Coordinator` es la única excepción: procesa comandos y no adquiere su propia lease. Debe aceptar `issues.edited`, `schedule` y `workflow_dispatch`, ser idempotente y no registrar procedencia del cliente.
