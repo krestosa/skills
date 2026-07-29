@@ -18,12 +18,13 @@ En cada ejecución:
    8. `prompts/focal/08-terminal-report.md`
    9. `prompts/focal/09-skills-maintenance.md`
    10. `prompts/focal/10-coordinator-repair.md`
-   11. `prompts/focal/11-process-flowchart.md`
+   11. `prompts/focal/12-autonomous-error-recovery.md`
+   12. `prompts/focal/11-process-flowchart.md`
 3. Verificá que todas las rutas existan y sean legibles hasta la última línea.
 4. No uses memoria, conversaciones anteriores, copias locales persistentes, caches ni snapshots históricos como fuente de instrucciones.
 5. Si el SHA de `krestosa/skills` cambia durante la carga, reiniciá la carga una sola vez desde el nuevo SHA. Si vuelve a cambiar, terminá `BLOCKED` por instrucciones inestables.
 
-No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10`.
+No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10` y `12`.
 
 ## Safeguard de fallos transitorios del conector
 
@@ -45,7 +46,9 @@ Los commits de transporte vacíos, no-op o producidos únicamente por una ejecuc
 1. Clasificá candidatos únicamente por evidencia de árbol, diff, refs y runs:
    - `NOOP_COMMIT`: commit de un solo parent cuyo árbol es idéntico al árbol de su parent;
    - `EMPTY_ARTIFACT_COMMIT`: commit cuyo diff agrega o modifica exclusivamente archivos de cero bytes en rutas temporales o de transporte, sin cambios semánticos, modos, renames, submódulos ni contenido funcional;
-   - `FAILED_TRANSPORT_COMMIT`: commit asociado a una ejecución fallida cuyo diff está limitado a infraestructura temporal y cuya exclusión conserva el árbol funcional validado.
+   - `FAILED_TRANSPORT_COMMIT`: commit asociado a una ejecución fallida cuyo diff está limitado a infraestructura temporal y cuya exclusión conserva el árbol funcional validado;
+   - `GARBAGE_ARTIFACT_COMMIT`: commit cuyo cambio se limita a archivos basura probados, incluidos placeholders mínimos, salidas de herramientas, volcados de error, contenido truncado o paths accidentales;
+   - `GARBAGE_ARTIFACT_MIXED_COMMIT`: commit con trabajo válido y basura; se reconstruye conservando el diff funcional y retirando solo los paths probados.
 2. El mensaje del commit, su autor o el resultado de un run nunca bastan por sí solos para eliminarlo. No sanees commits funcionales, firmados, publicados en release, alcanzables desde tags o protegidos por otra rama o PR.
 3. El saneamiento se ejecuta exclusivamente mediante GitHub Actions. No hagas force push desde un clon local ni mediante una mutación directa del conector.
 4. Reconstruí la cadena desde el último parent limpio: omití candidatos y reaplicá el diff de cada commit posterior conservado contra su nuevo parent. Para cada commit posterior preservá exactamente nombre y correo de autor, `authorDate`, nombre y correo de committer, `committerDate`, timezone, mensaje y topología soportada; nunca uses la hora del saneamiento.
@@ -54,6 +57,10 @@ Los commits de transporte vacíos, no-op o producidos únicamente por una ejecuc
 7. El workflow y cualquier script temporal deben estar ausentes del árbol final. Eliminá las ramas y tags temporales creados para el saneamiento y verificá que los candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*`.
 8. El resultado final no puede contener un commit o merge de limpieza. Si la Action falla antes del cambio de ref, la rama protegida permanece intacta y la rama temporal debe eliminarse en un paso `if: always()`; la evidencia queda en el run, no en una ref persistente.
 9. La auditoría y retención interna de la plataforma pueden conservar eventos u objetos no alcanzables. El contrato garantiza ausencia en el árbol y en las refs visibles controladas por el repositorio, no borrado físico de infraestructura externa.
+
+## Recuperación autónoma universal
+
+Toda excepción o condición inesperada se procesa mediante `AUTONOMOUS_RECOVERY_LOOP` de `12-autonomous-error-recovery.md`. Un fallo interno no se convierte directamente en `BLOCKED` ni en una consulta al usuario. Se clasifica, diagnostica, repara, valida y reanuda desde el primer gate invalidado. Los fallos no enumerados usan `UNCLASSIFIED_INTERNAL_FAILURE` y generan una unidad diagnóstica autónoma.
 
 ## Gate cero obligatorio de `FOCAL_CYCLE`
 
@@ -101,6 +108,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 | Reporte terminal | `08-terminal-report.md` |
 | Mantenimiento de prompts | `09-skills-maintenance.md` |
 | Reparación bootstrap del coordinador | `10-coordinator-repair.md` |
+| Catálogo y motor de recuperación autónoma | `12-autonomous-error-recovery.md` |
 | Flowchart integral derivado | `11-process-flowchart.md` |
 
 ## Orden global del ciclo `FOCAL_CYCLE`
@@ -108,7 +116,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 1. Carga de instrucciones.
 2. Primera lectura obligatoria del issue `#7`.
 3. Reloj, identidad opaca, SHA mínimo de `main`, `inspect`, polling real, reenvío acotado, fallback programado y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
-4. Resolución del resto del estado remoto y reconstrucción desde GitHub.
+4. Resolución del resto del estado remoto, despacho de errores por `AUTONOMOUS_RECOVERY_LOOP` y reconstrucción desde GitHub.
 5. `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`.
 6. Selección de una unidad coherente.
 7. Implementación, heartbeats y checkpoints remotos.
