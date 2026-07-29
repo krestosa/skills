@@ -44,9 +44,12 @@ En este modo:
 - Sin dependencias circulares.
 - Sin negaciones superpuestas para reemplazar reglas legacy.
 - Sin requerir releer contenido no relacionado en cada ciclo.
+- Todo polling de GitHub Actions debe medir tiempo UTC o monotónico realmente transcurrido; varias lecturas inmediatas no prueban que un comando quedó sin procesar.
+- El gate de lease debe observar comandos durante al menos 45 segundos, salvo que exista un run terminal fallido verificable.
 - El gate de lease debe incluir una ruta bootstrap acotada para reparar el coordinador cuando `inspect` no se procesa y el issue está inequívocamente `idle`.
-- Los workflows de coordinación deben ser compatibles con ediciones de GitHub Apps instaladas; no deben depender de una allowlist fija de `sender.login`.
+- Los workflows de coordinación deben ser compatibles con ediciones de GitHub Apps instaladas; no deben depender de una allowlist fija de `sender.login` incompatible con conectores autorizados.
 - La reparación bootstrap nunca debe ampliar su alcance a desarrollo funcional sin lease.
+- El workflow debe probar el modo real de invocación del coordinador, incluidos imports, checkout y `PYTHONPATH` cuando correspondan.
 
 ## Migración compatible
 
@@ -62,9 +65,11 @@ Antes de finalizar, verificá:
 - evidencia para completado;
 - pruebas obligatorias;
 - exclusión mutua y recuperación de lock;
+- polling con demora real y ventana mínima explícita;
 - `COORDINATOR_REPAIR` cargado y limitado a infraestructura de coordinación;
 - compatibilidad con comandos emitidos por GitHub Apps autorizadas;
 - ausencia de allowlists fijas de sender que bloqueen conectores autorizados;
+- validación del modo real de ejecución del coordinador;
 - reporte terminal único;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
