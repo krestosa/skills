@@ -1,0 +1,53 @@
+name: Apply Connector Retry Safeguard
+
+on:
+  push:
+    branches:
+      - maintenance/connector-retry-safeguard
+
+permissions:
+  contents: write
+
+concurrency:
+  group: connector-retry-safeguard-maintenance
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out maintenance branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          ref: maintenance/connector-retry-safeguard
+
+      - name: Apply prompt safeguard
+        run: python scripts/apply_connector_retry_safeguard.py
+
+      - name: Remove temporary maintenance files
+        run: |
+          rm scripts/apply_connector_retry_safeguard.py
+          rm .github/workflows/apply-connector-retry-safeguard.yml
+
+      - name: Refresh integrity metadata
+        run: python scripts/tooling.py --json refresh-integrity
+
+      - name: Validate prompt stack and repository
+        run: |
+          python -m py_compile scripts/validate_focal_prompt_stack.py
+          python scripts/validate_focal_prompt_stack.py
+          python -m compileall -q scripts tests
+          sudo --preserve-env=PATH python -m unittest discover -s tests -v
+          python scripts/tooling.py validate
+          python scripts/tooling.py check
+
+      - name: Publish validated result
+        run: |
+          git config user.name "repository-maintenance"
+          git config user.email "repository-maintenance@users.noreply.github.com"
+          git add -A
+          git commit -m "Add connector retry safeguard"
+          git push origin HEAD:maintenance/connector-retry-safeguard
