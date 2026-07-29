@@ -16,11 +16,31 @@ flowchart TD
     MODE -- SKILLS_MAINTENANCE --> SM1
     MODE -- FOCAL_CYCLE --> FC1
     LOAD_SHA -. error transitorio .-> CONNECTOR_ERROR
+    LOAD_ALL -. cualquier fallo .-> ERROR_CAPTURE
+    SM7 -. validación fallida .-> ERROR_CAPTURE
+    CR_TEST -. prueba fallida .-> ERROR_CAPTURE
+    HARNESS -. fallo gráfico .-> ERROR_CAPTURE
+    VALIDATE -. fallo .-> ERROR_CAPTURE
     SM4 -. error transitorio .-> CONNECTOR_ERROR
     INSPECT -. error transitorio .-> CONNECTOR_ERROR
     MUTATION_GUARD -. error transitorio .-> CONNECTOR_ERROR
     RELEASE -. error transitorio .-> CONNECTOR_ERROR
 
+
+    subgraph AUTONOMOUS_RECOVERY[Motor universal de recuperación — módulo 12]
+        ERROR_CAPTURE[Capturar fallo y pausar solo dependencias]
+        ERROR_CAPTURE --> ERROR_REMOTE[Releer estado remoto autoritativo]
+        ERROR_REMOTE --> ERROR_CLASSIFY{¿Código específico conocido?}
+        ERROR_CLASSIFY -- Sí --> ERROR_EVIDENCE[Reunir evidencia mínima reproducible]
+        ERROR_CLASSIFY -- No --> ERROR_UNKNOWN[UNCLASSIFIED_INTERNAL_FAILURE: reducir, formular hipótesis y crear prueba]
+        ERROR_UNKNOWN --> ERROR_EVIDENCE
+        ERROR_EVIDENCE --> ERROR_ROUTE[Aplicar escalera: retry, read-after-write, ruta alternativa, repair, reconstruct, sanitize, degrade, checkpoint]
+        ERROR_ROUTE --> ERROR_FIXED{¿Causa corregida y artefacto exacto validado?}
+        ERROR_FIXED -- Sí --> ERROR_RESUME[Reanudar desde el primer gate invalidado]
+        ERROR_FIXED -- No, hipótesis agotada --> ERROR_RECLASSIFY[Reunir evidencia nueva y cambiar hipótesis] --> ERROR_EVIDENCE
+        ERROR_FIXED -- No, tiempo insuficiente --> ERROR_CHECKPOINT[Publicar checkpoint recuperable y continuar en siguiente ejecución]
+        ERROR_FIXED -- No, capacidad externa imposible --> ERROR_EXTERNAL[EXTERNAL_BLOCKER exacto y mínimo]
+    end
 
     subgraph CONNECTOR_RETRY[Safeguard transversal del conector — módulos 01, 03, 09 y 10]
         CONNECTOR_ERROR{¿Llamada remota devuelve error transitorio?}
@@ -36,10 +56,12 @@ flowchart TD
     end
 
     subgraph HISTORY_SANITATION[Saneamiento histórico sin huellas — módulos 01, 09 y 10]
-        HISTORY_SCAN{¿Hay commit vacío, no-op o de transporte fallido alcanzable?}
+        HISTORY_SCAN{¿Hay commit no-op, transporte fallido o archivo basura alcanzable?}
         HISTORY_SCAN -- No --> HISTORY_CLEAR[Historia limpia]
         HISTORY_SCAN -- Sí --> HISTORY_CLASSIFY[Clasificar por tree, diff, refs y runs; nunca por mensaje]
-        HISTORY_CLASSIFY --> HISTORY_SAFE{¿Tramo lineal o parents de merge completamente mapeables?}
+        HISTORY_CLASSIFY --> HISTORY_GARBAGE{¿Commit solo basura o commit mixto?}
+        HISTORY_GARBAGE -- Solo basura --> HISTORY_SAFE{¿Tramo lineal o parents de merge completamente mapeables?}
+        HISTORY_GARBAGE -- Mixto --> HISTORY_REBUILD_MIXED[Reconstruir árbol sin paths basura y preservar diff funcional] --> HISTORY_SAFE
         HISTORY_SAFE -- No --> HISTORY_ABORT[Abortar sin mover refs]
         HISTORY_SAFE -- Sí --> HISTORY_REPLAY[GitHub Actions omite candidatos y reaplica cada diff posterior]
         HISTORY_REPLAY --> HISTORY_DATES[Preservar GIT_AUTHOR_DATE y GIT_COMMITTER_DATE exactos de cada commit posterior]
@@ -232,7 +254,8 @@ flowchart TD
 - `runId` y `commandId` son opacos. El proceso no registra la herramienta que originó la ejecución.
 - Un retraso de evento no es un fallo inmediato: primero se completa polling, un reenvío y el fallback programado.
 - Un error transitorio del conector tampoco es terminal: se reintenta la misma tarea, y toda mutación de resultado desconocido se reconcilia mediante `read-after-write` antes de repetirla.
-- Un commit vacío, no-op o de transporte fallido probado se elimina por GitHub Actions sin dejar commit de limpieza ni refs temporales. Los commits posteriores se reconstruyen con sus timestamps de autor y committer originales.
+- Un commit vacío, no-op, de transporte fallido o con archivos basura probados se sanea por GitHub Actions sin dejar commit de limpieza ni refs temporales. Esto incluye placeholders como `X`, tool output, dumps, truncados y paths accidentales solo cuando la evidencia conjunta confirma que no tienen función. Los commits posteriores conservan timestamps originales.
+- Todo fallo conocido o futuro entra en `AUTONOMOUS_RECOVERY_LOOP`; lo no catalogado usa `UNCLASSIFIED_INTERNAL_FAILURE`, se diagnostica y se reanuda sin pedir al usuario decisiones técnicas ordinarias.
 - `COORDINATOR_REPAIR` no es una lease ni una tercera modalidad funcional. Es una excepción bootstrap limitada al coordinador.
 - Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
 - `release` es siempre la última mutación remota de un ciclo funcional.
