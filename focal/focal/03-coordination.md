@@ -19,14 +19,14 @@ El cuerpo del issue es la única fuente de lease. El historial Git, ramas operat
 ## Invariantes de borde obligatorias
 
 1. Después de cargar el prompt, la **PRIMERA lectura remota de `krestosa/Focal`** debe ser el issue `#7` completo.
-2. Antes de adquirir la lease solo se permite, además de esa lectura, resolver la rama predeterminada y el SHA de `main` requerido por `baseMainSha`.
+2. Antes de adquirir la lease solo se permite, además de esa lectura, resolver la rama predeterminada y el SHA de `main` requerido por `baseMainSha`. Se exceptúan únicamente las lecturas limitadas exigidas para evaluar una lease vencida recuperable y las operaciones estrictas de `COORDINATOR_REPAIR` definidas en `10-coordinator-repair.md`.
 3. La primera mutación remota debe reemplazar exclusivamente el JSON de `focal-command:v3` para `inspect`, `acquire` o `recover`.
 4. Nunca edites directamente `focal-state:v3`; únicamente `Automation State Coordinator` puede modificarlo.
-5. No leas en profundidad ni mutes roadmap, matriz, archivos, ramas, PRs, commits, checks, workflows o releases hasta que el estado confirme propiedad.
+5. No leas en profundidad ni mutes roadmap, matriz, archivos, ramas, PRs, commits, checks, workflows o releases hasta que el estado confirme propiedad. Solo se permiten la inspección limitada previa a `recover` y la reparación bootstrap acotada de `10-coordinator-repair.md`.
 6. Antes de cada mutación posterior, releé el issue y confirmá `status == working`, `runId` propio y lease futura.
 7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en `focal-command:v3`.
 8. Después de `release` solo se permiten lecturas del issue para confirmar el estado y emitir el reporte.
-9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.
+9. Si un chat está trabajando pero el issue muestra `idle`, ese chat no posee la ejecución: debe detenerse. La única excepción es `COORDINATOR_REPAIR`, que no autoriza trabajo funcional y se limita al coordinador. Actividad del chat, herramientas abiertas o archivos locales no sustituyen la lease.
 10. `cleanup_branches` es una operación administrativa independiente. No puede formar parte del inicio, cuerpo o cierre de un `FOCAL_CYCLE`.
 
 ## Estado legacy retirado
@@ -86,9 +86,9 @@ Para cada comando:
 4. Conservá intacto el bloque de estado observado y cualquier campo desconocido.
 5. Reemplazá solo el JSON del bloque de comando.
 6. Actualizá el cuerpo completo.
-7. Esperá de 3 a 10 segundos y releé.
+7. Esperá entre 5 y 10 segundos reales antes de cada relectura.
 8. Correlacioná por `lastCommandId`.
-9. Usá polling acotado; no busy-wait ni esperas indefinidas.
+9. Mantené polling acotado durante al menos 45 segundos reales antes de clasificar el comando como no procesado; no busy-wait ni esperas indefinidas. Un run terminal fallido permite abreviar la ventana.
 10. No crees comentarios operativos.
 11. Si otro actor reemplazó el comando antes de ser procesado, no asumas éxito: releé estado, verificá propiedad y reenviá únicamente con un `commandId` nuevo si sigue siendo seguro.
 
@@ -201,7 +201,7 @@ Antes de analizar o mutar funcionalmente `krestosa/Focal`:
    - no inspecciones el trabajo funcional;
    - no crees rama, PR, comentario ni commit.
 4. Si el estado está `idle`, enviá `acquire`.
-5. Si el comando no se correlaciona dentro del límite, releé el estado. No reenvíes a ciegas ni asumas propiedad.
+5. Si el comando no se correlaciona después de la ventana temporal real, releé el estado y los runs del coordinador permitidos. No reenvíes a ciegas ni asumas propiedad; evaluá `COORDINATOR_REPAIR` solo si se cumplen todas sus condiciones.
 6. Solo comenzá otras lecturas y mutaciones después de confirmar propiedad.
 7. Inmediatamente después de adquirir, enviá un heartbeat de fase `REMOTE_STATE_AUDIT` antes de comenzar el análisis profundo.
 
@@ -267,8 +267,12 @@ Si el issue o el workflow falta o es inválido:
 
 - no inicies desarrollo funcional;
 - tratá la reparación como infraestructura prioritaria de `krestosa/Focal`;
-- repará mediante rama y PR si no existe lease activa verificable;
-- validá el workflow y ejecutá un `inspect`;
+- aplicá `COORDINATOR_REPAIR` únicamente cuando no exista lease activa verificable;
+- realizá todas las lecturas y mutaciones mediante el conector de GitHub o GitHub Actions;
+- usá ramas, PRs, workflows y commits de reparación solo como transporte temporal;
+- no cambies lógica funcional ajena al defecto mínimo del coordinador;
+- validá el árbol temporal, ejecutá la limpieza de historia mediante GitHub Actions y verificá que `main` no conserve commits, merges, workflows ni refs temporales alcanzables;
+- ejecutá un `inspect` con polling temporal real;
 - continuá solo después de `STATE_OBSERVED` y una adquisición confirmada.
 
 ## GitHub Actions mutadoras
