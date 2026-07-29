@@ -38,6 +38,23 @@ Un error aislado del conector no es una condición terminal ni autoriza abandona
 7. Solo podés detener el ciclo después de agotar reintentos, verificación remota y fallbacks autorizados, o cuando ya no quede tiempo seguro para preservar checkpoint, reconciliar y liberar. Clasificá ese caso como `CONNECTOR_RETRY_EXHAUSTED`.
 8. Si el proceso de ejecución desaparece por completo y ya no puede hacer llamadas, la siguiente ejecución independiente debe reconstruir y reintentar la misma tarea desde el estado remoto; nunca debe iniciar una unidad funcional paralela.
 
+## Safeguard de saneamiento histórico sin huellas
+
+Los commits de transporte vacíos, no-op o producidos únicamente por una ejecución fallida no forman parte del historial canónico.
+
+1. Clasificá candidatos únicamente por evidencia de árbol, diff, refs y runs:
+   - `NOOP_COMMIT`: commit de un solo parent cuyo árbol es idéntico al árbol de su parent;
+   - `EMPTY_ARTIFACT_COMMIT`: commit cuyo diff agrega o modifica exclusivamente archivos de cero bytes en rutas temporales o de transporte, sin cambios semánticos, modos, renames, submódulos ni contenido funcional;
+   - `FAILED_TRANSPORT_COMMIT`: commit asociado a una ejecución fallida cuyo diff está limitado a infraestructura temporal y cuya exclusión conserva el árbol funcional validado.
+2. El mensaje del commit, su autor o el resultado de un run nunca bastan por sí solos para eliminarlo. No sanees commits funcionales, firmados, publicados en release, alcanzables desde tags o protegidos por otra rama o PR.
+3. El saneamiento se ejecuta exclusivamente mediante GitHub Actions. No hagas force push desde un clon local ni mediante una mutación directa del conector.
+4. Reconstruí la cadena desde el último parent limpio: omití candidatos y reaplicá el diff de cada commit posterior conservado contra su nuevo parent. Para cada commit posterior preservá exactamente nombre y correo de autor, `authorDate`, nombre y correo de committer, `committerDate`, timezone, mensaje y topología soportada; nunca uses la hora del saneamiento.
+5. Por defecto solo se reescriben tramos lineales de commits de un parent. Un merge exige mapear todos sus parents y demostrar topología y árbol equivalentes; si no puede probarse, abortá sin mover refs.
+6. Validá el árbol final y los diffs semánticos antes de actualizar la rama. Mové la ref únicamente con `--force-with-lease` contra el head remoto exacto observado.
+7. El workflow y cualquier script temporal deben estar ausentes del árbol final. Eliminá las ramas y tags temporales creados para el saneamiento y verificá que los candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*`.
+8. El resultado final no puede contener un commit o merge de limpieza. Si la Action falla antes del cambio de ref, la rama protegida permanece intacta y la rama temporal debe eliminarse en un paso `if: always()`; la evidencia queda en el run, no en una ref persistente.
+9. La auditoría y retención interna de la plataforma pueden conservar eventos u objetos no alcanzables. El contrato garantiza ausencia en el árbol y en las refs visibles controladas por el repositorio, no borrado físico de infraestructura externa.
+
 ## Gate cero obligatorio de `FOCAL_CYCLE`
 
 Después de cargar íntegramente estas instrucciones, aplicá este gate antes de cualquier análisis del proyecto:

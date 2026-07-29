@@ -26,6 +26,17 @@ En este modo:
 - Solo detené el mantenimiento como `CONNECTOR_RETRY_EXHAUSTED` cuando los reintentos y verificaciones fueron agotados o el presupuesto ya no permite validar y publicar con seguridad.
 - Una ejecución posterior debe retomar la misma rama o PR remota incompleta en vez de duplicar el trabajo.
 
+## Safeguard de historia durante mantenimiento
+
+`SKILLS_MAINTENANCE` no deja ramas ni commits de transporte vacíos, no-op o fallidos.
+
+- Antes de abrir o mergear la PR, clasificá candidatos como `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` o `FAILED_TRANSPORT_COMMIT` usando árbol, diff, runs y refs; el mensaje no es evidencia suficiente.
+- Ejecutá la limpieza exclusivamente mediante GitHub Actions. La Action debe trabajar con un head esperado, validar antes de mover refs y usar `--force-with-lease`.
+- Omití los candidatos y reconstruí cada commit posterior contra el parent reescrito, conservando exactamente autor, committer, `authorDate`, `committerDate`, timezone y mensaje de cada commit posterior.
+- Un tramo con merges se sanea solo si todos los parents se mapean y la topología y los árboles quedan probados; de lo contrario se aborta sin modificar la ref.
+- El workflow y el script temporal se eliminan del árbol final. La rama temporal y cualquier tag de transporte se eliminan tanto en éxito como en fallo; no se deja un commit de limpieza.
+- Verificá que los SHAs candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*` y que el árbol final sea el validado.
+
 ## Procedimiento
 
 1. Obtené rama predeterminada y SHA remoto actual de `krestosa/skills`.
@@ -63,6 +74,7 @@ En este modo:
 - La reparación bootstrap nunca debe ampliar su alcance a desarrollo funcional sin lease.
 - Toda reparación de Focal previa a la lease usa exclusivamente el conector de GitHub o GitHub Actions.
 - Los commits, merges, workflows y refs temporales de `COORDINATOR_REPAIR` deben desaparecer de la historia alcanzable de `main` sin alterar el árbol funcional validado ni los metadatos que el contrato exige preservar.
+- Todo saneamiento de commits vacíos, no-op o fallidos se ejecuta por GitHub Actions, conserva los timestamps exactos de cada commit posterior y termina sin commit, workflow, tag o rama temporal de limpieza alcanzable.
 - El workflow debe probar el modo real de invocación del coordinador, incluidos imports, checkout y `PYTHONPATH` cuando correspondan.
 - El flowchart debe incluir carga de prompts, issue #7, inspect, polling, active lease, acquire, recover, coordinator repair, roadmap, Iris, implementación, OpenGL, CI, merge, reconciliación, release y todos los estados terminales.
 - El README debe listar cada clase de bloqueo autónomo definida por el stack, evidencia mínima, solución y condición de reanudación.
@@ -94,7 +106,8 @@ Antes de finalizar, verificá:
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
 - ausencia de contradicciones activas;
-- safeguard de reintentos, `read-after-write` y continuidad de la misma tarea ante fallos transitorios del conector.
+- safeguard de reintentos, `read-after-write` y continuidad de la misma tarea ante fallos transitorios del conector;
+- safeguard de saneamiento histórico con clasificación por evidencia, replay de commits posteriores, timestamps preservados y eliminación de refs temporales.
 
 ## Pull request
 

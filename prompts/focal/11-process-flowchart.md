@@ -35,6 +35,22 @@ flowchart TD
         EFFECT_OBSERVED -- No, presupuesto agotado --> CONNECTOR_RETRY_EXHAUSTED[Preservar checkpoint; PARTIAL o BLOCKED según evidencia]
     end
 
+    subgraph HISTORY_SANITATION[Saneamiento histórico sin huellas — módulos 01, 09 y 10]
+        HISTORY_SCAN{¿Hay commit vacío, no-op o de transporte fallido alcanzable?}
+        HISTORY_SCAN -- No --> HISTORY_CLEAR[Historia limpia]
+        HISTORY_SCAN -- Sí --> HISTORY_CLASSIFY[Clasificar por tree, diff, refs y runs; nunca por mensaje]
+        HISTORY_CLASSIFY --> HISTORY_SAFE{¿Tramo lineal o parents de merge completamente mapeables?}
+        HISTORY_SAFE -- No --> HISTORY_ABORT[Abortar sin mover refs]
+        HISTORY_SAFE -- Sí --> HISTORY_REPLAY[GitHub Actions omite candidatos y reaplica cada diff posterior]
+        HISTORY_REPLAY --> HISTORY_DATES[Preservar GIT_AUTHOR_DATE y GIT_COMMITTER_DATE exactos de cada commit posterior]
+        HISTORY_DATES --> HISTORY_VERIFY_TREE[Verificar diffs semánticos y árbol final validado]
+        HISTORY_VERIFY_TREE --> HISTORY_FORCE_LEASE[Actualizar ref con force-with-lease contra expectedOldHead]
+        HISTORY_FORCE_LEASE --> HISTORY_DELETE_REFS[Eliminar workflow, scripts, ramas y tags temporales; sin commit de limpieza]
+        HISTORY_DELETE_REFS --> HISTORY_REACHABILITY{¿Candidatos ausentes de refs/heads y refs/tags?}
+        HISTORY_REACHABILITY -- No --> HISTORY_ABORT
+        HISTORY_REACHABILITY -- Sí --> HISTORY_CLEAR
+    end
+
     subgraph SKILLS[SKILLS_MAINTENANCE — módulo 09]
         SM1[Confirmar autorización expresa para modificar krestosa/skills]
         SM1 --> SM2[Leer referencias, manifest, validadores y archivos afectados]
@@ -43,7 +59,9 @@ flowchart TD
         SM4 --> SM5[Aplicar cambios cohesivos]
         SM5 --> SM6[Actualizar entrypoint, módulos, flowchart, README, validadores e integridad]
         SM6 --> SM7[Validar Markdown, referencias, contratos, privacidad y determinismo]
-        SM7 --> SM8[Abrir o actualizar PR]
+        SM7 --> SM_ARTIFACTS{¿La rama contiene artefactos históricos candidatos?}
+        SM_ARTIFACTS -- No --> SM8[Abrir o actualizar PR]
+        SM_ARTIFACTS -- Sí --> SM_SANITIZE[Ejecutar HISTORY_SANITATION sobre la rama propia] --> SM8
         SM8 --> SM9{¿CI del head exacto está aprobada?}
         SM9 -- No --> SM10[Corregir fallos causados] --> SM6
         SM9 -- Sí --> SM11[Mergear y verificar main]
@@ -108,9 +126,9 @@ flowchart TD
         CR_TEST --> CR_GREEN{¿Checks del árbol exacto están verdes?}
         CR_GREEN -- No --> CR_FIX
         CR_GREEN -- Sí --> CR_PUBLISH[Publicar árbol reparado]
-        CR_PUBLISH --> CR_CLEAN[Retirar commits, workflows y refs temporales alcanzables]
-        CR_CLEAN --> CR_VERIFY[Verificar árbol, parent, autor, committer, fechas, mensaje y workflow temporal ausente]
-        CR_VERIFY --> CR_SMOKE[Smoke test inspect y ciclo diagnóstico seguro]
+        CR_PUBLISH --> HISTORY_SCAN
+        HISTORY_CLEAR --> CR_SMOKE[Smoke test inspect y ciclo diagnóstico seguro]
+        HISTORY_ABORT --> BLOCKED_COORD
         CR_SMOKE --> CR_IDLE{¿STATE_OBSERVED y luego LEASE_RELEASED en idle?}
         CR_IDLE -- No --> BLOCKED_COORD
         CR_IDLE -- Sí --> CR_RESTART[Generar runId funcional nuevo y volver al issue #7]
@@ -214,6 +232,7 @@ flowchart TD
 - `runId` y `commandId` son opacos. El proceso no registra la herramienta que originó la ejecución.
 - Un retraso de evento no es un fallo inmediato: primero se completa polling, un reenvío y el fallback programado.
 - Un error transitorio del conector tampoco es terminal: se reintenta la misma tarea, y toda mutación de resultado desconocido se reconcilia mediante `read-after-write` antes de repetirla.
+- Un commit vacío, no-op o de transporte fallido probado se elimina por GitHub Actions sin dejar commit de limpieza ni refs temporales. Los commits posteriores se reconstruyen con sus timestamps de autor y committer originales.
 - `COORDINATOR_REPAIR` no es una lease ni una tercera modalidad funcional. Es una excepción bootstrap limitada al coordinador.
 - Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
 - `release` es siempre la última mutación remota de un ciclo funcional.
