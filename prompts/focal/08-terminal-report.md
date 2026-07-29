@@ -28,6 +28,9 @@ Rama:
 Pull request:
 Estado del merge:
 Estado de CI:
+Reintentos del conector:
+Mutaciones con resultado desconocido reconciliadas mediante read-after-write:
+Presupuesto de reintentos agotado: sí | no
 Ítems de roadmap modificados:
 Estados finales de esos ítems:
 Capacidades de Iris verificadas o actualizadas:
@@ -53,6 +56,7 @@ Reglas:
 - No declares que un archivo o cambio existe si no fue observado remotamente.
 - No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
 - `runId` y `commandId` son identificadores opacos; no intentes derivar ni explicar la herramienta que los originó.
+- Un error transitorio aislado no justifica un resultado terminal. Informá cantidad de reintentos y cualquier `read-after-write` usado para reconciliar una mutación de resultado desconocido.
 - `PASS` requiere publicación, aceptación, reconciliación y liberación completas.
 - En `NO-OP` por lease activa, indicá únicamente `runId`, fase y expiración observados sin modificar el estado.
 - En `SKILLS_MAINTENANCE`, reemplazá las rutas de roadmap y matriz por `no aplicable` salvo que la tarea también autorice Focal.

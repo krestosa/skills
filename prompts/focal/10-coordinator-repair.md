@@ -46,6 +46,16 @@ Entrá en `COORDINATOR_REPAIR` únicamente cuando se cumplan simultáneamente:
 
 No actives este modo por latencia ordinaria, una lease ajena, un comando rechazado correctamente, un fallo funcional del proyecto ni para evitar el protocolo normal.
 
+## Safeguard del canal durante la reparación
+
+Un fallo transitorio del conector durante `COORDINATOR_REPAIR` no demuestra que el coordinador esté roto ni habilita abandonar la reparación.
+
+1. Reintentá la misma lectura o mutación hasta cuatro intentos totales con backoff de 2, 5, 10 y 20 segundos.
+2. Para toda mutación con respuesta de error, hacé `read-after-write` y verificá árbol, ref, issue, PR o workflow antes de repetir.
+3. Conservá el mismo payload, SHA esperado e identificador idempotente mientras el resultado sea desconocido.
+4. No crees una segunda reparación paralela ni reescribas historia para compensar un error no confirmado.
+5. Solo clasificá `CONNECTOR_RETRY_EXHAUSTED` después de agotar reintentos y verificaciones; preservá cualquier rama o PR recuperable y retomá desde allí en la siguiente ejecución.
+
 ## Canal de ejecución obligatorio
 
 Toda lectura y mutación de `krestosa/Focal` durante `COORDINATOR_REPAIR` debe ejecutarse mediante:

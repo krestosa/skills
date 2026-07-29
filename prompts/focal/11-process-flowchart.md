@@ -15,6 +15,25 @@ flowchart TD
 
     MODE -- SKILLS_MAINTENANCE --> SM1
     MODE -- FOCAL_CYCLE --> FC1
+    LOAD_SHA -. error transitorio .-> CONNECTOR_ERROR
+    SM4 -. error transitorio .-> CONNECTOR_ERROR
+    INSPECT -. error transitorio .-> CONNECTOR_ERROR
+    MUTATION_GUARD -. error transitorio .-> CONNECTOR_ERROR
+    RELEASE -. error transitorio .-> CONNECTOR_ERROR
+
+
+    subgraph CONNECTOR_RETRY[Safeguard transversal del conector — módulos 01, 03, 09 y 10]
+        CONNECTOR_ERROR{¿Llamada remota devuelve error transitorio?}
+        CONNECTOR_ERROR -- No --> CONNECTOR_CONTINUE[Continuar la misma tarea]
+        CONNECTOR_ERROR -- Sí, lectura --> CONNECTOR_BACKOFF[Backoff 2, 5, 10 y 20 segundos; máximo 4 intentos]
+        CONNECTOR_ERROR -- Sí, mutación --> READ_AFTER_WRITE[Marcar OUTCOME_UNKNOWN y ejecutar read-after-write]
+        READ_AFTER_WRITE --> EFFECT_OBSERVED{¿Efecto remoto observado?}
+        EFFECT_OBSERVED -- Sí --> CONNECTOR_CONTINUE
+        EFFECT_OBSERVED -- No, guardas vigentes --> RETRY_SAME_OPERATION[Reintentar la misma operación, payload e identificador idempotente]
+        RETRY_SAME_OPERATION --> CONNECTOR_BACKOFF
+        CONNECTOR_BACKOFF --> CONNECTOR_ERROR
+        EFFECT_OBSERVED -- No, presupuesto agotado --> CONNECTOR_RETRY_EXHAUSTED[Preservar checkpoint; PARTIAL o BLOCKED según evidencia]
+    end
 
     subgraph SKILLS[SKILLS_MAINTENANCE — módulo 09]
         SM1[Confirmar autorización expresa para modificar krestosa/skills]
@@ -194,6 +213,7 @@ flowchart TD
 
 - `runId` y `commandId` son opacos. El proceso no registra la herramienta que originó la ejecución.
 - Un retraso de evento no es un fallo inmediato: primero se completa polling, un reenvío y el fallback programado.
+- Un error transitorio del conector tampoco es terminal: se reintenta la misma tarea, y toda mutación de resultado desconocido se reconcilia mediante `read-after-write` antes de repetirla.
 - `COORDINATOR_REPAIR` no es una lease ni una tercera modalidad funcional. Es una excepción bootstrap limitada al coordinador.
 - Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
 - `release` es siempre la última mutación remota de un ciclo funcional.

@@ -69,7 +69,12 @@ REQUIRED_TEXT = (
     "workflow_dispatch",
     "schedule",
     "lease huérfana",
-    "No implementes esta prohibición mediante listas de nombres explícitos",
+    "Safeguard de fallos transitorios del conector",
+    "read-after-write",
+    "2, 5, 10 y 20 segundos",
+    "CONNECTOR_MUTATION_OUTCOME_UNKNOWN",
+    "CONNECTOR_RETRY_EXHAUSTED",
+    "Reintentos del conector:",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -104,6 +109,10 @@ FLOWCHART_NODES = (
     "NO-OP",
     "PARTIAL",
     "PASS",
+    "CONNECTOR_RETRY",
+    "READ_AFTER_WRITE",
+    "RETRY_SAME_OPERATION",
+    "CONNECTOR_RETRY_EXHAUSTED",
 )
 
 
@@ -171,6 +180,9 @@ def main() -> int:
         "schedule` cada cinco minutos",
         "workflow_dispatch",
         "No incluyas campos `owner`",
+        "OUTCOME_UNKNOWN",
+        "read-after-write",
+        "cuatro intentos",
     )
     for required in coordination_requirements:
         if required not in coordination:
@@ -238,6 +250,10 @@ def main() -> int:
         fail(errors, "working-state ownership is not reinforced across the prompt stack")
     if combined.count("última mutación") + combined.count("ÚLTIMA mutación") < 4:
         fail(errors, "final release boundary is not reinforced across the prompt stack")
+    if combined.count("read-after-write") < 5:
+        fail(errors, "connector unknown-outcome reconciliation is not reinforced across the prompt stack")
+    if combined.count("cuatro intentos") + combined.count("four total attempts") < 3:
+        fail(errors, "connector retry budget is not reinforced across the prompt stack")
 
     if errors:
         for error in errors:
