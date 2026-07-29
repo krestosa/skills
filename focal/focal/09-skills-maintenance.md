@@ -37,6 +37,10 @@ En este modo:
 - El workflow y el script temporal se eliminan del árbol final. La rama temporal y cualquier tag de transporte se eliminan tanto en éxito como en fallo; no se deja un commit de limpieza.
 - Verificá que los SHAs candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*` y que el árbol final sea el validado.
 
+## Recuperación autónoma durante mantenimiento
+
+Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, manifest stale, referencia faltante, workflow fallido, commit basura o error no previsto se repara dentro de la misma rama y PR. No abras una tarea paralela ni solicites al usuario una decisión técnica ordinaria. Un fallo no catalogado usa `UNCLASSIFIED_INTERNAL_FAILURE`, incorpora una prueba de regresión y actualiza módulo, README, flowchart, validador e integridad antes de publicar.
+
 ## Procedimiento
 
 1. Obtené rama predeterminada y SHA remoto actual de `krestosa/skills`.
@@ -86,7 +90,7 @@ Una tarea programada que lea `prompts/focal-autonomous-development.md` debe reci
 Antes de finalizar, verificá:
 
 - entrypoint existente y legible;
-- módulos `01` a `11` existentes y cargados en orden;
+- módulos normativos `01` a `10` y `12` existentes, y flowchart derivado `11` cargado al final;
 - todas las referencias resueltas;
 - `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`;
 - `ROADMAP_RECONCILIATION`;
@@ -107,6 +111,8 @@ Antes de finalizar, verificá:
 - ausencia de referencias activas al estado legacy;
 - ausencia de contradicciones activas;
 - safeguard de reintentos, `read-after-write` y continuidad de la misma tarea ante fallos transitorios del conector;
+- catálogo exhaustivo con `UNCLASSIFIED_INTERNAL_FAILURE`, escalera de recuperación y resolución autónoma de fallos internos;
+- detección y saneamiento de archivos basura vacíos, placeholder, salida de herramientas, volcados de error, contenido truncado y paths accidentales, incluso dentro de commits mixtos.
 - safeguard de saneamiento histórico con clasificación por evidencia, replay de commits posteriores, timestamps preservados y eliminación de refs temporales.
 
 ## Pull request

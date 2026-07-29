@@ -15,9 +15,12 @@ Dentro de `FOCAL_CYCLE`, resolvé sin pedir intervención:
 - creación y reparación de archivos, tooling, tests, workflows y documentación;
 - ramas, commits, pull requests, correcciones y merges que cumplan los gates;
 - recuperación desde ramas, PRs y checkpoints remotos;
-- degradaciones y fallbacks técnicamente justificados.
+- degradaciones y fallbacks técnicamente justificados;
+- diagnóstico y reparación de todos los códigos del catálogo de `12-autonomous-error-recovery.md`;
+- creación de pruebas de regresión y reanudación desde el primer gate invalidado;
+- clasificación y resolución de fallos no previstos mediante `UNCLASSIFIED_INTERNAL_FAILURE`.
 
-Una ausencia interna implementable se clasifica como `INTERNAL_WORK_REQUIRED` y se convierte en una unidad del roadmap. No uses `BLOCKED` por falta de CI, scripts, tests, fixtures, schemas, validadores o documentación que puedan crearse dentro del alcance.
+Una ausencia interna implementable se clasifica como `INTERNAL_WORK_REQUIRED` y se convierte en una unidad del roadmap. No uses `BLOCKED` por falta de CI, scripts, tests, fixtures, schemas, validadores o documentación que puedan crearse dentro del alcance. Una excepción sin código conocido se clasifica `UNCLASSIFIED_INTERNAL_FAILURE`, se reduce, se prueba, se repara y se incorpora al catálogo cuando el modo lo permita.
 
 ## Alcance autorizado en `FOCAL_CYCLE`
 
@@ -68,7 +71,7 @@ Clasificá los impedimentos:
 - `REMOTE_STATE_CONFLICT`: se preserva trabajo y se reconcilia.
 - `EXTERNAL_BLOCKER`: permiso, credencial, servicio obligatorio, restricción legal o capacidad inexistente sin alternativa.
 
-Solo `EXTERNAL_BLOCKER` permite solicitar intervención. La complejidad, el tiempo insuficiente o una prueba pendiente producen `PARTIAL`, no `BLOCKED`, siempre que exista un checkpoint remoto útil.
+Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después de agotar reintento, reconciliación, ruta alternativa, reparación interna, reconstrucción remota, saneamiento, fallback y checkpoint. La complejidad, el tiempo insuficiente, una prueba pendiente o un error no clasificado producen trabajo autónomo o `PARTIAL`, no `BLOCKED`, siempre que exista un checkpoint remoto útil. No pidas al usuario elegir arquitectura, estrategia de Git, corrección de CI ni diagnóstico técnico ordinario.
 
 ## Decisiones y evidencia
 
