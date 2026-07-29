@@ -170,17 +170,22 @@ flowchart TD
         RELEASE_OK -- Sí --> REPORT[Emitir una sola plantilla terminal con SHAs, PR, CI, roadmap, Iris, checkpoint y comandos]
     end
 
-    LOST --> PARTIAL_LOST[PARTIAL o BLOCKED según exista checkpoint remoto útil] --> RPT0
-    LOST_NO_RELEASE --> RPT0
-    RELEASE_UNKNOWN --> RPT0
-    REPORT --> END([Fin])
-    REPORT_SKILLS --> END
-    NOOP --> RPT0[Emitir reporte terminal único]
-    BLOCKED_PROMPT --> RPT0
-    BLOCKED_LOCK --> RPT0
-    BLOCKED_COORD --> RPT0
+    LOST --> EVIDENCE_RESULT{¿Existe checkpoint remoto útil?}
+    LOST_NO_RELEASE --> EVIDENCE_RESULT
+    RELEASE_UNKNOWN --> EVIDENCE_RESULT
+    EVIDENCE_RESULT -- Sí --> PARTIAL_RESULT([PARTIAL])
+    EVIDENCE_RESULT -- No --> BLOCKED_RESULT([BLOCKED])
+    REPORT --> PASS_RESULT([PASS])
+    REPORT_SKILLS --> PASS_RESULT
+    NOOP --> NOOP_RESULT([NO-OP])
+    BLOCKED_PROMPT --> BLOCKED_RESULT
+    BLOCKED_LOCK --> BLOCKED_RESULT
+    BLOCKED_COORD --> BLOCKED_RESULT
     PARTIAL_CP --> RECONCILE
-    RPT0 --> END
+    PASS_RESULT --> END([Fin])
+    PARTIAL_RESULT --> END
+    BLOCKED_RESULT --> END
+    NOOP_RESULT --> END
 ```
 
 ## Lectura del diagrama
