@@ -1,0 +1,44 @@
+name: Bootstrap Focal Prompt Integrity Refresh
+
+on:
+  push:
+    branches:
+      - prompt/require-terminal-opengl-harness
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bootstrap-focal-prompt-integrity-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.repository == 'krestosa/skills'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out prompt branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: prompt/require-terminal-opengl-harness
+          fetch-depth: 0
+
+      - name: Regenerate and validate final tree
+        run: |
+          rm .github/workflows/bootstrap-refresh-focal-prompt-integrity.yml
+          python -m py_compile scripts/validate_focal_prompt_stack.py
+          python scripts/tooling.py refresh-integrity
+          python scripts/validate_focal_prompt_stack.py
+          sudo --preserve-env=PATH python -m unittest discover -s tests -v
+          python scripts/tooling.py validate
+          python scripts/tooling.py check
+
+      - name: Publish integrity metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared/manifests/integrity.json
+          git commit -m "Refresh integrity for OpenGL harness prompt contract"
+          git push origin HEAD:prompt/require-terminal-opengl-harness
