@@ -25,12 +25,28 @@ Después de la primera lectura del issue:
 
 1. Validá título, bloques `focal-command:v3` y `focal-state:v3`, esquema y estado.
 2. Resolvé únicamente la rama predeterminada y el SHA actual de `main`, necesarios para `baseMainSha`.
-3. Ejecutá `inspect` mediante el bloque de comando y esperá `STATE_OBSERVED`.
-4. Si hay una lease ajena válida, terminá `NO-OP` sin otras lecturas ni mutaciones.
-5. Si el estado está `idle`, enviá `acquire`; si existe una lease vencida recuperable, aplicá `recover` conforme a `03-coordination.md`.
-6. Esperá y releé hasta confirmar `status == working`, `runId` propio, razón esperada y expiración futura.
-7. Si el issue continúa `idle`, no interpretes que el chat está trabajando: la ejecución no comenzó. Terminá `BLOCKED` o `NO-OP`.
-8. No crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de esta confirmación.
+3. Ejecutá `inspect` mediante el bloque de comando y registrá el instante de escritura.
+4. Esperá `STATE_OBSERVED` mediante polling con demora real: releé cada 5 a 10 segundos durante al menos 45 segundos antes de clasificar el comando como no procesado. Las lecturas consecutivas sin tiempo transcurrido no cuentan.
+5. Si hay una lease ajena válida, terminá `NO-OP` sin otras lecturas ni mutaciones.
+6. Si el estado está `idle`, enviá `acquire`; si existe una lease vencida recuperable, aplicá `recover` conforme a `03-coordination.md`.
+7. Para `acquire`, `recover`, `heartbeat` y `release`, aplicá la misma disciplina temporal: polling con demora real, correlación por `commandId` y observación del run cuando esté disponible.
+8. Esperá y releé hasta confirmar `status == working`, `runId` propio, razón esperada y expiración futura.
+9. Si `inspect` fue procesado pero la adquisición no produce propiedad, la ejecución no comenzó: terminá `BLOCKED` o `NO-OP`.
+10. Si `inspect` no se correlaciona después de la ventana real o un run terminal falla antes, evaluá y, solo si cumple todas sus condiciones, ejecutá `COORDINATOR_REPAIR` conforme a `10-coordinator-repair.md`.
+11. Si el entorno no permite esperar o medir tiempo transcurrido, terminá `BLOCKED` por observación insuficiente; no declares que el coordinador está roto.
+12. Fuera de esa excepción bootstrap, no crees ramas, PRs, commits, comentarios, archivos ni checkpoints antes de la confirmación de lease.
+
+### 2.1 Retorno después de `COORDINATOR_REPAIR`
+
+Cuando el coordinador haya sido reparado y el smoke test confirme `STATE_OBSERVED`:
+
+1. descartá el `runId` previo al fallo y cualquier run diagnóstico;
+2. releé el issue completo;
+3. generá identidad y tiempos nuevos para el ciclo funcional;
+4. reiniciá esta sección desde el paso 1;
+5. no reutilices ramas ni commits de reparación como rama funcional del shader.
+
+Si la reparación no queda mergeada o el smoke test sigue sin correlacionarse después de la ventana obligatoria, terminá `BLOCKED` sin analizar roadmap ni código funcional.
 
 ## 3. Estado remoto autorizado
 
@@ -41,7 +57,7 @@ Solo después de adquirir o recuperar la lease:
 3. No confíes en un clon, stash, reflog, workspace o archivo local de una ejecución anterior.
 4. Materializá archivos localmente solo desde un ref remoto exacto y únicamente para validación o edición durante el ciclo actual.
 5. Cualquier diferencia local sin contraparte remota carece de autoridad y no puede justificar progreso.
-6. Emití un `heartbeat` de transición con fase `REMOTE_STATE_AUDIT` y confirmá `HEARTBEAT_ACCEPTED`.
+6. Emití un `heartbeat` de transición con fase `REMOTE_STATE_AUDIT` y confirmá `HEARTBEAT_ACCEPTED` mediante polling temporal real.
 
 ## 4. Recuperación remota
 
@@ -87,10 +103,10 @@ Antes de cualquier mutación en `krestosa/Focal`, incluyendo crear o actualizar 
 1. Releé el issue `#7`.
 2. Confirmá `status == working`, `runId` propio y `leaseExpiresAt` futuro.
 3. Confirmá que ningún comando externo haya cambiado la propiedad o dejado el estado `idle`.
-4. Si restan menos de cinco minutos de lease, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED`.
+4. Si restan menos de cinco minutos de lease, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` mediante polling temporal real.
 5. Si no podés confirmar propiedad, no ejecutes la mutación.
 
-Un chat que sigue trabajando mientras el issue está `idle` está fuera del protocolo y debe detenerse inmediatamente.
+Un chat que sigue trabajando mientras el issue está `idle` está fuera del protocolo y debe detenerse inmediatamente, excepto durante las operaciones estrictamente limitadas de `COORDINATOR_REPAIR`.
 
 ## 8. Rama, implementación y checkpoints
 
@@ -133,7 +149,7 @@ En un bloque de finalización equivalente a `finally`:
 4. Releé el issue y confirmá por última vez que seguís siendo propietario.
 5. Enviá `release`. Este comando debe ser la **última mutación remota** de todo el ciclo.
 6. Después de `release`, no actualices archivos, ramas, PRs, comentarios, labels, releases ni el bloque de comando nuevamente.
-7. Releé el issue en modo solo lectura hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
+7. Releé el issue en modo solo lectura, con demoras reales, hasta confirmar `idle`, `runId == null`, `lastRunId` propio y `LEASE_RELEASED`, o documentá exactamente por qué no pudo confirmarse.
 8. Emití únicamente la plantilla de `08-terminal-report.md`.
 
 No ejecutes `cleanup_branches` como parte del cierre. Esa operación es mantenimiento administrativo independiente y solo puede comenzar cuando no existe ninguna ejecución de desarrollo activa.
