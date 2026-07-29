@@ -37,8 +37,8 @@
       },
       {
         "path": ".github/workflows/focal-prompt-validation.yml",
-        "sha256": "0c3868751f6ecc781d859aae0c9aa41849c54a5a8582eecb5bd13346b8551f3f",
-        "bytes": 4725
+        "sha256": "da1de77437e1a985773311c558f30493e961a4a2653ae9196fc537ec49d83629",
+        "bytes": 2635
       },
       {
         "path": ".gitignore",
