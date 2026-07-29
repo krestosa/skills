@@ -167,7 +167,7 @@ def main() -> int:
         "Toda lectura y mutación de `krestosa/Focal`",
         "conector de GitHub",
         "GitHub Actions",
-        "no debe conservar commits",
+        "dejar en `main` commits",
         "force-with-lease",
         "árbol final validado",
         "autor",

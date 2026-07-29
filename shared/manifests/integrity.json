@@ -37,8 +37,8 @@
       },
       {
         "path": ".github/workflows/focal-prompt-validation.yml",
-        "sha256": "da1de77437e1a985773311c558f30493e961a4a2653ae9196fc537ec49d83629",
-        "bytes": 2635
+        "sha256": "0c3868751f6ecc781d859aae0c9aa41849c54a5a8582eecb5bd13346b8551f3f",
+        "bytes": 4725
       },
       {
         "path": ".gitignore",
@@ -127,8 +127,8 @@
       },
       {
         "path": "prompts/focal/11-process-flowchart.md",
-        "sha256": "7274d47de727b112835d9b50bc8552ddc9599ec7498720cee5294c6d5771c356",
-        "bytes": 12751
+        "sha256": "3c84d909dacc0f03ab622b83fc58247117a1dede92824f6cad3a70c9796bad10",
+        "bytes": 12981
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -157,8 +157,8 @@
       },
       {
         "path": "scripts/validate_focal_prompt_stack.py",
-        "sha256": "0a7458d17f679583eedae586cde9417da14e4d608a0f7104b61b166f1d8a74d0",
-        "bytes": 8763
+        "sha256": "4ab911952af625b040f6a5af9dfde62ac553896f8a8534856d0d56b12ae7f994",
+        "bytes": 8761
       },
       {
         "path": "scripts/validate_gpt56.py",
