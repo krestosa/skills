@@ -8,10 +8,12 @@ import sys
 from pathlib import Path
 
 ENTRYPOINT = Path("prompts/focal-autonomous-development.md")
+OPERATING_CYCLE = Path("prompts/focal/01-operating-cycle.md")
+COORDINATION = Path("prompts/focal/03-coordination.md")
 REQUIRED_MODULES = (
-    Path("prompts/focal/01-operating-cycle.md"),
+    OPERATING_CYCLE,
     Path("prompts/focal/02-autonomy-and-scope.md"),
-    Path("prompts/focal/03-coordination.md"),
+    COORDINATION,
     Path("prompts/focal/04-roadmap.md"),
     Path("prompts/focal/05-iris-capability-research.md"),
     Path("prompts/focal/06-technical-requirements.md"),
@@ -37,6 +39,14 @@ REQUIRED_TEXT = (
     "Issue: #7",
     "focal-command:v3",
     "focal-state:v3",
+    "PRIMERA lectura remota de `krestosa/Focal`",
+    "ÚLTIMA mutación remota del ciclo",
+    "status == working",
+    "runId` propio",
+    "HEARTBEAT_ACCEPTED",
+    "Si el issue permanece `idle`",
+    "Antes de cada mutación",
+    "cleanup_branches` no forma parte de un ciclo de desarrollo",
     "OPENGL_RUNTIME_HARNESS",
     "focal-gl probe",
     "focal-gl compile",
@@ -80,6 +90,8 @@ def main() -> int:
 
     texts = {path: (repo / path).read_text(encoding="utf-8") for path in required_paths}
     entry = texts[ENTRYPOINT]
+    operating = texts[OPERATING_CYCLE]
+    coordination = texts[COORDINATION]
 
     for module in REQUIRED_MODULES:
         if f"`{module.as_posix()}`" not in entry:
@@ -90,8 +102,31 @@ def main() -> int:
         if required not in combined:
             fail(errors, f"missing required contract text: {required}")
 
+    entry_first = entry.find("PRIMERA lectura remota de `krestosa/Focal`")
+    entry_roadmap = entry.find("`ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`")
+    if entry_first == -1 or entry_roadmap == -1 or entry_first > entry_roadmap:
+        fail(errors, "entrypoint does not place issue acquisition before roadmap work")
+
+    if "La **primera llamada remota contra `krestosa/Focal`**" not in operating:
+        fail(errors, "operating cycle does not make issue #7 the first Focal remote call")
+    if "Este comando debe ser la **última mutación remota**" not in operating:
+        fail(errors, "operating cycle does not make release the final mutation")
+    if "Un chat que sigue trabajando mientras el issue está `idle`" not in operating:
+        fail(errors, "operating cycle does not stop unleased active chats")
+
+    coordination_requirements = (
+        "Nunca edites directamente `focal-state:v3`",
+        "Mientras el issue no muestre esos valores, el ciclo sigue sin comenzar",
+        "## Guardia previa a cada mutación",
+        "Después de enviarlo, no vuelvas a editar el issue ni ningún otro recurso",
+        "`cleanup_branches` es una operación administrativa independiente",
+    )
+    for required in coordination_requirements:
+        if required not in coordination:
+            fail(errors, f"coordination boundary missing: {required}")
+
     active_without_coordination = "\n".join(
-        text for path, text in texts.items() if path != Path("prompts/focal/03-coordination.md")
+        text for path, text in texts.items() if path != COORDINATION
     )
     for pattern in FORBIDDEN_ACTIVE_PATTERNS:
         if re.search(pattern, active_without_coordination, flags=re.IGNORECASE):
@@ -115,6 +150,10 @@ def main() -> int:
         fail(errors, "OpenGL runtime harness is not defined across roadmap, technical and validation contracts")
     if combined.count("https://shaders.properties/current/reference/") < 2:
         fail(errors, "official Iris documentation links are not required across roadmap and research contracts")
+    if combined.count("status == working") < 4:
+        fail(errors, "working-state ownership is not reinforced across the prompt stack")
+    if combined.count("última mutación") + combined.count("ÚLTIMA mutación") < 4:
+        fail(errors, "final release boundary is not reinforced across the prompt stack")
 
     if errors:
         for error in errors:

@@ -23,6 +23,26 @@ En cada ejecución:
 
 No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable.
 
+## Gate cero obligatorio de `FOCAL_CYCLE`
+
+Después de cargar íntegramente estas instrucciones, aplicá este gate antes de cualquier análisis del proyecto:
+
+1. La **PRIMERA lectura remota de `krestosa/Focal`** debe ser el cuerpo completo del issue `#7`, `[automation-state] Focal execution state`.
+2. Antes de leer roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows o releases, generá el `runId`, resolvé únicamente el SHA de `main` necesario para el comando y ejecutá `inspect` seguido de `acquire` o `recover` según `03-coordination.md`.
+3. La primera mutación remota del ciclo debe afectar exclusivamente el bloque `focal-command:v3` del issue `#7`; el bloque `focal-state:v3` solo lo modifica GitHub Actions.
+4. No existe ejecución activa por el hecho de que un chat esté razonando, ejecutando herramientas, creando código local o anunciando que comenzó. La ejecución existe únicamente cuando el issue confirma simultáneamente:
+   - `status == working`;
+   - `runId` propio;
+   - `lastCommandAccepted == true`;
+   - `lastCommandReason == LEASE_ACQUIRED` o `LEASE_RECOVERED`;
+   - `leaseExpiresAt` futuro.
+5. Si el issue permanece `idle`, si el comando no se correlaciona o si aparece otro propietario, no continúes con análisis funcional ni mutaciones: terminá `NO-OP` o `BLOCKED` según corresponda.
+6. Antes de cada mutación posterior en `krestosa/Focal`, releé el issue y confirmá propiedad y vigencia. Si faltan menos de cinco minutos para expirar, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` antes de mutar.
+7. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
+8. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
+
+`cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ningún chat autorizado trabajando sobre Focal.
+
 ## Modo de ejecución
 
 Determiná un único modo antes de mutar:
@@ -49,18 +69,19 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 
 ## Orden global del ciclo `FOCAL_CYCLE`
 
-1. Carga de instrucciones y reloj.
-2. Resolución del estado remoto.
-3. Inspección y adquisición de la exclusión mutua.
-4. Reconstrucción desde GitHub.
+1. Carga de instrucciones.
+2. Primera lectura obligatoria del issue `#7`.
+3. Reloj, identidad, SHA mínimo de `main`, `inspect` y adquisición confirmada.
+4. Resolución del resto del estado remoto y reconstrucción desde GitHub.
 5. `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`.
 6. Selección de una unidad coherente.
-7. Implementación y checkpoints remotos.
+7. Implementación, heartbeats y checkpoints remotos.
 8. Validación, publicación, pull request y merge cuando corresponda.
 9. `ROADMAP_RECONCILIATION`.
-10. Liberación de la lease y reporte terminal único.
+10. Finalización de todas las mutaciones del proyecto.
+11. `release` como última mutación, confirmación read-only y reporte terminal único.
 
-No selecciones ni implementes trabajo funcional antes de completar la fase 5.
+No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5.
 
 ## Precedencia
 
@@ -83,6 +104,7 @@ Detenete sin iniciar nuevo trabajo cuando:
 
 - otra ejecución posee una lease válida;
 - no podés verificar o adquirir la exclusión mutua;
+- el issue sigue `idle` después del intento de adquisición;
 - perdés la propiedad de la lease;
 - el estado remoto necesario es ambiguo después de los fallbacks permitidos;
 - falta una autorización indispensable;
