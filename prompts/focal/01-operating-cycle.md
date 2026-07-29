@@ -45,6 +45,10 @@ Este protocolo se aplica antes de mergear y antes de `release` cuando el ciclo c
 6. La actualización de ref usa `--force-with-lease` contra el head exacto. El workflow, scripts, ramas y tags temporales se eliminan; no se crea un commit de limpieza.
 7. Si la Action falla antes del cambio de ref, no continúes con merge ni cierre. La ref objetivo debe quedar intacta y la rama temporal debe eliminarse mediante cleanup incondicional.
 
+## 1.3 Despacho autónomo de errores
+
+Toda operación del ciclo está envuelta por `AUTONOMOUS_RECOVERY_LOOP` de `12-autonomous-error-recovery.md`. Ante un fallo, pausá solo dependencias, releé la autoridad remota, clasificá, reuní evidencia, aplicá la escalera de recuperación, validá el artefacto exacto y retomá desde el primer gate invalidado. `UNCLASSIFIED_INTERNAL_FAILURE` obliga a crear un diagnóstico reproducible y un fix interno; no autoriza finalizar de inmediato.
+
 ## 2. Adquisición obligatoria antes del análisis
 
 Después de la primera lectura del issue:
@@ -178,7 +182,7 @@ En un bloque de finalización equivalente a `finally`:
 1. Detené procesos locales propios.
 2. Verificá que todo trabajo preservable esté en GitHub.
 3. Completá antes de liberar cualquier mutación pendiente de archivos, ramas, PRs, merges, roadmap, matriz o checkpoints.
-4. Auditá la historia y las refs creadas por el ciclo. Si existe un candidato `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` o `FAILED_TRANSPORT_COMMIT`, completá el saneamiento por GitHub Actions y verificá ausencia de artefactos alcanzables antes de liberar.
+4. Auditá la historia, las refs y todos los paths creados o modificados por el ciclo. Si existe `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT`, `FAILED_TRANSPORT_COMMIT`, `GARBAGE_ARTIFACT_COMMIT` o `GARBAGE_ARTIFACT_MIXED_COMMIT`, incluido un archivo con solo `X` o contenido placeholder similar sin función, completá el saneamiento por GitHub Actions y verificá ausencia de artefactos alcanzables antes de liberar.
 5. Releé el issue y confirmá por última vez que seguís siendo propietario.
 6. Enviá `release`. Este comando debe ser la **última mutación remota** de todo el ciclo.
 7. Después de `release`, no actualices archivos, ramas, PRs, comentarios, labels, releases ni el bloque de comando nuevamente.

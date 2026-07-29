@@ -21,7 +21,11 @@ Pruebas no ejecutadas y motivo:
 Commit(s) funcionales:
 Commits temporales de reparación:
 Historia final de Focal: no aplicable | limpia, sin commits temporales alcanzables | pendiente de limpieza
-Candidatos saneados: NOOP_COMMIT | EMPTY_ARTIFACT_COMMIT | FAILED_TRANSPORT_COMMIT | ninguno
+Candidatos saneados: NOOP_COMMIT | EMPTY_ARTIFACT_COMMIT | FAILED_TRANSPORT_COMMIT | GARBAGE_ARTIFACT_COMMIT | GARBAGE_ARTIFACT_MIXED_COMMIT | ninguno
+Paths basura retirados y clasificación:
+Fallos autónomamente recuperados:
+Ruta de recuperación aplicada:
+Fallos no clasificados convertidos en diagnóstico: ninguno | detalle
 SHAs excluidos y evidencia:
 Commits posteriores reconstruidos:
 Timestamps posteriores preservados: authorDate y committerDate exactos | no aplicable | no verificado
@@ -68,6 +72,7 @@ Reglas:
 - En `NO-OP` por lease activa, indicá únicamente `runId`, fase y expiración observados sin modificar el estado.
 - En `SKILLS_MAINTENANCE`, reemplazá las rutas de roadmap y matriz por `no aplicable` salvo que la tarea también autorice Focal.
 - En `COORDINATOR_REPAIR`, distinguí commits temporales observados de commits alcanzables al final. `PASS` requiere que ningún commit, merge, workflow o ref temporal de reparación permanezca alcanzable desde `main`.
-- Cuando se sanee historia, listá los candidatos, su clasificación probada, los commits posteriores reconstruidos y la comparación exacta de `authorDate` y `committerDate`. `PASS` exige cero candidatos alcanzables desde heads o tags, cero ramas temporales y ningún commit de limpieza.
+- Cuando se sanee historia, listá commits y paths candidatos, su clasificación probada, los commits posteriores reconstruidos y la comparación exacta de `authorDate` y `committerDate`. Incluí archivos placeholder como `X`, salidas de herramientas y dumps solo cuando la evidencia conjunta demuestre que son basura. `PASS` exige cero candidatos alcanzables desde heads o tags, cero ramas temporales y ningún commit de limpieza.
+- Para cada error, informá el código, la ruta de recuperación y la validación que permitió reanudar. `UNCLASSIFIED_INTERNAL_FAILURE` no puede quedar sin diagnóstico o checkpoint recuperable.
 - Si se reescribió el commit final de Focal mediante GitHub Actions, informá el árbol preservado, parent, autor, committer, fechas y mensaje verificados.
 - La imposibilidad de borrar auditoría interna de GitHub o del proveedor es una limitación de plataforma; no la confundas con contenido controlado por el repositorio.

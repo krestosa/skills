@@ -106,14 +106,22 @@ Los commits de reparación, transporte, archivos vacíos y no-op no forman parte
 
 ### Clasificación obligatoria
 
-Antes de excluir un SHA, reuní evidencia suficiente:
+Antes de excluir un SHA o path, reuní evidencia suficiente:
 
 - `NOOP_COMMIT`: commit de un solo parent y `tree(commit) == tree(parent)`;
 - `EMPTY_ARTIFACT_COMMIT`: el diff se limita a archivos de cero bytes en rutas temporales o de transporte, sin contenido funcional, cambios de modo, renames, submódulos ni efectos laterales;
 - `FAILED_TRANSPORT_COMMIT`: existe un run fallido correlacionado, el diff está limitado a infraestructura temporal y el replay sin ese commit produce el árbol funcional esperado;
-- commits que no cumplen exactamente una clase permanecen intactos.
+- `GARBAGE_ARTIFACT_FILE`: path accidental sin consumidor ni función en build, runtime, tests, documentación, packaging o coordinación;
+- `PLACEHOLDER_GARBAGE_FILE`: contenido normalizado de uno o pocos tokens sin función semántica, por ejemplo `X`, placeholder, marcador provisional o puntuación repetida;
+- `TOOL_OUTPUT_ARTIFACT_FILE`: argumentos, payloads, respuestas o serializaciones de herramientas copiados accidentalmente;
+- `ERROR_DUMP_ARTIFACT_FILE`: traceback, stack trace, página de error o diagnóstico transitorio no usado como fixture intencional;
+- `TRUNCATED_GENERATION_ARTIFACT_FILE`: contenido cortado o sintaxis incompleta por una generación interrumpida;
+- `WRONG_PATH_ARTIFACT_FILE`: duplicado, extensión errónea o contenido escrito en una ruta no consumida;
+- `GARBAGE_ARTIFACT_COMMIT`: commit cuyo cambio completo se limita a una o más clases de archivo basura probadas;
+- `GARBAGE_ARTIFACT_MIXED_COMMIT`: commit que combina trabajo válido con basura; se conserva el diff funcional y se retiran solo los paths probados;
+- commits y paths que no cumplen exactamente una clase permanecen intactos.
 
-El mensaje, el autor, la hora, el nombre de rama o el estado del run nunca bastan solos. No excluyas commits firmados, asociados a una release, alcanzables por tags, compartidos por ramas protegidas, usados por otro PR o funcionalmente necesarios. No atravieses un merge sin mapear todos sus parents y demostrar topología equivalente.
+El contenido mínimo, mensaje, autor, hora, nombre de rama o estado del run nunca bastan solos. Verificá referencias, convenciones legítimas, parser esperado, manifests, imports, includes, tests, fixtures, snapshots, packaging y árbol resultante. Protegé marcadores de directorio, módulos intencionalmente vacíos, fixtures de vacío, sentinels, licencias y formatos mínimos válidos. No excluyas commits firmados, asociados a una release, alcanzables por tags, compartidos por ramas protegidas, usados por otro PR o funcionalmente necesarios. No atravieses un merge sin mapear todos sus parents y demostrar topología equivalente.
 
 ### Reescritura mediante GitHub Actions
 
@@ -122,7 +130,8 @@ Antes de finalizar `COORDINATOR_REPAIR`:
 1. fijá `expectedOldHead`, el último parent limpio, el árbol funcional validado y la lista cerrada de candidatos con evidencia;
 2. ejecutá exclusivamente mediante GitHub Actions; no uses force push local ni una mutación directa del conector;
 3. trabajá en un checkout completo y reconstruí la cadena en orden topológico:
-   - omití los candidatos;
+   - omití commits formados solo por candidatos;
+   - para un `GARBAGE_ARTIFACT_MIXED_COMMIT`, reconstruí el árbol conservando todos los cambios funcionales y retirando únicamente los paths probados;
    - para cada commit posterior conservado, reaplicá su diff exacto contra el nuevo parent y calculá un árbol nuevo;
    - conservá exactamente nombre y correo de autor mediante `GIT_AUTHOR_NAME` y `GIT_AUTHOR_EMAIL`;
    - conservá exactamente fecha y timezone de autor mediante `GIT_AUTHOR_DATE` tomada del commit original;
@@ -198,7 +207,7 @@ La reparación exige:
 7. checks verdes del árbol y head temporales exactos;
 8. publicación del árbol reparado y limpieza de toda historia temporal alcanzable;
 9. verificación de árbol, parent, autor, committer, fechas, mensaje y ausencia del workflow temporal;
-10. tests o aserciones para `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT` y `FAILED_TRANSPORT_COMMIT`, incluida la prohibición de clasificar por mensaje solamente;
+10. tests o aserciones para `NOOP_COMMIT`, `EMPTY_ARTIFACT_COMMIT`, `FAILED_TRANSPORT_COMMIT`, `GARBAGE_ARTIFACT_COMMIT` y `GARBAGE_ARTIFACT_MIXED_COMMIT`, incluidos archivos con solo `X`, placeholders, tool output, error dumps, contenido truncado y paths accidentales, con casos legítimos mínimos que no deben eliminarse;
 11. prueba de replay que conserve `GIT_AUTHOR_DATE` y `GIT_COMMITTER_DATE` de todos los commits posteriores y produzca el árbol esperado;
 12. prueba de `--force-with-lease`, ausencia de candidatos en `refs/heads/*` y `refs/tags/*`, eliminación de ramas temporales y ausencia de commit de limpieza;
 13. comando `inspect` nuevo observado durante la ventana obligatoria y correlacionado con `STATE_OBSERVED`;

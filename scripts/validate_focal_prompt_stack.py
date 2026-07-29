@@ -11,6 +11,7 @@ ENTRYPOINT = Path("prompts/focal-autonomous-development.md")
 OPERATING_CYCLE = Path("prompts/focal/01-operating-cycle.md")
 COORDINATION = Path("prompts/focal/03-coordination.md")
 COORDINATOR_REPAIR = Path("prompts/focal/10-coordinator-repair.md")
+ERROR_RECOVERY = Path("prompts/focal/12-autonomous-error-recovery.md")
 FLOWCHART = Path("prompts/focal/11-process-flowchart.md")
 README = Path("README.md")
 REQUIRED_MODULES = (
@@ -24,6 +25,7 @@ REQUIRED_MODULES = (
     Path("prompts/focal/08-terminal-report.md"),
     Path("prompts/focal/09-skills-maintenance.md"),
     COORDINATOR_REPAIR,
+    ERROR_RECOVERY,
     FLOWCHART,
 )
 RETIRED_ACTIVE_FILES = (
@@ -85,6 +87,18 @@ REQUIRED_TEXT = (
     "refs/heads/*",
     "refs/tags/*",
     "Commit o merge de limpieza presente:",
+    "AUTONOMOUS_RECOVERY_LOOP",
+    "UNCLASSIFIED_INTERNAL_FAILURE",
+    "RECOVERY_REPAIR_IN_PLACE",
+    "GARBAGE_ARTIFACT_FILE",
+    "PLACEHOLDER_GARBAGE_FILE",
+    "TOOL_OUTPUT_ARTIFACT_FILE",
+    "ERROR_DUMP_ARTIFACT_FILE",
+    "TRUNCATED_GENERATION_ARTIFACT_FILE",
+    "WRONG_PATH_ARTIFACT_FILE",
+    "GARBAGE_ARTIFACT_COMMIT",
+    "GARBAGE_ARTIFACT_MIXED_COMMIT",
+    "No pidas al usuario elegir arquitectura",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -130,6 +144,13 @@ FLOWCHART_NODES = (
     "HISTORY_FORCE_LEASE",
     "HISTORY_DELETE_REFS",
     "HISTORY_REACHABILITY",
+    "AUTONOMOUS_RECOVERY",
+    "ERROR_CAPTURE",
+    "ERROR_CLASSIFY",
+    "ERROR_UNKNOWN",
+    "ERROR_ROUTE",
+    "ERROR_RESUME",
+    "ERROR_CHECKPOINT",
 )
 
 
@@ -161,6 +182,7 @@ def main() -> int:
     operating = texts[OPERATING_CYCLE]
     coordination = texts[COORDINATION]
     repair = texts[COORDINATOR_REPAIR]
+    recovery = texts[ERROR_RECOVERY]
     flowchart = texts[FLOWCHART]
     readme = (repo / README).read_text(encoding="utf-8")
 
@@ -233,6 +255,21 @@ def main() -> int:
     for marker in FLOWCHART_NODES:
         if marker not in flowchart:
             fail(errors, f"flowchart missing required node or state: {marker}")
+    recovery_requirements = (
+        "AUTONOMOUS_RECOVERY_LOOP",
+        "UNCLASSIFIED_INTERNAL_FAILURE",
+        "RECOVERY_EXTERNAL_ESCALATION",
+        "GARBAGE_ARTIFACT_FILE",
+        "PLACEHOLDER_GARBAGE_FILE",
+        "GARBAGE_ARTIFACT_MIXED_COMMIT",
+        "GIT_AUTHOR_DATE",
+        "GIT_COMMITTER_DATE",
+        "Nunca se pide al usuario",
+    )
+    for required in recovery_requirements:
+        if required not in recovery:
+            fail(errors, f"autonomous recovery contract missing: {required}")
+
     if flowchart.count("```mermaid") != 1 or flowchart.count("```") < 2:
         fail(errors, "flowchart does not contain exactly one Mermaid block")
 
@@ -240,8 +277,24 @@ def main() -> int:
         if marker not in readme:
             fail(errors, f"README troubleshooting section missing: {marker}")
     blocker_rows = len(re.findall(r"^\| `[^`]+` \|", readme, flags=re.MULTILINE))
-    if blocker_rows < 20:
-        fail(errors, f"README blocker matrix is incomplete: {blocker_rows} rows")
+    if blocker_rows < 100:
+        fail(errors, f"README failure matrix is incomplete: {blocker_rows} rows")
+    required_readme_codes = (
+        "GARBAGE_ARTIFACT_FILE",
+        "PLACEHOLDER_GARBAGE_FILE",
+        "TOOL_OUTPUT_ARTIFACT_FILE",
+        "ERROR_DUMP_ARTIFACT_FILE",
+        "TRUNCATED_GENERATION_ARTIFACT_FILE",
+        "WRONG_PATH_ARTIFACT_FILE",
+        "GARBAGE_ARTIFACT_MIXED_COMMIT",
+        "UNCLASSIFIED_INTERNAL_FAILURE",
+        "EXTERNAL_BLOCKER",
+        "GLSL_COMPILE_FAILED",
+        "SECRET_OR_TOKEN_DETECTED",
+    )
+    for code in required_readme_codes:
+        if not re.search(rf"^\| `{re.escape(code)}` \|", readme, flags=re.MULTILINE):
+            fail(errors, f"README failure matrix missing code: {code}")
 
     active_without_coordination = "\n".join(
         text for path, text in texts.items() if path != COORDINATION
@@ -285,6 +338,14 @@ def main() -> int:
         fail(errors, "later-commit timestamp preservation is not reinforced across the prompt stack")
     if combined.count("refs/heads/*") < 3 or combined.count("refs/tags/*") < 3:
         fail(errors, "history sanitation reachability verification is not reinforced")
+    if combined.count("AUTONOMOUS_RECOVERY_LOOP") < 4:
+        fail(errors, "autonomous recovery loop is not reinforced across the prompt stack")
+    if combined.count("UNCLASSIFIED_INTERNAL_FAILURE") < 5:
+        fail(errors, "unknown internal failure route is not reinforced")
+    if combined.count("GARBAGE_ARTIFACT_MIXED_COMMIT") < 5:
+        fail(errors, "mixed-commit garbage sanitation is not reinforced")
+    if "solo `X`" not in combined and "por ejemplo `X`" not in combined:
+        fail(errors, "placeholder garbage example is not explicitly covered")
     if "mensaje" not in repair or "nunca bastan solos" not in repair:
         fail(errors, "history candidates can be classified without sufficient evidence")
 
