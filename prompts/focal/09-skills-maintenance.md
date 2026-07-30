@@ -70,6 +70,8 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 - Granularidad adaptativa: bulk solo para cambios independientes de bajo riesgo e incrementos verticales para trabajo importante.
 - En bulk de bajo riesgo, un commit dedicado por archivo; en alto impacto, commits lógicos multarchivo cuando la atomicidad lo requiera.
 - Checkpoints exclusivamente contingentes y `PARTIAL` limitado a causas objetivas.
+- `NO-OP` con causas cerradas: `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` y `LATE_ACQUIRE_ORPHANED`.
+- `WORK_SELECTION_PROOF` obligatorio, al menos tres candidatos, descomposición vertical, límite de quince minutos y recuperación ante repetición.
 - Calidad explícita: sin código de relleno, placeholders, deuda oculta, abstracciones especulativas ni tests superficiales.
 - Reporte terminal orientado a lectura humana: resultado, entrega, PR/merge, CI y siguiente acción arriba; identificadores y mecánica dentro de detalles desplegables.
 - El reporte terminal usa Markdown renderizado y queda prohibido volver a una lista plana o a un bloque `text` de campos consecutivos.
@@ -117,6 +119,9 @@ Antes de finalizar, verificá:
 - flowchart Mermaid completo y consistente;
 - sección de bloqueos y recuperación en `README.md`;
 - reporte terminal único, renderizado como Markdown legible y con la información prioritaria antes de la trazabilidad técnica;
+- estado del coordinador acompañado por `Estado observado UTC`;
+- causas cerradas de `NO-OP`, prueba de selección y rechazo de `NO_VALID_UNIT` como motivo terminal;
+- regresión `NOOP_REASON_REPEATED` y recuperación `ROADMAP_GRANULARITY_FAILURE`;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
 - ausencia de contradicciones activas;

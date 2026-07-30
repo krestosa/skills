@@ -47,6 +47,15 @@ Aplicá en orden y detente en la primera ruta que resuelva con evidencia:
 
 No ejecutes la misma estrategia fallida indefinidamente. Después de dos intentos de reparación con la misma hipótesis causal, reuní evidencia nueva y cambiá de hipótesis o ruta.
 
+## Fallos de selección y granularidad
+
+- `ROADMAP_GRANULARITY_FAILURE`: existen ítems `PENDIENTE`, `EN PROGRESO` o `REVALIDAR`, pero la ejecución no produjo un incremento vertical utilizable. Repará el roadmap, completá `WORK_SELECTION_PROOF` y ejecutá el primer slice.
+- `WORK_SELECTION_PROOF_MISSING`: no se evaluaron al menos tres candidatos —o todos los restantes— con dependencias, resultado mínimo, validación, presupuesto y código de descarte. Volvé a la fase de selección.
+- `NOOP_REASON_INVALID`: se intentó terminar `NO-OP` con una razón fuera del conjunto cerrado. Reclasificá y reanudá; no liberes como `NO-OP` por complejidad o incertidumbre.
+- `NOOP_REASON_REPEATED`: dos ciclos consecutivos repiten un `NO-OP` de selección mientras el roadmap conserva trabajo activo. Cambiá la hipótesis, descomponé la primera prioridad y ejecutala.
+
+`NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, “no se encontró un incremento seguro” y equivalentes quedan retirados como causas terminales: son aliases de `ROADMAP_GRANULARITY_FAILURE`.
+
 ## Clasificación de archivos basura generados por error
 
 La categoría operativa de artefacto no-op o basura incluye archivos creados o modificados accidentalmente, aunque el commit cambie el árbol.
@@ -121,7 +130,7 @@ Si el proceso desaparece completamente, la siguiente ejecución lee el estado re
 
 - `PASS`: causa reparada, pruebas repetidas, estado reconciliado y tarea original completada.
 - `PARTIAL`: existe checkpoint remoto útil y una siguiente ejecución puede continuar autónomamente.
-- `NO-OP`: otra lease válida posee el trabajo o no existe acción segura necesaria.
+- `NO-OP`: solo `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`, con evidencia explícita.
 - `BLOCKED`: reservado para un `EXTERNAL_BLOCKER` real o una condición de coordinación irrecuperable después de todas las rutas y sin checkpoint útil.
 
 La mera presencia de un error, una excepción, un run fallido, un archivo corrupto, una herramienta ausente o una prueba roja nunca basta para `BLOCKED`.

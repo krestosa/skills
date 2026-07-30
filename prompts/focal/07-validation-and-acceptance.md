@@ -16,6 +16,7 @@ Antes de editar, registrá para la unidad:
 - clasificación `LOW_RISK_BULK` o `HIGH_IMPACT_INCREMENT` y justificación;
 - lista cerrada de ítems cuando sea un lote de bajo riesgo;
 - resultado funcional observable cuando sea un incremento de alto impacto;
+- `WORK_SELECTION_PROOF` con al menos tres candidatos —o todos si quedan menos—, slice mínimo y códigos de descarte;
 - condición objetiva que impediría `PASS`.
 
 ## Gates por carril y calidad
@@ -273,6 +274,14 @@ Existe una restricción externa real sin alternativa autorizada, o el coordinado
 
 ### `NO-OP`
 
-No se realizó trabajo funcional porque otra lease estaba activa, no existía unidad válida o el estado remoto ya satisfacía el objetivo.
+`NO-OP` es una clasificación cerrada y exige uno de estos códigos con evidencia explícita:
+
+- `ACTIVE_RUN`: otra lease futura válida posee la ejecución;
+- `PROJECT_ALREADY_COMPLETE`: `main`, roadmap y matriz prueban que no queda trabajo `PENDIENTE`, `EN PROGRESO` ni `REVALIDAR`;
+- `NO_AUTHORIZED_WORK`: la instrucción actual no autoriza ninguna operación aplicable;
+- `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`: todos los ítems restantes dependen de una capacidad externa comprobada, sin fallback autorizado;
+- `LATE_ACQUIRE_ORPHANED`: una adquisición tardía se libera sin iniciar trabajo retrospectivo.
+
+Antes de usar cualquiera salvo `ACTIVE_RUN` o `LATE_ACQUIRE_ORPHANED`, adjuntá `WORK_SELECTION_PROOF`. Si existen ítems activos y no se encontró un slice, el resultado es `ROADMAP_GRANULARITY_FAILURE`, no `NO-OP`. Un código distinto se clasifica `NOOP_REASON_INVALID`. Repetir en dos ciclos el mismo `NO-OP` de selección mientras el roadmap mantiene trabajo se clasifica `NOOP_REASON_REPEATED` y obliga a descomponer y ejecutar.
 
 No uses `PASS` para una PR abierta, trabajo solo local, pruebas faltantes, CI desconocida, roadmap sin reconciliar o lock sin liberar.

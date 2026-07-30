@@ -113,7 +113,7 @@ La fase termina únicamente cuando:
 - `docs/ROADMAP.md` existe y fue auditado contra el estado remoto;
 - `docs/IRIS-CAPABILITY-MATRIX.md` existe y posee cobertura suficiente para tomar la decisión del ciclo;
 - el roadmap y la matriz se enlazan;
-- se identificó una unidad válida o se determinó que no existe trabajo ejecutable.
+- se identificó una unidad válida o se demostró una causa cerrada de `NO-OP` mediante `WORK_SELECTION_PROOF`.
 
 Si la fase consume el presupuesto, publicá solo su corrección documental y continuá con reconciliación; no fuerces una feature.
 
@@ -141,6 +141,19 @@ Antes de crear o retomar una rama, resolvé en este orden:
 6. Seleccioná el paquete más grande que tenga alta probabilidad de quedar completamente validado, mergeado y reconciliado antes del soft stop. Reducí alcance antes de empezar si esa probabilidad no es alta.
 7. Un checkpoint, una nota de intención, una PR preparatoria o un documento que solo enumera trabajo pendiente no constituyen una unidad seleccionable.
 8. Dos ciclos consecutivos no pueden terminar `PARTIAL` sobre la misma unidad salvo que aparezca nueva evidencia objetiva: CI todavía en ejecución, dependencia externa, conflicto remoto, pérdida de lease, fallo reproducible no resuelto o entorno obligatorio no disponible.
+
+### 6.1 `WORK_SELECTION_PROOF` obligatorio
+
+Antes de terminar la selección sin una unidad funcional:
+
+1. Enumerá al menos tres candidatos del roadmap; si quedan menos, enumeralos todos.
+2. Para cada candidato registrá identificador, estado, prioridad, dependencias, resultado observable mínimo, archivos o subsistemas, validación, evidencia requerida, presupuesto y un código factual de descarte.
+3. No descartes un candidato por ser una feature grande. Descomponelo por capacidad funcional y criterio de aceptación hasta obtener un `HIGH_IMPACT_INCREMENT` utilizable y mergeable.
+4. Aplicá esta ruta fallback obligatoria: retomar `PARTIAL`; restaurar CI o validación; continuar `OPENGL_RUNTIME_HARNESS`; reparar granularidad del roadmap y ejecutar inmediatamente su primer incremento; seleccionar la menor capacidad vertical pendiente; resolver una inconsistencia documental factual solo cuando no exista trabajo funcional ejecutable.
+5. Completá la selección dentro de los primeros quince minutos reales posteriores a `LEASE_ACQUIRED` o `LEASE_RECOVERED`. Si no ocurre, clasificá `ROADMAP_GRANULARITY_FAILURE` y ejecutá `AUTONOMOUS_RECOVERY_LOOP`; no consumas el ciclo en auditoría abierta.
+6. `NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, “demasiado grande”, complejidad o incertidumbre temporal no son resultados terminales ni causas de `NO-OP`.
+7. `NO-OP` solo admite `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`, cada uno con evidencia remota explícita.
+8. Si el último ciclo terminó `NO-OP` por selección y el roadmap todavía contiene `PENDIENTE`, `EN PROGRESO` o `REVALIDAR`, repetir el mismo motivo se clasifica `NOOP_REASON_REPEATED`; la ejecución debe descomponer y seleccionar trabajo.
 
 No abras subsistemas desconectados. La infraestructura habilitante y su primera utilización pueden formar un único incremento cuando sean inseparables y validables.
 

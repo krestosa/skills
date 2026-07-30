@@ -68,6 +68,17 @@ Una feature debe separarse cuando cambien cualquiera de estos factores:
 
 No atomices en tareas microscópicas ni por archivo. Tampoco ocultes múltiples features independientes dentro de un único ítem amplio. No crees ítems cuyo único resultado sea preparar, describir o preservar el trabajo que otro ciclo deberá implementar.
 
+## `WORK_SELECTION_PROOF` y reparación de granularidad
+
+Antes de afirmar que no existe trabajo ejecutable:
+
+1. construí una tabla con al menos tres candidatos —o todos si quedan menos— y columnas `Ítem`, `Estado`, `Dependencias`, `Resultado observable mínimo`, `Validación`, `Presupuesto` y `Código de descarte`;
+2. intentá descomponer cada candidato demasiado amplio por capacidad funcional, no por archivo ni fase administrativa;
+3. cuando el roadmap no permita identificar un slice vertical, clasificá `ROADMAP_GRANULARITY_FAILURE`, corregí el ítem y seleccioná inmediatamente el primer incremento resultante;
+4. no uses la corrección documental como sustituto del incremento cuando reste tiempo suficiente para implementar y validar su primera utilización;
+5. conservá la prueba de selección en el reporte y en la PR cuando haya cambios de granularidad;
+6. un `NO-OP` consecutivo por el mismo motivo de selección con ítems activos es `NOOP_REASON_REPEATED` y debe entrar en recuperación.
+
 ## Estructura obligatoria de cada ítem
 
 Cada ítem debe tener un identificador estable, por ejemplo `FOCAL-LIGHT-001`, y conservarlo al reordenarse. Puede representarse como subsección o fila de tabla siempre que todos los campos permanezcan explícitos y legibles.
@@ -179,17 +190,18 @@ Después de la fase inicial:
 
 1. completar la misma unidad remota que terminó `PARTIAL`, salvo que ya haya sido completada por otro actor o exista nueva evidencia objetiva que la vuelva inválida;
 2. restaurar compilación, validación o estabilidad;
-3. resolver bloqueos;
+3. resolver bloqueos internos;
 4. construir o completar `OPENGL_RUNTIME_HARNESS` hasta disponer de compile/link/render/readback mínimo;
-5. completar infraestructura compartida;
-6. continuar `EN PROGRESO`;
-7. revisar `REVALIDAR`;
-8. implementar prioridad alta;
-9. agrupar correcciones `LOW_RISK_BULK` compatibles cuando todas puedan cerrarse en el ciclo;
-10. investigar documentación necesaria;
-11. mejorar visual o rendimiento con medición.
+5. reparar `ROADMAP_GRANULARITY_FAILURE` y ejecutar el primer incremento vertical producido;
+6. completar infraestructura compartida junto con su primera utilización;
+7. continuar `EN PROGRESO`;
+8. revisar `REVALIDAR`;
+9. implementar la menor capacidad vertical de prioridad alta;
+10. agrupar correcciones `LOW_RISK_BULK` compatibles cuando todas puedan cerrarse en el ciclo;
+11. resolver documentación factual necesaria;
+12. mejorar visual o rendimiento con medición.
 
-No selecciones una unidad ausente del roadmap. No selecciones un checkpoint o documento preparatorio como sustituto de una unidad ejecutable.
+No selecciones una unidad ausente del roadmap. No selecciones un checkpoint o documento preparatorio como sustituto de una unidad ejecutable. `NO-OP` solo es válido como `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`; la existencia de cualquier ítem `PENDIENTE`, `EN PROGRESO` o `REVALIDAR` invalida `PROJECT_ALREADY_COMPLETE`.
 
 ## Fase `ROADMAP_RECONCILIATION`
 
