@@ -12,6 +12,13 @@ Runtime guard:
 SHA remoto inicial:
 SHA remoto final observado:
 Objetivo seleccionado:
+Carril de ejecución: LOW_RISK_BULK | HIGH_IMPACT_INCREMENT | RECOVERY | no aplicable
+Justificación de riesgo:
+Lote o incremento seleccionado:
+Resultado observable entregado:
+Continuidad de un PARTIAL anterior: no | sí, detalle
+Revisión de calidad: propósito, simplicidad, deuda, placeholders, código muerto, abstracciones, errores y tests
+Motivo objetivo de PARTIAL: no aplicable | detalle y evidencia
 Alcance realizado:
 Archivos creados, modificados, movidos o eliminados:
 Pruebas ejecutadas:
@@ -68,7 +75,9 @@ Reglas:
 - No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
 - `runId` y `commandId` son identificadores opacos; no intentes derivar ni explicar la herramienta que los originó.
 - Un error transitorio aislado no justifica un resultado terminal. Informá cantidad de reintentos y cualquier `read-after-write` usado para reconciliar una mutación de resultado desconocido.
-- `PASS` requiere publicación, aceptación, reconciliación y liberación completas.
+- `PASS` requiere publicación, aceptación, reconciliación y liberación completas. En `LOW_RISK_BULK`, todos los archivos e ítems del lote deben estar cerrados; en `HIGH_IMPACT_INCREMENT`, debe estar cerrado el incremento vertical seleccionado.
+- `PARTIAL` requiere una causa objetiva verificable y continuidad explícita de la misma unidad; un checkpoint planificado o trabajo meramente preparatorio no es evidencia suficiente.
+- Informá la revisión de calidad con hallazgos concretos; no uses una declaración genérica para ocultar código de relleno, deuda o tests insuficientes.
 - En `NO-OP` por lease activa, indicá únicamente `runId`, fase y expiración observados sin modificar el estado.
 - En `SKILLS_MAINTENANCE`, reemplazá las rutas de roadmap y matriz por `no aplicable` salvo que la tarea también autorice Focal.
 - En `COORDINATOR_REPAIR`, distinguí commits temporales observados de commits alcanzables al final. `PASS` requiere que ningún commit, merge, workflow o ref temporal de reparación permanezca alcanzable desde `main`.
