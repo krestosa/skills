@@ -12,6 +12,7 @@ OPERATING_CYCLE = Path("prompts/focal/01-operating-cycle.md")
 COORDINATION = Path("prompts/focal/03-coordination.md")
 COORDINATOR_REPAIR = Path("prompts/focal/10-coordinator-repair.md")
 ERROR_RECOVERY = Path("prompts/focal/12-autonomous-error-recovery.md")
+TERMINAL_REPORT = Path("prompts/focal/08-terminal-report.md")
 FLOWCHART = Path("prompts/focal/11-process-flowchart.md")
 README = Path("README.md")
 REQUIRED_MODULES = (
@@ -22,7 +23,7 @@ REQUIRED_MODULES = (
     Path("prompts/focal/05-iris-capability-research.md"),
     Path("prompts/focal/06-technical-requirements.md"),
     Path("prompts/focal/07-validation-and-acceptance.md"),
-    Path("prompts/focal/08-terminal-report.md"),
+    TERMINAL_REPORT,
     Path("prompts/focal/09-skills-maintenance.md"),
     COORDINATOR_REPAIR,
     ERROR_RECOVERY,
@@ -61,7 +62,17 @@ REQUIRED_TEXT = (
     "GL_RENDER_READBACK",
     "campo `Iris docs`",
     "https://shaders.properties/current/reference/",
-    "Resultado: PASS | PARTIAL | BLOCKED | NO-OP",
+    "# ✅ PASS —",
+    "# 🟡 PARTIAL —",
+    "# 🔴 BLOCKED —",
+    "# ⚪ NO-OP —",
+    "## Cambios principales",
+    "## Validación",
+    "## Estado del proyecto",
+    "## Riesgos y limitaciones",
+    "## Próximo paso",
+    "## Trazabilidad",
+    "Detalles operativos y de recuperación",
     "45 segundos",
     "conector de GitHub o GitHub Actions",
     "commits de reparación alcanzables",
@@ -198,6 +209,7 @@ def main() -> int:
     repair = texts[COORDINATOR_REPAIR]
     recovery = texts[ERROR_RECOVERY]
     flowchart = texts[FLOWCHART]
+    terminal = texts[TERMINAL_REPORT]
     readme = (repo / README).read_text(encoding="utf-8")
 
     for module in REQUIRED_MODULES:
@@ -374,6 +386,38 @@ def main() -> int:
         fail(errors, "implementation quality safeguards are not reinforced")
     if "segunda ejecución" not in combined and "siguiente ejecución" not in combined:
         fail(errors, "PARTIAL continuity is not enforced")
+
+    terminal_sections = (
+        "# <icono> <RESULTADO> — <resumen concreto>",
+        "## Cambios principales",
+        "## Validación",
+        "## Estado del proyecto",
+        "## Riesgos y limitaciones",
+        "## Próximo paso",
+        "## Trazabilidad",
+        "<details>",
+        "Detalles operativos y de recuperación",
+    )
+    for marker in terminal_sections:
+        if marker not in terminal:
+            fail(errors, f"terminal report missing readable section: {marker}")
+    if "```text" in terminal:
+        fail(errors, "terminal report reverted to a flat text block")
+    if "Resultado: PASS | PARTIAL | BLOCKED | NO-OP" in terminal:
+        fail(errors, "terminal report contains the retired flat result layout")
+    heading_positions = [terminal.find(marker) for marker in (
+        "# <icono> <RESULTADO> — <resumen concreto>",
+        "## Cambios principales",
+        "## Validación",
+        "## Trazabilidad",
+        "<details>",
+    )]
+    if any(position < 0 for position in heading_positions) or heading_positions != sorted(heading_positions):
+        fail(errors, "terminal report does not place summary and validation before traceability details")
+    for heading in ("# ✅ PASS —", "# 🟡 PARTIAL —", "# 🔴 BLOCKED —", "# ⚪ NO-OP —"):
+        if heading not in terminal:
+            fail(errors, f"terminal report missing result heading contract: {heading}")
+
 
     if errors:
         for error in errors:
