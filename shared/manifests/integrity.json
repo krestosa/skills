@@ -27,8 +27,8 @@
     "flatOutputs": 25
   },
   "inventory": {
-    "count": 108,
-    "sha256": "d2dd8b026761211c034df619c97625a7877534ebf047665b4c3197aeaaab92cc",
+    "count": 109,
+    "sha256": "2b8aa5c23b77cf47dd0c519efd58fe83dc8cd3da92dab1017a9bbd0f1f5f13ee",
     "files": [
       {
         "path": ".gitattributes",
@@ -37,8 +37,8 @@
       },
       {
         "path": ".github/workflows/focal-prompt-validation.yml",
-        "sha256": "da1de77437e1a985773311c558f30493e961a4a2653ae9196fc537ec49d83629",
-        "bytes": 2635
+        "sha256": "605ae5fe2593d9ae0ce3be8661bbde56f4749a0d7045081bf07d33ff21b69575",
+        "bytes": 3596
       },
       {
         "path": ".gitignore",
@@ -72,8 +72,8 @@
       },
       {
         "path": "prompts/focal-autonomous-development.md",
-        "sha256": "37c9df370a447444e4bb97863d25d0577989e205cf72d7ac8d7bf0dfd918bda8",
-        "bytes": 17551
+        "sha256": "125df915ab1ebe2c77ae1def8acde4e496a152ee0bf3029e432dc8d66244f98c",
+        "bytes": 18389
       },
       {
         "path": "prompts/focal/01-operating-cycle.md",
@@ -134,6 +134,11 @@
         "path": "prompts/focal/12-autonomous-error-recovery.md",
         "sha256": "a1e4b3b71e05ffd3b57d5cbd667faa65315086e804e64bc92c6e484cba27dbb2",
         "bytes": 11921
+      },
+      {
+        "path": "prompts/focal/13-autonomy-control-plane-v4.md",
+        "sha256": "acc1cd2c6b1aef5214811ec5d8d969ff3a43f3e696c9c15728a49d44f1fad3af",
+        "bytes": 8463
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -322,8 +327,8 @@
       },
       {
         "path": "shared/manifests/tooling.json",
-        "sha256": "06f650abc2281a6e2eaaf54b7192428b3fdb6637a9adc6d703188c1e8483bec9",
-        "bytes": 5213
+        "sha256": "674268ec3fb0c0571d9ab107f1f03c6eb91336791681eac7877b9484c655aa6d",
+        "bytes": 5267
       },
       {
         "path": "shared/models/gpt-5.6-sol.json",
