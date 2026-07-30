@@ -91,7 +91,8 @@ Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después 
 - No hagas commits operativos para lock, heartbeat o reporte.
 - No uses squash como requisito universal; elegí un método de merge compatible con la política del repositorio y la trazabilidad necesaria.
 - La historia visible de la rama predeterminada debe conservar la referencia al pull request que produjo cada merge.
-- Preferí el título automático de GitHub. Si la operación envía `commit_title` o cualquier título personalizado, el subject debe contener el número exacto del PR: usá `<título de la PR> (#<n>)` para squash o `Merge pull request #<n> from <head>` para merge commit.
+- Preferí el título automático de GitHub. Por defecto omití `commit_title`; solo envialo cuando sea necesario controlar explícitamente el subject.
+- Si la operación envía `commit_title` o cualquier título personalizado, el subject debe contener el número exacto del PR: usá `<título de la PR> (#<n>)` para squash o `Merge pull request #<n> from <head>` para merge commit.
 - No uses rebase merge cuando elimine la referencia visible `#<n>` del historial de la rama predeterminada.
 - Un título personalizado sin el número exacto del PR es inválido aunque GitHub conserve una asociación interna entre la PR y el commit.
 - Verificá el head exacto antes de mergear.
