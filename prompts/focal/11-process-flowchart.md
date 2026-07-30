@@ -86,8 +86,11 @@ flowchart TD
         SM_ARTIFACTS -- Sí --> SM_SANITIZE[Ejecutar HISTORY_SANITATION sobre la rama propia] --> SM8
         SM8 --> SM9{¿CI del head exacto está aprobada?}
         SM9 -- No --> SM10[Corregir fallos causados] --> SM6
-        SM9 -- Sí --> SM11[Mergear y verificar main]
-        SM11 --> REPORT_SKILLS[Reporte terminal único]
+        SM9 -- Sí --> SM_MERGE_TITLE[MERGE_TITLE_POLICY: título automático o personalizado con número exacto de PR]
+        SM_MERGE_TITLE --> SM11[Mergear y verificar main]
+        SM11 --> SM_MERGE_REFERENCE{¿Subject publicado contiene #n y coincide con la PR?}
+        SM_MERGE_REFERENCE -- No --> SM_MERGE_REFERENCE_MISSING[MERGE_PR_REFERENCE_MISSING: no reescribir historia; reparar procedimiento] --> ERROR_CAPTURE
+        SM_MERGE_REFERENCE -- Sí --> REPORT_SKILLS[Reporte terminal único]
     end
 
     subgraph PREFLIGHT[Preflight FOCAL_CYCLE — módulos 01 y 02]
@@ -225,8 +228,13 @@ flowchart TD
         CI_RESULT -- Sí --> MERGE_GUARD[Releer issue y verificar head]
         MERGE_GUARD --> MERGE_OK{¿Propiedad y gates válidos?}
         MERGE_OK -- No --> LOST
-        MERGE_OK -- Sí --> MERGE[Merge autónomo]
-        MERGE --> POST_MERGE[Verificar main y CI post-merge]
+        MERGE_OK -- Sí --> MERGE_TITLE_POLICY[Resolver PR, método y subject: automático o commit_title con #n]
+        MERGE_TITLE_POLICY --> MERGE_TITLE_CHECK{¿El subject esperado conserva el PR exacto?}
+        MERGE_TITLE_CHECK -- No --> MERGE_PR_REFERENCE_MISSING[MERGE_PR_REFERENCE_MISSING: corregir antes de merge] --> ERROR_CAPTURE
+        MERGE_TITLE_CHECK -- Sí --> MERGE[Merge autónomo]
+        MERGE --> MERGE_PR_REFERENCE{¿PR mergeada, merge_commit_sha correcto y subject contiene #n?}
+        MERGE_PR_REFERENCE -- No --> MERGE_PR_REFERENCE_MISSING
+        MERGE_PR_REFERENCE -- Sí --> POST_MERGE[Verificar main y CI post-merge]
         POST_MERGE --> RECONCILE
     end
 
@@ -281,6 +289,7 @@ flowchart TD
 - Todo fallo conocido o futuro entra en `AUTONOMOUS_RECOVERY_LOOP`; lo no catalogado usa `UNCLASSIFIED_INTERNAL_FAILURE`, se diagnostica y se reanuda sin pedir al usuario decisiones técnicas ordinarias.
 - `COORDINATOR_REPAIR` no es una lease ni una tercera modalidad funcional. Es una excepción bootstrap limitada al coordinador.
 - Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. En `LOW_RISK_BULK` cada archivo usa un commit dedicado; en `HIGH_IMPACT_INCREMENT` los commits pueden abarcar archivos relacionados para preservar atomicidad e intención.
+- `MERGE_TITLE_POLICY` exige que el historial visible conserve `#<n>`: se prefiere el título automático de GitHub y todo `commit_title` personalizado debe incluir el PR exacto; después del merge se verifica PR, `merge_commit_sha`, main y subject.
 - La calidad exige ausencia de código de relleno, placeholders, deuda oculta, abstracciones especulativas y tests superficiales. Un checkpoint es contingencia, no objetivo.
 - Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
 - `release` es siempre la última mutación remota de un ciclo funcional.
