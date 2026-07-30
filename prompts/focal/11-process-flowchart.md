@@ -73,7 +73,8 @@ flowchart TD
         FC2 --> INSPECT[Escribir inspect]
         INSPECT --> POLL1[Polling real]
         POLL1 --> STATE_KIND{¿STATE_OBSERVED?}
-        STATE_KIND -- Lease ajena --> NOOP[NO-OP ACTIVE_RUN]
+        STATE_KIND -- Lease ajena --> NOOP_CAUSE[NOOP_CAUSE: ACTIVE_RUN]
+        NOOP_CAUSE --> NOOP[NO-OP]
         STATE_KIND -- idle --> ACQUIRE[Enviar acquire]
         STATE_KIND -- lease vencida --> RECOVER[Enviar recover]
         STATE_KIND -- coordinador roto --> COORDINATOR_REPAIR
@@ -153,7 +154,7 @@ flowchart TD
         ERROR_CLASSIFY -- Conocido --> ERROR_ROUTE
         ERROR_UNKNOWN --> ERROR_ROUTE
         ERROR_ROUTE --> ERROR_RESUME[Reanudar primer gate invalidado]
-        ERROR_ROUTE --> ERROR_CHECKPOINT[Checkpoint recuperable]
+        ERROR_ROUTE --> ERROR_CHECKPOINT[Checkpoint por contingencia; nunca como objetivo planificado]
     end
 
     subgraph HISTORY_SANITATION[Historia excepcional]
