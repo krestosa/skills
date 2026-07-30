@@ -132,6 +132,10 @@ REQUIRED_TEXT = (
     "ALL_REMAINING_WORK_EXTERNALLY_BLOCKED",
     "LATE_ACQUIRE_ORPHANED",
     "Estado observado UTC",
+    "## Enlaces Markdown obligatorios",
+    "Nunca insertes URLs ni sintaxis Markdown en JSON",
+    "Run de Actions",
+    "Workflow:",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -444,6 +448,22 @@ def main() -> int:
         fail(errors, "work selection has no bounded post-lease deadline")
     if "Estado observado UTC" not in terminal:
         fail(errors, "terminal report does not timestamp coordinator state snapshots")
+    if "## Enlaces Markdown obligatorios" not in terminal:
+        fail(errors, "terminal report does not require Markdown links for navigable resources")
+    required_link_examples = (
+        "[PR #<n>](https://github.com/<owner>/<repo>/pull/<n>)",
+        "https://github.com/<owner>/<repo>/tree/<rama>",
+        "https://github.com/<owner>/<repo>/commit/<SHA completo>",
+        "https://github.com/<owner>/<repo>/actions/workflows/<archivo-workflow>",
+        "https://github.com/<owner>/<repo>/actions/runs/<id>",
+        "https://github.com/<owner>/<repo>/issues/<n>",
+        "https://github.com/<owner>/<repo>/blob/<SHA-o-rama>/<ruta>",
+    )
+    for example in required_link_examples:
+        if example not in terminal:
+            fail(errors, f"terminal report missing Markdown link contract: {example}")
+    if "JSON, payloads estructurados y bloques de código sin Markdown ni URLs añadidas" not in terminal:
+        fail(errors, "terminal report does not protect machine-readable data from Markdown links")
 
     terminal_sections = (
         "# <icono> <RESULTADO> — <resumen concreto>",
