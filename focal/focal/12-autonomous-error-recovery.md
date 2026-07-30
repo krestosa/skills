@@ -29,7 +29,7 @@ Ante cualquier fallo:
 7. **Validar el artefacto exacto.** Repetí la operación fallida y todas las pruebas invalidadas sobre el head, árbol, run o binario exactos.
 8. **Reanudar desde la primera fase invalidada.** No reinicies todo si existe un checkpoint coherente, pero tampoco saltes gates afectados.
 9. **Registrar aprendizaje operativo.** Añadí test de regresión o evidencia equivalente. Si el fallo no estaba catalogado y el modo autoriza `krestosa/skills`, incorporá el nuevo código al catálogo y al README en la misma unidad.
-10. **Preservar continuidad.** Si el presupuesto no alcanza, publicá checkpoint, rama y PR recuperables, reconciliá estados y dejá que la siguiente ejecución continúe la misma tarea.
+10. **Preservar continuidad.** Si una contingencia real consume el presupuesto después de producir avance útil, publicá checkpoint, rama y PR recuperables, reconciliá estados y dejá que la siguiente ejecución continúe la misma tarea. No planifiques el checkpoint como objetivo ni lo uses para sustituir una unidad pequeña que podía completarse.
 
 ## Escalera obligatoria de recuperación
 
@@ -108,6 +108,14 @@ El README es el registro exhaustivo de códigos conocidos. Las familias mínimas
 8. continuá la tarea original desde el gate invalidado.
 
 Si el proceso desaparece completamente, la siguiente ejecución lee el estado remoto, adopta la misma rama, PR y checkpoint, ejecuta este loop y no crea una unidad paralela.
+
+## Continuidad y límite de `PARTIAL`
+
+- La ejecución siguiente retoma primero la misma unidad, rama, PR y checkpoint remotos.
+- No se abre una unidad paralela ni una segunda PR descriptiva sobre la misma deuda.
+- Dos ciclos consecutivos solo pueden terminar `PARTIAL` sobre la misma unidad cuando exista nueva evidencia objetiva que impida el cierre.
+- Un checkpoint sin implementación, prueba, corrección o decisión técnica útil no constituye avance recuperable.
+- Cuando la causa desaparece dentro del presupuesto, el ciclo debe completar validación, merge, reconciliación y cierre en lugar de publicar otro checkpoint.
 
 ## Resultado y parada
 
