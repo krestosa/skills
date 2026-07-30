@@ -27,8 +27,8 @@
     "flatOutputs": 25
   },
   "inventory": {
-    "count": 109,
-    "sha256": "2b8aa5c23b77cf47dd0c519efd58fe83dc8cd3da92dab1017a9bbd0f1f5f13ee",
+    "count": 110,
+    "sha256": "ac490e2f583b3aa3adcbf905a899ceb848c167588567485f7df8a26b4beddb79",
     "files": [
       {
         "path": ".gitattributes",
@@ -72,8 +72,8 @@
       },
       {
         "path": "prompts/focal-autonomous-development.md",
-        "sha256": "125df915ab1ebe2c77ae1def8acde4e496a152ee0bf3029e432dc8d66244f98c",
-        "bytes": 18389
+        "sha256": "c9aeae4be3baff67cf9ed61d61ad5d67dbb95d8282dc9c57633568e2c60109a8",
+        "bytes": 20941
       },
       {
         "path": "prompts/focal/01-operating-cycle.md",
@@ -112,8 +112,8 @@
       },
       {
         "path": "prompts/focal/08-terminal-report.md",
-        "sha256": "767e860c45fac8ac20fba6aa01cb852a4f076398d3c092879b62ca0a163ea53e",
-        "bytes": 10436
+        "sha256": "9a68a9fa9247c38921c37ca6f2f7d3ad0b43e57a5a82a7c4757c5881135d1d96",
+        "bytes": 10134
       },
       {
         "path": "prompts/focal/09-skills-maintenance.md",
@@ -127,8 +127,8 @@
       },
       {
         "path": "prompts/focal/11-process-flowchart.md",
-        "sha256": "e4ead5c6d893e327936ee4ee8ea9c47b0355cab977cf5813649ff9a521300b73",
-        "bytes": 20642
+        "sha256": "303546d84da87087c3964bb0cbd1827bc0747535bd90de276566cda379f136c0",
+        "bytes": 9454
       },
       {
         "path": "prompts/focal/12-autonomous-error-recovery.md",
@@ -137,8 +137,8 @@
       },
       {
         "path": "prompts/focal/13-autonomy-control-plane-v4.md",
-        "sha256": "acc1cd2c6b1aef5214811ec5d8d969ff3a43f3e696c9c15728a49d44f1fad3af",
-        "bytes": 8463
+        "sha256": "0517dd53fd0d0e669c0495654896c11079c9a9934fc3b9e0dc26c353635afa81",
+        "bytes": 13284
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -574,6 +574,11 @@
         "path": "tests/test_dynamic_tooling.py",
         "sha256": "829bdc87311225d2f4eaff97007738ebf32dbfa9e8cd91411d1a805401c96bc5",
         "bytes": 45420
+      },
+      {
+        "path": "tests/test_focal_repository_maintenance_routing.py",
+        "sha256": "da5a0e6f6f8e8ce44aaea90ef9691545d6a34f9519a88ba6415a64e4805c7792",
+        "bytes": 3379
       }
     ]
   },
