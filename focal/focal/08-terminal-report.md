@@ -35,6 +35,7 @@ No uses un emoji distinto para esos cuatro resultados.
 | **PR / merge** | <PR y estado del merge, o no aplicable> |
 | **CI** | <icono y run exacto: aprobado, fallido, pendiente o no aplicable> |
 | **Coordinador** | <🟢 `IDLE`, 🔵 `WORKING`, 🔴 desconocido o no adquirido> |
+| **Estado observado UTC** | <timestamp exacto de la lectura que sustenta el estado; es una instantánea, no una garantía futura> |
 | **Duración** | <inicio UTC → fin UTC; indicar si quedó dentro del runtime guard> |
 
 > [!IMPORTANT]
@@ -110,11 +111,13 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 | **Último heartbeat confirmado** | <timestamp o no aplicable> |
 | **Command ID de liberación** | `<identificador opaco o no aplicable>` |
 | **Lock liberado** | sí, no o no adquirido |
-| **Estado final observado** | `idle`, `working` o desconocido |
+| **Estado final observado** | `idle`, `working` o desconocido, con timestamp UTC exacto |
 
 ### Alcance técnico
 
 - **Lote o incremento seleccionado:** <detalle>.
+- **WORK_SELECTION_PROOF:** <al menos tres candidatos o todos los restantes, slices evaluados y códigos de descarte>.
+- **Código de NO-OP:** <`ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`, `LATE_ACQUIRE_ORPHANED` o no aplicable>.
 - **Justificación de riesgo:** <detalle>.
 - **Continuidad de un PARTIAL anterior:** <no o sí + referencia>.
 - **Motivo objetivo de PARTIAL:** <no aplicable o evidencia>.
@@ -163,7 +166,9 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 - Un error transitorio aislado no justifica un resultado terminal.
 - `PASS` requiere publicación, aceptación, reconciliación y liberación completas. En `LOW_RISK_BULK`, todos los archivos e ítems del lote deben estar cerrados; en `HIGH_IMPACT_INCREMENT`, debe estar cerrado el incremento vertical seleccionado.
 - `PARTIAL` requiere una causa objetiva verificable y continuidad explícita de la misma unidad; un checkpoint planificado o trabajo preparatorio no alcanza.
-- En `NO-OP` por lease activa, mostrale al usuario únicamente estado, fase, expiración y motivo; omití secciones sin contenido.
+- Toda afirmación `IDLE` o `WORKING` debe incluir `Estado observado UTC`; presentala como una instantánea que puede cambiar después de la lectura.
+- En `NO-OP` por lease activa, usá `ACTIVE_RUN` y mostrale al usuario únicamente estado, fase, expiración, timestamp observado y motivo; omití secciones sin contenido.
+- Todo `NO-OP` debe declarar uno de los cinco códigos cerrados; una razón abierta como “no se encontró una unidad acotada” es inválida.
 - En `SKILLS_MAINTENANCE`, roadmap y matriz de Iris son no aplicables salvo autorización adicional.
 - En `COORDINATOR_REPAIR`, distinguí artefactos temporales observados de artefactos alcanzables al final.
 - La imposibilidad de borrar auditoría interna de la plataforma no equivale a contenido controlado por el repositorio.
