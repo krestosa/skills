@@ -52,7 +52,7 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 7. Conservá `prompts/focal-autonomous-development.md` como entrypoint estable.
 8. Conservá `prompts/focal/11-process-flowchart.md` como representación derivada integral, nunca como fuente normativa paralela.
 9. Si retirás contenido, preferí el historial Git. Archivá solo cuando tenga valor operativo y marcá el archivo como no canónico y no ejecutable.
-10. Actualizá todas las referencias, el manifest, la integridad, el flowchart, los validadores y la sección de troubleshooting del README, incluidos los contratos de granularidad adaptativa, commits, calidad y presentación del reporte terminal.
+10. Actualizá todas las referencias, el manifest, la integridad, el flowchart, los validadores y la sección de troubleshooting del README, incluidos los contratos de granularidad adaptativa, commits, calidad, `MERGE_TITLE_POLICY`, referencia visible al PR y presentación del reporte terminal.
 11. Validá Markdown, Mermaid, rutas, términos canónicos, fases, estados y ausencia de referencias legacy activas.
 12. Revisá el diff completo.
 13. Publicá la rama y abrí una pull request.
@@ -69,6 +69,8 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 - Condiciones verificables y resultados no ambiguos.
 - Granularidad adaptativa: bulk solo para cambios independientes de bajo riesgo e incrementos verticales para trabajo importante.
 - En bulk de bajo riesgo, un commit dedicado por archivo; en alto impacto, commits lógicos multarchivo cuando la atomicidad lo requiera.
+- Todo merge autónomo conserva el PR en el historial visible: título automático de GitHub o título personalizado con `#<n>`; si existe `commit_title`, usá `<título de la PR> (#<n>)` o `Merge pull request #<n> from <head>`.
+- No uses rebase merge cuando elimine esa referencia visible y verificá el subject publicado después del merge.
 - Checkpoints exclusivamente contingentes y `PARTIAL` limitado a causas objetivas.
 - `NO-OP` con causas cerradas: `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` y `LATE_ACQUIRE_ORPHANED`.
 - `WORK_SELECTION_PROOF` obligatorio, al menos tres candidatos, descomposición vertical, límite de quince minutos y recuperación ante repetición.
@@ -107,6 +109,7 @@ Antes de finalizar, verificá:
 - evidencia para completado;
 - clasificación `LOW_RISK_BULK` y `HIGH_IMPACT_INCREMENT` coherente en entrypoint, operación, roadmap, aceptación, reporte y flowchart;
 - un commit dedicado por archivo para bulk de bajo riesgo y commits lógicos atómicos para incrementos importantes;
+- `MERGE_TITLE_POLICY`, referencia visible `#<n>` en el subject final, rechazo de `commit_title` sin PR y recuperación `MERGE_PR_REFERENCE_MISSING`;
 - prohibición de checkpoints planificados y de `PARTIAL` sin causa objetiva;
 - gates contra código de relleno, placeholders, deuda oculta, abstracciones especulativas y tests superficiales;
 - pruebas obligatorias;
@@ -144,4 +147,5 @@ El cuerpo debe explicar:
 - comportamiento del roadmap y matriz de Iris;
 - flowchart y troubleshooting;
 - validaciones;
+- política de título de merge y referencia visible al PR;
 - riesgos de migración.
