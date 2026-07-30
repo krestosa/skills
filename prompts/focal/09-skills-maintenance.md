@@ -52,7 +52,7 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 7. Conservá `prompts/focal-autonomous-development.md` como entrypoint estable.
 8. Conservá `prompts/focal/11-process-flowchart.md` como representación derivada integral, nunca como fuente normativa paralela.
 9. Si retirás contenido, preferí el historial Git. Archivá solo cuando tenga valor operativo y marcá el archivo como no canónico y no ejecutable.
-10. Actualizá todas las referencias, el manifest, la integridad, el flowchart, los validadores y la sección de troubleshooting del README, incluidos los contratos de granularidad adaptativa, commits y calidad.
+10. Actualizá todas las referencias, el manifest, la integridad, el flowchart, los validadores y la sección de troubleshooting del README, incluidos los contratos de granularidad adaptativa, commits, calidad y presentación del reporte terminal.
 11. Validá Markdown, Mermaid, rutas, términos canónicos, fases, estados y ausencia de referencias legacy activas.
 12. Revisá el diff completo.
 13. Publicá la rama y abrí una pull request.
@@ -71,6 +71,8 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 - En bulk de bajo riesgo, un commit dedicado por archivo; en alto impacto, commits lógicos multarchivo cuando la atomicidad lo requiera.
 - Checkpoints exclusivamente contingentes y `PARTIAL` limitado a causas objetivas.
 - Calidad explícita: sin código de relleno, placeholders, deuda oculta, abstracciones especulativas ni tests superficiales.
+- Reporte terminal orientado a lectura humana: resultado, entrega, PR/merge, CI y siguiente acción arriba; identificadores y mecánica dentro de detalles desplegables.
+- El reporte terminal usa Markdown renderizado y queda prohibido volver a una lista plana o a un bloque `text` de campos consecutivos.
 - Sin snapshots históricos incorporados como instrucciones.
 - Sin dependencias circulares.
 - Sin negaciones superpuestas para reemplazar reglas legacy.
@@ -114,7 +116,7 @@ Antes de finalizar, verificá:
 - limpieza obligatoria de commits temporales de reparación en Focal;
 - flowchart Mermaid completo y consistente;
 - sección de bloqueos y recuperación en `README.md`;
-- reporte terminal único;
+- reporte terminal único, renderizado como Markdown legible y con la información prioritaria antes de la trazabilidad técnica;
 - autorización limitada de `krestosa/skills`;
 - ausencia de referencias activas al estado legacy;
 - ausencia de contradicciones activas;
