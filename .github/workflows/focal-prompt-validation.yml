@@ -61,16 +61,22 @@ jobs:
         run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
 
       - name: Generate refreshed integrity metadata
+        shell: bash
         run: |
-          python scripts/tooling.py --json refresh-integrity > /tmp/focal-integrity-refresh.json
+          set +e
+          python scripts/tooling.py --json refresh-integrity > /tmp/focal-integrity-refresh.json 2>&1
+          status=$?
           cat /tmp/focal-integrity-refresh.json
+          exit "$status"
 
-      - name: Upload generated integrity manifest
+      - name: Upload integrity diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: focal-integrity-manifest-${{ github.sha }}
-          path: shared/manifests/integrity.json
+          name: focal-integrity-diagnostics-${{ github.sha }}
+          path: |
+            shared/manifests/integrity.json
+            /tmp/focal-integrity-refresh.json
           if-no-files-found: error
           retention-days: 7
 
