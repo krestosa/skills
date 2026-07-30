@@ -1,57 +1,40 @@
-name: Focal Prompt Validation
+name: Apply Focal Merge Traceability Migration
 
 on:
   pull_request:
     paths:
-      - "README.md"
-      - "prompts/focal-autonomous-development.md"
-      - "prompts/focal/**"
-      - "scripts/repository_tooling.py"
-      - "scripts/tooling.py"
-      - "scripts/validate.py"
-      - "scripts/validate_focal_prompt_stack.py"
-      - "tests/test_dynamic_tooling.py"
-      - "shared/manifests/tooling.json"
-      - "shared/manifests/integrity.json"
-      - ".github/workflows/focal-prompt-validation.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "README.md"
-      - "prompts/focal-autonomous-development.md"
-      - "prompts/focal/**"
-      - "scripts/repository_tooling.py"
-      - "scripts/tooling.py"
-      - "scripts/validate.py"
-      - "scripts/validate_focal_prompt_stack.py"
-      - "tests/test_dynamic_tooling.py"
-      - "shared/manifests/tooling.json"
-      - "shared/manifests/integrity.json"
+      - "scripts/apply_focal_merge_traceability_patch.py"
       - ".github/workflows/focal-prompt-validation.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
-  group: focal-prompt-validation-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: focal-merge-traceability-migration-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  validate:
+  migrate:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    name: Validate Focal prompt stack
+    name: Apply and validate merge traceability policy
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
     steps:
       - name: Check out exact branch head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          ref: ${{ env.BRANCH_NAME }}
+          fetch-depth: 0
           persist-credentials: true
 
-      - name: Validate Focal prompt contracts
+      - name: Apply migration with one commit per governed file
+        run: python scripts/apply_focal_merge_traceability_patch.py
+
+      - name: Validate migrated Focal prompt contracts
         run: |
           python -m py_compile scripts/validate_focal_prompt_stack.py
           python scripts/validate_focal_prompt_stack.py
@@ -62,41 +45,45 @@ jobs:
       - name: Run unit tests under required root runtime
         run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
 
-      - name: Generate refreshed integrity metadata
+      - name: Refresh repository integrity metadata
         shell: bash
         run: |
           python scripts/tooling.py --json refresh-integrity > /tmp/focal-integrity-refresh.json
           cat /tmp/focal-integrity-refresh.json
+          if ! git diff --quiet -- shared/manifests/integrity.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add shared/manifests/integrity.json
+            git commit -m "Refresh repository integrity metadata"
+          fi
 
-      - name: Publish refreshed integrity metadata on internal PRs
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      - name: Validate final exact tree
+        run: |
+          python scripts/validate_focal_prompt_stack.py
+          python scripts/tooling.py validate
+          python scripts/tooling.py check
+          test ! -e scripts/apply_focal_merge_traceability_patch.py
+          git diff --exit-code origin/main -- .github/workflows/focal-prompt-validation.yml
+          git diff --exit-code
+
+      - name: Publish migrated branch
+        run: git push origin "HEAD:${BRANCH_NAME}"
+
+      - name: Dispatch canonical validation on final head
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          if git diff --quiet -- shared/manifests/integrity.json; then
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add shared/manifests/integrity.json
-          git commit -m "Refresh repository integrity metadata"
-          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-
-      - name: Upload integrity diagnostics
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: focal-integrity-diagnostics-${{ github.sha }}
-          path: |
-            shared/manifests/integrity.json
-            /tmp/focal-integrity-refresh.json
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Verify integrity metadata is current
-        run: git diff --exit-code -- shared/manifests/integrity.json
-
-      - name: Run repository validation
-        run: python scripts/tooling.py validate
-
-      - name: Run repository checks
-        run: python scripts/tooling.py check
+          payload=$(python - <<'PY'
+          import json
+          import os
+          print(json.dumps({"ref": os.environ["BRANCH_NAME"]}))
+          PY
+          )
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/focal-prompt-validation.yml/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "${payload}"
