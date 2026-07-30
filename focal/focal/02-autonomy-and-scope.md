@@ -20,7 +20,7 @@ Dentro de `FOCAL_CYCLE`, resolvé sin pedir intervención:
 - creación de pruebas de regresión y reanudación desde el primer gate invalidado;
 - clasificación y resolución de fallos no previstos mediante `UNCLASSIFIED_INTERNAL_FAILURE`.
 
-Una ausencia interna implementable se clasifica como `INTERNAL_WORK_REQUIRED` y se convierte en una unidad del roadmap. No uses `BLOCKED` por falta de CI, scripts, tests, fixtures, schemas, validadores o documentación que puedan crearse dentro del alcance. Una excepción sin código conocido se clasifica `UNCLASSIFIED_INTERNAL_FAILURE`, se reduce, se prueba, se repara y se incorpora al catálogo cuando el modo lo permita.
+Una ausencia interna implementable se clasifica como `INTERNAL_WORK_REQUIRED` y se convierte en una unidad del roadmap. No uses `BLOCKED` por falta de CI, scripts, tests, fixtures, schemas, validadores o documentación que puedan crearse dentro del alcance. La incapacidad de encontrar un incremento acotado cuando existen ítems `PENDIENTE`, `EN PROGRESO` o `REVALIDAR` se clasifica `ROADMAP_GRANULARITY_FAILURE`: debe producir `WORK_SELECTION_PROOF`, descomponer la primera prioridad y continuar con su menor resultado observable. Una excepción sin código conocido se clasifica `UNCLASSIFIED_INTERNAL_FAILURE`, se reduce, se prueba, se repara y se incorpora al catálogo cuando el modo lo permita.
 
 ## Alcance autorizado en `FOCAL_CYCLE`
 
@@ -67,11 +67,12 @@ Los commits funcionales ordinarios de un `FOCAL_CYCLE` no están alcanzados por 
 Clasificá los impedimentos:
 
 - `INTERNAL_WORK_REQUIRED`: se implementa o se planifica.
+- `ROADMAP_GRANULARITY_FAILURE`: se corrige la estructura del roadmap, se define un incremento vertical y se ejecuta en el mismo ciclo.
 - `TOOL_ROUTE_ALTERNATIVE`: se usa otra operación autorizada.
 - `REMOTE_STATE_CONFLICT`: se preserva trabajo y se reconcilia.
 - `EXTERNAL_BLOCKER`: permiso, credencial, servicio obligatorio, restricción legal o capacidad inexistente sin alternativa.
 
-Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después de agotar reintento, reconciliación, ruta alternativa, reparación interna, reconstrucción remota, saneamiento, fallback y checkpoint. La complejidad, el tiempo insuficiente, una prueba pendiente o un error no clasificado producen trabajo autónomo o `PARTIAL`, no `BLOCKED`, siempre que exista un checkpoint remoto útil. No pidas al usuario elegir arquitectura, estrategia de Git, corrección de CI ni diagnóstico técnico ordinario.
+Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después de agotar reintento, reconciliación, ruta alternativa, reparación interna, reconstrucción remota, saneamiento, fallback y checkpoint. La complejidad, la dificultad para acotar alcance, el tiempo insuficiente, una prueba pendiente o un error no clasificado producen trabajo autónomo, `ROADMAP_GRANULARITY_FAILURE` o `PARTIAL`, no `NO-OP` ni `BLOCKED`, siempre que exista trabajo o un checkpoint remoto útil. No pidas al usuario elegir arquitectura, estrategia de Git, corrección de CI ni diagnóstico técnico ordinario.
 
 ## Decisiones y evidencia
 

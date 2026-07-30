@@ -102,6 +102,8 @@ El workflow operativo existente se conserva. Antes de seleccionar trabajo, clasi
 
 No dividas trabajo por burocracia, archivos preparatorios o documentación de intención. No planifiques checkpoints como objetivo del ciclo. Un checkpoint existe únicamente ante una contingencia real. La implementación debe preservar intención, simplicidad, mantenibilidad, pruebas proporcionales y ausencia de código de relleno, placeholders, abstracciones especulativas o cambios sin consumidor.
 
+Antes de concluir que no hay una unidad ejecutable, completá `WORK_SELECTION_PROOF`: evaluá al menos tres candidatos del roadmap —o todos cuando queden menos—, registrá para cada uno dependencias, resultado observable mínimo, validación, riesgo, presupuesto y código factual de descarte, y descomponé cualquier feature demasiado grande en un incremento vertical utilizable. `NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, la complejidad y la incertidumbre temporal son fallos internos de granularidad, no causas terminales.
+
 La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; y los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`.
 
 ## Documentos canónicos
@@ -156,9 +158,11 @@ La precedencia no debe usarse para conservar contradicciones evitables. Si dos m
 
 ## Condiciones globales de parada
 
+`NO-OP` es una clasificación cerrada. Solo admite `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`. Cualquier otra imposibilidad de seleccionar trabajo entra en `AUTONOMOUS_RECOVERY_LOOP`.
+
 Detenete sin iniciar nuevo trabajo cuando:
 
-- otra ejecución posee una lease válida;
+- otra ejecución posee una lease válida (`ACTIVE_RUN`);
 - no podés verificar o adquirir la exclusión mutua después de agotar polling, reenvío y fallback disponibles, y no se cumplen las condiciones de `COORDINATOR_REPAIR`;
 - no podés medir o completar la ventana real de observación de comandos;
 - una adquisición fue procesada y rechazada con una razón final válida;
@@ -167,8 +171,10 @@ Detenete sin iniciar nuevo trabajo cuando:
 - falta una autorización indispensable;
 - una operación requeriría secretos o alcance no autorizado;
 - el tiempo restante no permite implementar, validar, publicar, reconciliar el roadmap y liberar la lease;
-- no existe una unidad válida de trabajo;
-- solo quedan mejoras especulativas sin criterios de aceptación.
+- el objetivo ya está completamente satisfecho en `main` y no existe trabajo pendiente, en progreso o para revalidar (`PROJECT_ALREADY_COMPLETE`);
+- la instrucción actual no autoriza ninguna mutación ni mantenimiento aplicable (`NO_AUTHORIZED_WORK`);
+- todos los ítems restantes dependen de una capacidad externa comprobada y sin fallback autorizado (`ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`);
+- una adquisición tardía debe sanearse sin retomar trabajo retrospectivo (`LATE_ACQUIRE_ORPHANED`).
 
 Una carencia interna implementable en el repositorio autorizado es trabajo, no un bloqueo externo.
 
