@@ -172,10 +172,16 @@ flowchart TD
         RI2 --> RI3[Auditar estados y evidencia contra main]
         RI3 --> RI4[Verificar capacidades con documentación primaria de Iris]
         RI4 --> RI5[Enlazar roadmap, matriz y campo Iris docs]
-        RI5 --> RI6{¿Existe trabajo ejecutable y tiempo suficiente para cerrarlo?}
-        RI6 -- No --> RECONCILE
-        RI6 -- Solo documentación atómica --> DOC_ONLY[Completar, validar y mergear la corrección documental] --> RECONCILE
-        RI6 -- Sí --> UNIT_RISK
+        RI5 --> WORK_SELECTION_PROOF[WORK_SELECTION_PROOF: evaluar al menos tres candidatos o todos los restantes]
+        WORK_SELECTION_PROOF --> SLICE_FOUND{¿Existe un slice vertical observable y validable?}
+        SLICE_FOUND -- Sí --> UNIT_RISK
+        SLICE_FOUND -- Ítem demasiado amplio --> DECOMPOSE_VERTICAL[Descomponer por capacidad funcional y aceptación] --> UNIT_RISK
+        SLICE_FOUND -- Prueba ausente o razón abierta --> ROADMAP_GRANULARITY_FAILURE[ROADMAP_GRANULARITY_FAILURE] --> ERROR_CAPTURE
+        SLICE_FOUND -- No queda trabajo --> NOOP_CAUSE{¿Causa cerrada de NO-OP?}
+        NOOP_CAUSE -- PROJECT_ALREADY_COMPLETE --> NOOP_RESULT
+        NOOP_CAUSE -- NO_AUTHORIZED_WORK --> NOOP_RESULT
+        NOOP_CAUSE -- ALL_REMAINING_WORK_EXTERNALLY_BLOCKED --> NOOP_RESULT
+        NOOP_CAUSE -- Otra --> ROADMAP_GRANULARITY_FAILURE
     end
 
     subgraph IMPLEMENTATION[Selección adaptativa e implementación — módulos 01, 02 y 06]
@@ -268,6 +274,8 @@ flowchart TD
 
 - `runId` y `commandId` son opacos. El proceso no registra la herramienta que originó la ejecución.
 - Un retraso de evento no es un fallo inmediato: primero se completa polling, un reenvío y el fallback programado.
+- `NO-OP` usa causas cerradas. Si el roadmap conserva trabajo, `WORK_SELECTION_PROOF` debe encontrar o crear un slice vertical; no hallar alcance es `ROADMAP_GRANULARITY_FAILURE`.
+- Todo estado `IDLE` o `WORKING` del reporte lleva timestamp UTC de observación porque es una instantánea.
 - Un error transitorio del conector tampoco es terminal: se reintenta la misma tarea, y toda mutación de resultado desconocido se reconcilia mediante `read-after-write` antes de repetirla.
 - Un commit vacío, no-op, de transporte fallido o con archivos basura probados se sanea por GitHub Actions sin dejar commit de limpieza ni refs temporales. Esto incluye placeholders como `X`, tool output, dumps, truncados y paths accidentales solo cuando la evidencia conjunta confirma que no tienen función. Los commits posteriores conservan timestamps originales.
 - Todo fallo conocido o futuro entra en `AUTONOMOUS_RECOVERY_LOOP`; lo no catalogado usa `UNCLASSIFIED_INTERNAL_FAILURE`, se diagnostica y se reanuda sin pedir al usuario decisiones técnicas ordinarias.

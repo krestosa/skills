@@ -9,22 +9,26 @@ from pathlib import Path
 
 ENTRYPOINT = Path("prompts/focal-autonomous-development.md")
 OPERATING_CYCLE = Path("prompts/focal/01-operating-cycle.md")
+AUTONOMY = Path("prompts/focal/02-autonomy-and-scope.md")
 COORDINATION = Path("prompts/focal/03-coordination.md")
+ROADMAP = Path("prompts/focal/04-roadmap.md")
+ACCEPTANCE = Path("prompts/focal/07-validation-and-acceptance.md")
+TERMINAL_REPORT = Path("prompts/focal/08-terminal-report.md")
+MAINTENANCE = Path("prompts/focal/09-skills-maintenance.md")
 COORDINATOR_REPAIR = Path("prompts/focal/10-coordinator-repair.md")
 ERROR_RECOVERY = Path("prompts/focal/12-autonomous-error-recovery.md")
-TERMINAL_REPORT = Path("prompts/focal/08-terminal-report.md")
 FLOWCHART = Path("prompts/focal/11-process-flowchart.md")
 README = Path("README.md")
 REQUIRED_MODULES = (
     OPERATING_CYCLE,
-    Path("prompts/focal/02-autonomy-and-scope.md"),
+    AUTONOMY,
     COORDINATION,
-    Path("prompts/focal/04-roadmap.md"),
+    ROADMAP,
     Path("prompts/focal/05-iris-capability-research.md"),
     Path("prompts/focal/06-technical-requirements.md"),
-    Path("prompts/focal/07-validation-and-acceptance.md"),
+    ACCEPTANCE,
     TERMINAL_REPORT,
-    Path("prompts/focal/09-skills-maintenance.md"),
+    MAINTENANCE,
     COORDINATOR_REPAIR,
     ERROR_RECOVERY,
     FLOWCHART,
@@ -117,6 +121,17 @@ REQUIRED_TEXT = (
     "checkpoint no puede ser el objetivo",
     "ciclos consecutivos",
     "código de relleno",
+    "WORK_SELECTION_PROOF",
+    "ROADMAP_GRANULARITY_FAILURE",
+    "WORK_SELECTION_PROOF_MISSING",
+    "NOOP_REASON_INVALID",
+    "NOOP_REASON_REPEATED",
+    "ACTIVE_RUN",
+    "PROJECT_ALREADY_COMPLETE",
+    "NO_AUTHORIZED_WORK",
+    "ALL_REMAINING_WORK_EXTERNALLY_BLOCKED",
+    "LATE_ACQUIRE_ORPHANED",
+    "Estado observado UTC",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -137,6 +152,7 @@ README_MARKERS = (
     "Recovery procedure",
     "Resume condition",
     "## Focal adaptive execution granularity",
+    "### Focal closed NO-OP contract",
 )
 FLOWCHART_NODES = (
     "flowchart TD",
@@ -176,6 +192,11 @@ FLOWCHART_NODES = (
     "QUALITY_GATE",
     "PARTIAL_CAUSE",
     "RESULT_GATE",
+    "WORK_SELECTION_PROOF",
+    "SLICE_FOUND",
+    "DECOMPOSE_VERTICAL",
+    "NOOP_CAUSE",
+    "ROADMAP_GRANULARITY_FAILURE",
 )
 
 
@@ -205,7 +226,11 @@ def main() -> int:
     texts = {path: (repo / path).read_text(encoding="utf-8") for path in prompt_paths}
     entry = texts[ENTRYPOINT]
     operating = texts[OPERATING_CYCLE]
+    autonomy = texts[AUTONOMY]
     coordination = texts[COORDINATION]
+    roadmap = texts[ROADMAP]
+    acceptance = texts[ACCEPTANCE]
+    maintenance = texts[MAINTENANCE]
     repair = texts[COORDINATOR_REPAIR]
     recovery = texts[ERROR_RECOVERY]
     flowchart = texts[FLOWCHART]
@@ -317,6 +342,11 @@ def main() -> int:
         "EXTERNAL_BLOCKER",
         "GLSL_COMPILE_FAILED",
         "SECRET_OR_TOKEN_DETECTED",
+        "ROADMAP_GRANULARITY_FAILURE",
+        "WORK_SELECTION_PROOF_MISSING",
+        "NOOP_REASON_INVALID",
+        "NOOP_REASON_REPEATED",
+        "COORDINATOR_STATUS_STALE_REPORT",
     )
     for code in required_readme_codes:
         if not re.search(rf"^\| `{re.escape(code)}` \|", readme, flags=re.MULTILINE):
@@ -386,6 +416,34 @@ def main() -> int:
         fail(errors, "implementation quality safeguards are not reinforced")
     if "segunda ejecución" not in combined and "siguiente ejecución" not in combined:
         fail(errors, "PARTIAL continuity is not enforced")
+    if combined.count("WORK_SELECTION_PROOF") < 6:
+        fail(errors, "mandatory work-selection proof is not reinforced across the prompt stack")
+    if combined.count("ROADMAP_GRANULARITY_FAILURE") < 6:
+        fail(errors, "roadmap granularity recovery is not reinforced")
+    if "al menos tres candidatos" not in combined:
+        fail(errors, "selection proof does not require at least three candidates")
+    closed_noop_codes = (
+        "ACTIVE_RUN",
+        "PROJECT_ALREADY_COMPLETE",
+        "NO_AUTHORIZED_WORK",
+        "ALL_REMAINING_WORK_EXTERNALLY_BLOCKED",
+        "LATE_ACQUIRE_ORPHANED",
+    )
+    for code in closed_noop_codes:
+        if combined.count(code) < 3:
+            fail(errors, f"closed NO-OP reason is not reinforced: {code}")
+    if "no existía unidad válida" in acceptance:
+        fail(errors, "acceptance still allows open-ended NO-OP for missing work units")
+    if "no existe una unidad válida de trabajo" in entry:
+        fail(errors, "entrypoint still treats missing unit selection as a terminal condition")
+    if re.search(r"^\| `NO_VALID_WORK` \|", readme, flags=re.MULTILINE):
+        fail(errors, "README still contains retired NO_VALID_WORK terminal classification")
+    if "NOOP_REASON_REPEATED" not in roadmap or "NOOP_REASON_REPEATED" not in recovery:
+        fail(errors, "consecutive invalid NO-OP recovery is incomplete")
+    if "quince minutos reales" not in operating:
+        fail(errors, "work selection has no bounded post-lease deadline")
+    if "Estado observado UTC" not in terminal:
+        fail(errors, "terminal report does not timestamp coordinator state snapshots")
 
     terminal_sections = (
         "# <icono> <RESULTADO> — <resumen concreto>",
