@@ -221,6 +221,15 @@ The recovery prompt must be idempotent: preserve verified work, reuse every vali
 - Practical reasoning never grants side effects or weakens authorization, safety, evidence, or quality requirements.
 
 
+## Focal adaptive execution granularity
+
+Focal keeps the existing lease, roadmap, Iris, validation, PR, merge, reconciliation, and release workflow. Work selection now uses two explicit lanes:
+
+- `LOW_RISK_BULK` groups independent, reversible, mechanically verifiable corrections into one cycle, branch, and PR. Every modified file receives a dedicated single-file commit, each commit is validated, and the final combined head is validated again.
+- `HIGH_IMPACT_INCREMENT` decomposes architecture, shaders, runtime, compatibility, security, data, critical CI, migration, or performance-sensitive work into vertical increments that deliver an observable, testable, mergeable capability. Commits may span related files when atomicity or intent requires it.
+
+A checkpoint is only a recovery mechanism for an objective contingency; it is never a planned deliverable. A following cycle resumes the same partial unit first, and a second consecutive `PARTIAL` requires new objective evidence. Quality gates reject filler code, placeholders, falsely complete stubs, dead code, avoidable duplication, speculative abstractions, silent fallbacks, untracked TODOs, opportunistic refactors, and tests that merely mirror implementation shape.
+
 <!-- focal-autonomous-blockers:start -->
 ## Focal autonomous work blockers
 

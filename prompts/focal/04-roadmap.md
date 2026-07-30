@@ -46,11 +46,16 @@ Después de adquirir la lease y antes de elegir trabajo funcional:
 
 La ausencia o invalidez grave del roadmap es bloqueante para desarrollo funcional y constituye la unidad prioritaria del ciclo.
 
-## Granularidad obligatoria por feature
+## Granularidad obligatoria por feature y por ciclo
 
 El roadmap debe describir **cada feature técnica o visual como una unidad identificable y verificable**. No alcanza con una línea como “sombras”, “agua”, “materiales”, “OpenGL harness” o “compatibilidad”.
 
-Una feature puede agrupar trabajo interno inseparable, pero debe separarse cuando cambien cualquiera de estos factores:
+Cada ítem debe poder clasificarse para ejecución:
+
+- `LOW_RISK_BULK`: corrección pequeña, independiente, reversible y mecánicamente verificable que puede agruparse con otras del mismo riesgo. El lote no fusiona objetivos; solo reduce overhead de ciclo, rama, PR y reconciliación.
+- `HIGH_IMPACT_INCREMENT`: incremento vertical de una feature importante que entrega una capacidad observable y aceptable en `main` sin depender de una futura PR para tener sentido básico.
+
+Una feature debe separarse cuando cambien cualquiera de estos factores:
 
 - resultado observable;
 - pass o familia de programas;
@@ -61,7 +66,7 @@ Una feature puede agrupar trabajo interno inseparable, pero debe separarse cuand
 - riesgo de rendimiento o compatibilidad;
 - criterio de aceptación.
 
-No atomices en tareas microscópicas, pero tampoco ocultes múltiples features independientes dentro de un único ítem amplio.
+No atomices en tareas microscópicas ni por archivo. Tampoco ocultes múltiples features independientes dentro de un único ítem amplio. No crees ítems cuyo único resultado sea preparar, describir o preservar el trabajo que otro ciclo deberá implementar.
 
 ## Estructura obligatoria de cada ítem
 
@@ -69,7 +74,7 @@ Cada ítem debe tener un identificador estable, por ejemplo `FOCAL-LIGHT-001`, y
 
 Incluí:
 
-- estado canónico, prioridad y clasificación;
+- estado canónico, prioridad, clasificación y carril previsto (`LOW_RISK_BULK` o `HIGH_IMPACT_INCREMENT`) con justificación de riesgo;
 - título inequívoco;
 - alcance y resultado observable;
 - exclusiones o límites;
@@ -172,17 +177,19 @@ Una feature que requiere ejecución OpenGL no puede quedar `COMPLETADO` solo por
 
 Después de la fase inicial:
 
-1. restaurar compilación, validación o estabilidad;
-2. resolver bloqueos;
-3. construir o completar `OPENGL_RUNTIME_HARNESS` hasta disponer de compile/link/render/readback mínimo;
-4. completar infraestructura compartida;
-5. continuar `EN PROGRESO`;
-6. revisar `REVALIDAR`;
-7. implementar prioridad alta;
-8. investigar documentación necesaria;
-9. mejorar visual o rendimiento con medición.
+1. completar la misma unidad remota que terminó `PARTIAL`, salvo que ya haya sido completada por otro actor o exista nueva evidencia objetiva que la vuelva inválida;
+2. restaurar compilación, validación o estabilidad;
+3. resolver bloqueos;
+4. construir o completar `OPENGL_RUNTIME_HARNESS` hasta disponer de compile/link/render/readback mínimo;
+5. completar infraestructura compartida;
+6. continuar `EN PROGRESO`;
+7. revisar `REVALIDAR`;
+8. implementar prioridad alta;
+9. agrupar correcciones `LOW_RISK_BULK` compatibles cuando todas puedan cerrarse en el ciclo;
+10. investigar documentación necesaria;
+11. mejorar visual o rendimiento con medición.
 
-No selecciones una unidad ausente del roadmap.
+No selecciones una unidad ausente del roadmap. No selecciones un checkpoint o documento preparatorio como sustituto de una unidad ejecutable.
 
 ## Fase `ROADMAP_RECONCILIATION`
 

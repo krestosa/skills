@@ -47,8 +47,8 @@
       },
       {
         "path": "README.md",
-        "sha256": "1678a9d46eeec13ff09c1320188e0d5d6e58fb3757c18ff44481ca8fa9aa5c4a",
-        "bytes": 67381
+        "sha256": "9bdb82565351973a288c9f88cae825e34b5e688336ed86699e7ff3b5715aaba2",
+        "bytes": 68611
       },
       {
         "path": "SKILL.md",
@@ -72,18 +72,18 @@
       },
       {
         "path": "prompts/focal-autonomous-development.md",
-        "sha256": "b963607927e877be5d6e8f42dac73a0ecb5a1cdb21308189d6c044ea0b814577",
-        "bytes": 14805
+        "sha256": "aeb2ca8533c4e46804ada521554382cad811d7b8c1b851371b1078c49e148f78",
+        "bytes": 16345
       },
       {
         "path": "prompts/focal/01-operating-cycle.md",
-        "sha256": "a513efe511ac79e756573586bf5bf648ca5c253a8ca87e5e78858b877ac1f427",
-        "bytes": 14512
+        "sha256": "f81759a2afe461bd4866e7cc46ab6200861e55156bf2bbee9968ae1882cee6ac",
+        "bytes": 17744
       },
       {
         "path": "prompts/focal/02-autonomy-and-scope.md",
-        "sha256": "3458d1ab19c756c911c3db82c46e8cb0fc47144da6e22454054bf4a0c5164e70",
-        "bytes": 5786
+        "sha256": "9dbebb82cf95f55b66a3949757796545620b1a8488e897e7dfceea76157ef785",
+        "bytes": 7410
       },
       {
         "path": "prompts/focal/03-coordination.md",
@@ -92,8 +92,8 @@
       },
       {
         "path": "prompts/focal/04-roadmap.md",
-        "sha256": "c1815d07584d60b70d24680926e5829ee2143649110ceea1708d5170dde9903a",
-        "bytes": 10754
+        "sha256": "9fc3d2facd841d151ff47ce06d6ec62eeba3ede8bd238892ac9a3e099923fa1a",
+        "bytes": 11775
       },
       {
         "path": "prompts/focal/05-iris-capability-research.md",
@@ -107,18 +107,18 @@
       },
       {
         "path": "prompts/focal/07-validation-and-acceptance.md",
-        "sha256": "1777553159461f6a3cc26fe1df2ec279b1166d0f4c9b510a2f9cfff135639a99",
-        "bytes": 8694
+        "sha256": "dcdc42dd7676e664c180be8311afbd23f094d4334935991aeee8f55a47553157",
+        "bytes": 11391
       },
       {
         "path": "prompts/focal/08-terminal-report.md",
-        "sha256": "a004edfb0d2d73fe4d9462acb6b69f8d1360e39780f18b2f28d4bd699ca2ba24",
-        "bytes": 4393
+        "sha256": "beabb799cc3439abbe52a1b1ca08caaeb0aa5f4ee4940fb09a76bd3bc2f0bf55",
+        "bytes": 5305
       },
       {
         "path": "prompts/focal/09-skills-maintenance.md",
-        "sha256": "d38fefa373626fe9521aa56425f1a331cf9d28106c4d527bf77c667d45dbfae7",
-        "bytes": 9097
+        "sha256": "1695bfd0354b6f5dcbc21349f1be1ee9ccf278275ab296ec7bb385bf73960943",
+        "bytes": 10110
       },
       {
         "path": "prompts/focal/10-coordinator-repair.md",
@@ -127,13 +127,13 @@
       },
       {
         "path": "prompts/focal/11-process-flowchart.md",
-        "sha256": "785eee398824d84daad9feafc272eb37025d5895c48e0a05afc66ebd33aa25a8",
-        "bytes": 16705
+        "sha256": "794a8984c519f6838abad0559c011b840d482c3803f061a657eede20832a1f5a",
+        "bytes": 18590
       },
       {
         "path": "prompts/focal/12-autonomous-error-recovery.md",
-        "sha256": "09428b7343ee76aea22ef03e726a2d6abf5bb0d1cfd56b59bd647f24c1234cab",
-        "bytes": 9975
+        "sha256": "6ae45159927ae112a2376c84092f0e77a53f0404aa04304d423b54cc7777bdb5",
+        "bytes": 10773
       },
       {
         "path": "scripts/build_chatgpt_flat.py",
@@ -162,8 +162,8 @@
       },
       {
         "path": "scripts/validate_focal_prompt_stack.py",
-        "sha256": "4eb70ae68aad7743113fb5d2e6b0c430d9d0d70c1d3eb9abbd10f6dee51ddd3f",
-        "bytes": 13943
+        "sha256": "339a096fc2b46722e490fb6dec83b2cf6b9e3b999a85e6338c7a9bb4836a0183",
+        "bytes": 15221
       },
       {
         "path": "scripts/validate_gpt56.py",

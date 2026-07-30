@@ -1,6 +1,6 @@
 # Focal — Flowchart integral del proceso autónomo
 
-Este diagrama es una vista derivada del entrypoint y de los módulos `01` a `10`. No crea reglas nuevas. Cuando exista una diferencia, la regla normativa es el módulo indicado en el nodo y la contradicción debe corregirse mediante `SKILLS_MAINTENANCE`.
+Este diagrama es una vista derivada del entrypoint y de los módulos normativos `01` a `10` y `12`. No crea reglas nuevas. Cuando exista una diferencia, la regla normativa es el módulo indicado en el nodo y la contradicción debe corregirse mediante `SKILLS_MAINTENANCE`.
 
 ```mermaid
 flowchart TD
@@ -172,14 +172,18 @@ flowchart TD
         RI2 --> RI3[Auditar estados y evidencia contra main]
         RI3 --> RI4[Verificar capacidades con documentación primaria de Iris]
         RI4 --> RI5[Enlazar roadmap, matriz y campo Iris docs]
-        RI5 --> RI6{¿Existe unidad coherente y tiempo suficiente?}
+        RI5 --> RI6{¿Existe trabajo ejecutable y tiempo suficiente para cerrarlo?}
         RI6 -- No --> RECONCILE
-        RI6 -- Solo documentación --> DOC_ONLY[Publicar corrección documental] --> RECONCILE
-        RI6 -- Sí --> UNIT_DEFINE
+        RI6 -- Solo documentación atómica --> DOC_ONLY[Completar, validar y mergear la corrección documental] --> RECONCILE
+        RI6 -- Sí --> UNIT_RISK
     end
 
-    subgraph IMPLEMENTATION[Unidad funcional — módulos 01, 02 y 06]
-        UNIT_DEFINE[Definir objetivo, alcance, archivos, aceptación, pruebas y parada]
+    subgraph IMPLEMENTATION[Selección adaptativa e implementación — módulos 01, 02 y 06]
+        UNIT_RISK{Clasificar riesgo e impacto}
+        UNIT_RISK -- Bajo, independiente y reversible --> LOW_RISK_BULK[LOW_RISK_BULK: agrupar correcciones compatibles]
+        UNIT_RISK -- Arquitectura, runtime, compatibilidad o intención crítica --> HIGH_IMPACT_INCREMENT[HIGH_IMPACT_INCREMENT: definir incremento vertical observable]
+        LOW_RISK_BULK --> UNIT_DEFINE[Definir lote cerrado, archivos, aceptación, pruebas y parada]
+        HIGH_IMPACT_INCREMENT --> UNIT_DEFINE
         UNIT_DEFINE --> UNIT_BRANCH[Retomar o crear rama no forzada]
         UNIT_BRANCH --> MUTATION_GUARD[Antes de cada mutación: releer issue y comprobar runId propio + lease futura]
         MUTATION_GUARD --> MARGIN{¿Propiedad y margen ≥5m?}
@@ -187,13 +191,19 @@ flowchart TD
         RENEW_OK -- No --> LOST
         RENEW_OK -- Sí --> MARK_PROGRESS
         MARGIN -- No, propiedad perdida --> LOST
-        MARGIN -- Sí --> MARK_PROGRESS[Marcar ítem EN PROGRESO]
-        MARK_PROGRESS --> IMPLEMENT[Implementar solución mínima completa]
-        IMPLEMENT --> OPENGL{¿Requiere validación gráfica?}
+        MARGIN -- Sí --> MARK_PROGRESS[Marcar ítems EN PROGRESO y registrar carril]
+        MARK_PROGRESS --> COMMIT_MODE{¿Qué carril se ejecuta?}
+        COMMIT_MODE -- LOW_RISK_BULK --> LOW_COMMITS[Implementar lote: un archivo por commit y validación individual]
+        COMMIT_MODE -- HIGH_IMPACT_INCREMENT --> HIGH_COMMITS[Implementar incremento: commits lógicos multarchivo cuando la atomicidad lo exige]
+        LOW_COMMITS --> QUALITY_GATE[Revisar propósito, simplicidad, errores, deuda, placeholders, código muerto, abstracciones y tests]
+        HIGH_COMMITS --> QUALITY_GATE
+        QUALITY_GATE --> QUALITY_OK{¿Calidad e intención preservadas?}
+        QUALITY_OK -- No --> QUALITY_FIX[Eliminar relleno y corregir diseño o pruebas] --> COMMIT_MODE
+        QUALITY_OK -- Sí --> OPENGL{¿Requiere validación gráfica?}
         OPENGL -- Sí --> HARNESS[OPENGL_RUNTIME_HARNESS: focal-gl probe, compile, render y suite]
-        OPENGL -- No --> CHECKPOINT
-        HARNESS --> CHECKPOINT[Checkpoint remoto antes de validación extensa, CI o merge]
-        CHECKPOINT --> VALIDATE
+        OPENGL -- No --> VALIDATE_PREP
+        HARNESS --> VALIDATE_PREP[Checkpoint solo ante contingencia real; nunca como objetivo planificado]
+        VALIDATE_PREP --> VALIDATE
     end
 
     subgraph VALIDATION[Validación, PR y merge — módulo 07]
@@ -203,7 +213,9 @@ flowchart TD
         PR --> CI[Inspeccionar checks del head exacto]
         CI --> CI_RESULT{¿Checks requeridos aprobados?}
         CI_RESULT -- Fallo causado --> FIX[Corregir] --> MUTATION_GUARD
-        CI_RESULT -- Pendiente o evidencia faltante --> PARTIAL_CP[Preservar rama, PR y checkpoint] --> RECONCILE
+        CI_RESULT -- Pendiente o evidencia faltante --> PARTIAL_CAUSE{¿Existe causa objetiva para no cerrar?}
+        PARTIAL_CAUSE -- No --> FIX
+        PARTIAL_CAUSE -- Sí --> PARTIAL_CP[Preservar rama, PR y checkpoint recuperables] --> RECONCILE
         CI_RESULT -- Sí --> MERGE_GUARD[Releer issue y verificar head]
         MERGE_GUARD --> MERGE_OK{¿Propiedad y gates válidos?}
         MERGE_OK -- No --> LOST
@@ -237,7 +249,10 @@ flowchart TD
     RELEASE_UNKNOWN --> EVIDENCE_RESULT
     EVIDENCE_RESULT -- Sí --> PARTIAL_RESULT([PARTIAL])
     EVIDENCE_RESULT -- No --> BLOCKED_RESULT([BLOCKED])
-    REPORT --> PASS_RESULT([PASS])
+    REPORT --> RESULT_GATE{¿Lote o incremento seleccionado completo, mergeado y reconciliado?}
+    RESULT_GATE -- Sí --> PASS_RESULT([PASS])
+    RESULT_GATE -- No, causa objetiva y checkpoint útil --> PARTIAL_RESULT
+    RESULT_GATE -- No, bloqueo externo sin alternativa --> BLOCKED_RESULT
     REPORT_SKILLS --> PASS_RESULT
     NOOP --> NOOP_RESULT([NO-OP])
     BLOCKED_PROMPT --> BLOCKED_RESULT
@@ -257,5 +272,7 @@ flowchart TD
 - Un commit vacío, no-op, de transporte fallido o con archivos basura probados se sanea por GitHub Actions sin dejar commit de limpieza ni refs temporales. Esto incluye placeholders como `X`, tool output, dumps, truncados y paths accidentales solo cuando la evidencia conjunta confirma que no tienen función. Los commits posteriores conservan timestamps originales.
 - Todo fallo conocido o futuro entra en `AUTONOMOUS_RECOVERY_LOOP`; lo no catalogado usa `UNCLASSIFIED_INTERNAL_FAILURE`, se diagnostica y se reanuda sin pedir al usuario decisiones técnicas ordinarias.
 - `COORDINATOR_REPAIR` no es una lease ni una tercera modalidad funcional. Es una excepción bootstrap limitada al coordinador.
-- Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
+- Los commits funcionales ordinarios permanecen sujetos a rama, PR, CI y merge. En `LOW_RISK_BULK` cada archivo usa un commit dedicado; en `HIGH_IMPACT_INCREMENT` los commits pueden abarcar archivos relacionados para preservar atomicidad e intención.
+- La calidad exige ausencia de código de relleno, placeholders, deuda oculta, abstracciones especulativas y tests superficiales. Un checkpoint es contingencia, no objetivo.
+- Solo los artefactos temporales de reparación deben desaparecer de la historia alcanzable de `main`.
 - `release` es siempre la última mutación remota de un ciclo funcional.
