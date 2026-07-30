@@ -112,13 +112,13 @@
       },
       {
         "path": "prompts/focal/08-terminal-report.md",
-        "sha256": "4fef0fe56e51cf7cebf41918838e6229eb1789974c008dbe03f93c6edc204dab",
-        "bytes": 8395
+        "sha256": "4f2c3a25dd999ab72fc91ac8986bc1f500f9646bebf2ea3315ec17c446fb16bd",
+        "bytes": 10046
       },
       {
         "path": "prompts/focal/09-skills-maintenance.md",
-        "sha256": "28a0f23258327d98a6aa0a1e9bb4c88e59474dac9019cc18924c3a85f142c3fd",
-        "bytes": 11115
+        "sha256": "04560ec9fb2f1062a86641b0967ce198be2c21042fbb8f6713b7ef1b44e1a748",
+        "bytes": 11491
       },
       {
         "path": "prompts/focal/10-coordinator-repair.md",
@@ -162,8 +162,8 @@
       },
       {
         "path": "scripts/validate_focal_prompt_stack.py",
-        "sha256": "bb590167da1d529ce43341fc3458776d5675defa638f68cf62e53e3ed3d07333",
-        "bytes": 19506
+        "sha256": "f6c713416900545a97560e88eb3f10ddd8839a1e9dbe290604d74448806aa461",
+        "bytes": 20665
       },
       {
         "path": "scripts/validate_gpt56.py",
