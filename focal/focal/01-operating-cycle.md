@@ -117,20 +117,32 @@ La fase termina únicamente cuando:
 
 Si la fase consume el presupuesto, publicá solo su corrección documental y continuá con reconciliación; no fuerces una feature.
 
-## 6. Selección de unidad
+## 6. Clasificación de riesgo y selección adaptativa
 
-Seleccioná una sola unidad coherente con:
+Antes de crear o retomar una rama, resolvé en este orden:
 
-- objetivo verificable;
-- alcance y archivos previstos;
-- dependencias resueltas;
-- criterios de aceptación;
-- validaciones aplicables;
-- evidencia esperada;
-- condición de parada;
-- tiempo suficiente para publicación y reconciliación.
+1. Si el ciclo anterior terminó `PARTIAL`, retomá primero la misma unidad, rama, PR y checkpoint. No selecciones trabajo nuevo mientras esa deuda siga siendo ejecutable.
+2. Clasificá el paquete de ejecución:
+   - `LOW_RISK_BULK`: cambios pequeños, independientes, reversibles, sin modificación de arquitectura, contratos públicos, shaders runtime, seguridad, persistencia, compatibilidad, historia, releases ni infraestructura crítica; cada cambio posee aceptación y validación mecánicas.
+   - `HIGH_IMPACT_INCREMENT`: cualquier cambio arquitectónico, funcional, gráfico, runtime, de compatibilidad, seguridad, datos, CI crítica, migración, API, rendimiento sensible o con riesgo de perder intención.
+3. En `LOW_RISK_BULK`, podés agrupar varios ítems independientes en un solo ciclo, rama y PR para evitar avance administrativo fragmentado. El lote debe seguir cabiendo completo antes del soft stop.
+4. En `HIGH_IMPACT_INCREMENT`, seleccioná un solo incremento vertical con resultado observable, utilizable y mergeable. Si la feature completa no cabe, dividila por capacidad funcional y criterio de aceptación, nunca por archivo, documento preparatorio o fase administrativa.
+5. Para cualquiera de los carriles, definí:
+   - objetivo verificable y resultado observable;
+   - ítems de roadmap incluidos;
+   - alcance y archivos previstos;
+   - dependencias resueltas;
+   - criterios de aceptación;
+   - validaciones aplicables;
+   - evidencia esperada;
+   - riesgos y reversibilidad;
+   - condición de parada;
+   - tiempo suficiente para implementación, publicación, merge, reconciliación y `release`.
+6. Seleccioná el paquete más grande que tenga alta probabilidad de quedar completamente validado, mergeado y reconciliado antes del soft stop. Reducí alcance antes de empezar si esa probabilidad no es alta.
+7. Un checkpoint, una nota de intención, una PR preparatoria o un documento que solo enumera trabajo pendiente no constituyen una unidad seleccionable.
+8. Dos ciclos consecutivos no pueden terminar `PARTIAL` sobre la misma unidad salvo que aparezca nueva evidencia objetiva: CI todavía en ejecución, dependencia externa, conflicto remoto, pérdida de lease, fallo reproducible no resuelto o entorno obligatorio no disponible.
 
-No abras subsistemas desconectados. Una unidad puede incluir infraestructura habilitante y su primera utilización solo si forman una secuencia inseparable y validable.
+No abras subsistemas desconectados. La infraestructura habilitante y su primera utilización pueden formar un único incremento cuando sean inseparables y validables.
 
 ## 7. Guardia de propiedad antes de cada mutación
 
@@ -148,16 +160,16 @@ Un chat que sigue trabajando mientras el issue está `idle` está fuera del prot
 
 1. Retomá una rama remota compatible o creá una rama nueva desde el SHA remoto verificado.
 2. No hagas push directo a la rama predeterminada.
-3. Marcá el ítem seleccionado `🟡 EN PROGRESO` con rama, PR o siguiente acción.
-4. Implementá la solución mínima completa; no reduzcas criterios para que entre en el ciclo.
-5. Creá commits coherentes por cambio lógico. No existe una regla de un archivo por commit.
-6. Publicá un checkpoint antes de:
-   - una validación extensa;
-   - esperar CI;
-   - alcanzar el soft stop;
-   - realizar una operación de merge.
-7. Enviá heartbeat en cada cambio de fase y como máximo cada cinco minutos mientras continúe el trabajo.
-8. Cada heartbeat debe registrar fase, rama, head, PR y checkpoint actuales, sin procedencia del cliente de ejecución.
+3. Marcá cada ítem seleccionado `🟡 EN PROGRESO` con carril, rama, PR o siguiente acción.
+4. Implementá la solución mínima completa; no reduzcas criterios para que entre en el ciclo y no agregues código sin consumidor verificable.
+5. Aplicá la disciplina de commits del carril:
+   - `LOW_RISK_BULK`: cada archivo modificado se publica en un commit dedicado que modifica exactamente ese archivo. No combines archivos ni mezcles dos archivos por conveniencia. Validá cada commit y luego el lote completo.
+   - `HIGH_IMPACT_INCREMENT`: cada commit representa un cambio lógico revisable y puede modificar varias rutas relacionadas cuando separarlas produciría estados intermedios rotos, ocultaría intención o degradaría la revisión. No fuerces un commit por archivo.
+6. En ambos carriles, cada commit debe tener propósito explícito, diff mínimo, nombres coherentes, manejo de errores deliberado y pruebas proporcionales. Eliminá placeholders, código muerto, duplicación, abstracciones especulativas, wrappers sin necesidad, fallbacks silenciosos y comentarios generados que no expliquen una decisión real.
+7. Un incremento de alto impacto debe quedar individualmente construible, comprobable y mergeable; no depende de una futura PR para adquirir sentido básico.
+8. Publicá un checkpoint únicamente ante una contingencia real: validación extensa que puede exceder el presupuesto, espera de CI, fallo transitorio persistente, riesgo de soft stop, pérdida inminente de lease o una operación de merge. El checkpoint no puede ser el objetivo planificado del ciclo.
+9. Enviá heartbeat en cada cambio de fase y como máximo cada cinco minutos mientras continúe el trabajo.
+10. Cada heartbeat debe registrar fase, rama, head, PR y checkpoint actuales, sin procedencia del cliente de ejecución.
 
 ## 9. Validación y publicación
 

@@ -83,12 +83,24 @@ Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después 
 
 ## Política de Git
 
-- Una rama representa una unidad coherente.
-- Los commits representan cambios lógicos revisables; pueden modificar varias rutas relacionadas.
+- Una rama representa un paquete de ejecución coherente: un lote `LOW_RISK_BULK` o un incremento `HIGH_IMPACT_INCREMENT`.
+- En `LOW_RISK_BULK`, cada archivo modificado debe tener un commit dedicado de un solo archivo. La independencia del lote debe poder revisarse y revertirse archivo por archivo.
+- En `HIGH_IMPACT_INCREMENT`, los commits representan cambios lógicos revisables y pueden modificar varias rutas relacionadas cuando la atomicidad, el build, los tests o la intención lo requieran.
+- No uses la regla de un archivo por commit para fragmentar una feature importante en estados intermedios rotos.
 - No hagas commits operativos para lock, heartbeat o reporte.
 - No uses squash como requisito universal; elegí un método de merge compatible con la política del repositorio y la trazabilidad necesaria.
 - Verificá el head exacto antes de mergear.
 - La limpieza de commits temporales de `COORDINATOR_REPAIR` es una excepción administrativa explícita y no altera esta política para trabajo funcional.
+
+## Calidad de implementación
+
+- Todo código nuevo debe tener un consumidor, contrato o criterio de aceptación identificable.
+- Preferí la solución más simple que preserve comportamiento, intención, compatibilidad y capacidad de prueba.
+- Prohibí código de relleno, placeholders, stubs presentados como terminados, ramas muertas, duplicación evitable, abstracciones especulativas, wrappers sin valor, nombres genéricos, constantes mágicas no justificadas, excepciones capturadas y silenciadas, fallbacks invisibles y `TODO` sin ítem de roadmap.
+- No aceptes tests que solo repliquen la implementación o afirmen estructura sin comprobar comportamiento e invariantes relevantes.
+- No amplíes el alcance mediante refactors oportunistas. Un refactor adicional exige una causa observable y validación propia.
+- Revisá el diff completo por claridad, cohesión, acoplamiento, manejo de errores, límites de recursos, compatibilidad, rendimiento y mantenibilidad antes de publicar.
+- Una implementación que compila pero pierde la intención funcional, oculta deuda o deja trabajo esencial para una PR futura no satisface el criterio de calidad.
 
 ## Mantenimiento de `krestosa/skills`
 

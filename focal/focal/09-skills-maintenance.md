@@ -52,7 +52,7 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 7. Conservá `prompts/focal-autonomous-development.md` como entrypoint estable.
 8. Conservá `prompts/focal/11-process-flowchart.md` como representación derivada integral, nunca como fuente normativa paralela.
 9. Si retirás contenido, preferí el historial Git. Archivá solo cuando tenga valor operativo y marcá el archivo como no canónico y no ejecutable.
-10. Actualizá todas las referencias, el manifest, la integridad, el flowchart y la sección de troubleshooting del README.
+10. Actualizá todas las referencias, el manifest, la integridad, el flowchart, los validadores y la sección de troubleshooting del README, incluidos los contratos de granularidad adaptativa, commits y calidad.
 11. Validá Markdown, Mermaid, rutas, términos canónicos, fases, estados y ausencia de referencias legacy activas.
 12. Revisá el diff completo.
 13. Publicá la rama y abrí una pull request.
@@ -67,6 +67,10 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 - Estado separado de documentación.
 - Coordinación separada de especificación gráfica.
 - Condiciones verificables y resultados no ambiguos.
+- Granularidad adaptativa: bulk solo para cambios independientes de bajo riesgo e incrementos verticales para trabajo importante.
+- En bulk de bajo riesgo, un commit dedicado por archivo; en alto impacto, commits lógicos multarchivo cuando la atomicidad lo requiera.
+- Checkpoints exclusivamente contingentes y `PARTIAL` limitado a causas objetivas.
+- Calidad explícita: sin código de relleno, placeholders, deuda oculta, abstracciones especulativas ni tests superficiales.
 - Sin snapshots históricos incorporados como instrucciones.
 - Sin dependencias circulares.
 - Sin negaciones superpuestas para reemplazar reglas legacy.
@@ -96,6 +100,10 @@ Antes de finalizar, verificá:
 - `ROADMAP_RECONCILIATION`;
 - roadmap y matriz de Iris obligatorios;
 - evidencia para completado;
+- clasificación `LOW_RISK_BULK` y `HIGH_IMPACT_INCREMENT` coherente en entrypoint, operación, roadmap, aceptación, reporte y flowchart;
+- un commit dedicado por archivo para bulk de bajo riesgo y commits lógicos atómicos para incrementos importantes;
+- prohibición de checkpoints planificados y de `PARTIAL` sin causa objetiva;
+- gates contra código de relleno, placeholders, deuda oculta, abstracciones especulativas y tests superficiales;
 - pruebas obligatorias;
 - exclusión mutua y recuperación de lock;
 - polling con demora real y ventana mínima explícita;

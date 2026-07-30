@@ -93,6 +93,17 @@ Determiná un único modo antes de mutar:
 
 La autorización de un modo no se extiende al otro repositorio ni a terceros. Las reglas específicas están en `02-autonomy-and-scope.md` y `09-skills-maintenance.md`.
 
+## Política adaptativa de unidad, granularidad y calidad
+
+El workflow operativo existente se conserva. Antes de seleccionar trabajo, clasificá el paquete de ejecución por riesgo e impacto:
+
+- `LOW_RISK_BULK`: varias correcciones pequeñas, independientes, reversibles y de bajo riesgo pueden resolverse juntas dentro del mismo ciclo. Cada archivo modificado debe quedar en un commit dedicado de un solo archivo, con validación individual y validación agregada del lote.
+- `HIGH_IMPACT_INCREMENT`: arquitectura, shaders, runtime, compatibilidad, seguridad, datos, CI crítica, migraciones o cambios con intención funcional importante se dividen en incrementos verticales observables, aceptables y mergeables. Sus commits pueden abarcar varios archivos relacionados cuando la atomicidad técnica lo requiera.
+
+No dividas trabajo por burocracia, archivos preparatorios o documentación de intención. No planifiques checkpoints como objetivo del ciclo. Un checkpoint existe únicamente ante una contingencia real. La implementación debe preservar intención, simplicidad, mantenibilidad, pruebas proporcionales y ausencia de código de relleno, placeholders, abstracciones especulativas o cambios sin consumidor.
+
+La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; y los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`.
+
 ## Documentos canónicos
 
 | Concepto | Fuente canónica |
@@ -118,7 +129,7 @@ La autorización de un modo no se extiende al otro repositorio ni a terceros. La
 3. Reloj, identidad opaca, SHA mínimo de `main`, `inspect`, polling real, reenvío acotado, fallback programado y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
 4. Resolución del resto del estado remoto, despacho de errores por `AUTONOMOUS_RECOVERY_LOOP` y reconstrucción desde GitHub.
 5. `ROADMAP_BOOTSTRAP_AND_IRIS_AUDIT`.
-6. Selección de una unidad coherente.
+6. Clasificación de riesgo y selección de una unidad o lote coherente conforme a la política adaptativa.
 7. Implementación, heartbeats y checkpoints remotos.
 8. Validación, publicación, pull request y merge cuando corresponda.
 9. `ROADMAP_RECONCILIATION`.

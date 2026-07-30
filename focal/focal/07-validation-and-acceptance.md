@@ -13,7 +13,33 @@ Antes de editar, registrá para la unidad:
 - pruebas disponibles en el entorno;
 - evidencia esperada;
 - nivel de evidencia requerido: estático, OpenGL standalone, shader parcheado o cliente Iris;
-- condición que impediría `PASS`.
+- clasificación `LOW_RISK_BULK` o `HIGH_IMPACT_INCREMENT` y justificación;
+- lista cerrada de ítems cuando sea un lote de bajo riesgo;
+- resultado funcional observable cuando sea un incremento de alto impacto;
+- condición objetiva que impediría `PASS`.
+
+## Gates por carril y calidad
+
+### `LOW_RISK_BULK`
+
+- Cada archivo debe quedar en un commit dedicado de un solo archivo.
+- Ejecutá la validación aplicable después de cada commit y repetí la validación agregada sobre el head final.
+- Si un archivo falla, corregilo o retiralo del lote antes de abrir o actualizar la PR; no ocultes el fallo detrás del resto del bulk.
+- Todos los ítems del lote deben quedar mergeados y reconciliados para que el ciclo sea `PASS`.
+
+### `HIGH_IMPACT_INCREMENT`
+
+- El incremento debe entregar una capacidad vertical observable, construible, comprobable y mergeable.
+- Los commits pueden abarcar múltiples archivos relacionados cuando separarlos rompa atomicidad, build, pruebas o intención.
+- Revisá interfaces, invariantes, compatibilidad, fallbacks, rendimiento, deuda introducida y límites del incremento.
+- La aceptación se aplica al incremento seleccionado, no exige terminar toda la feature arquitectónica en un solo ciclo.
+
+### Calidad común
+
+- Verificá ausencia de código de relleno, placeholders, stubs falsamente completos, código muerto, duplicación evitable, abstracciones especulativas, wrappers sin valor, fallbacks silenciosos y `TODO` sin trazabilidad.
+- Comprobá que los tests validen comportamiento e invariantes y no solo la forma de la implementación.
+- Rechazá refactors no requeridos por el objetivo o sin evidencia propia.
+- Confirmá que nombres, errores, límites, comentarios y documentación preserven la intención técnica del cambio.
 
 ## Validaciones por tipo
 
@@ -229,7 +255,17 @@ Un ciclo que afirma aceptación runtime sin la evidencia OpenGL o Iris requerida
 
 ### `PARTIAL`
 
-Existe avance remoto útil, pero falta merge, prueba, CI, reconciliación final o aceptación completa.
+Existe avance remoto funcional o documental útil y recuperable, pero una causa objetiva impide completar el paquete seleccionado. Las causas válidas son:
+
+- CI obligatorio todavía pendiente o ejecutándose;
+- entorno, hardware, servicio o prueba obligatoria no disponible;
+- conflicto remoto o cambio de base que exige reconciliación adicional;
+- pérdida de lease o imposibilidad de renovarla;
+- reintentos del conector agotados después de `read-after-write`;
+- soft stop alcanzado después de publicar implementación real;
+- fallo reproducible todavía no resuelto pese a aplicar la recuperación autónoma.
+
+No uses `PARTIAL` por conservadurismo, por haber elegido una unidad demasiado pequeña, por dejar documentación preparatoria, por abrir una PR sin intentar cerrarla, por posponer una corrección de bajo riesgo, por pruebas opcionales o por haber planificado un checkpoint como objetivo. La siguiente ejecución debe retomar la misma unidad primero. Un segundo `PARTIAL` consecutivo sobre la misma deuda exige nueva evidencia objetiva registrada.
 
 ### `BLOCKED`
 
