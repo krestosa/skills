@@ -99,6 +99,13 @@ REQUIRED_TEXT = (
     "GARBAGE_ARTIFACT_COMMIT",
     "GARBAGE_ARTIFACT_MIXED_COMMIT",
     "No pidas al usuario elegir arquitectura",
+    "LOW_RISK_BULK",
+    "HIGH_IMPACT_INCREMENT",
+    "un commit dedicado",
+    "incremento vertical",
+    "checkpoint no puede ser el objetivo",
+    "ciclos consecutivos",
+    "código de relleno",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -118,6 +125,7 @@ README_MARKERS = (
     "Evidence required",
     "Recovery procedure",
     "Resume condition",
+    "## Focal adaptive execution granularity",
 )
 FLOWCHART_NODES = (
     "flowchart TD",
@@ -151,6 +159,12 @@ FLOWCHART_NODES = (
     "ERROR_ROUTE",
     "ERROR_RESUME",
     "ERROR_CHECKPOINT",
+    "UNIT_RISK",
+    "LOW_RISK_BULK",
+    "HIGH_IMPACT_INCREMENT",
+    "QUALITY_GATE",
+    "PARTIAL_CAUSE",
+    "RESULT_GATE",
 )
 
 
@@ -348,6 +362,18 @@ def main() -> int:
         fail(errors, "placeholder garbage example is not explicitly covered")
     if "mensaje" not in repair or "nunca bastan solos" not in repair:
         fail(errors, "history candidates can be classified without sufficient evidence")
+    if combined.count("LOW_RISK_BULK") < 6 or combined.count("HIGH_IMPACT_INCREMENT") < 6:
+        fail(errors, "adaptive work-unit lanes are not reinforced across the prompt stack")
+    if combined.count("un commit dedicado") < 3:
+        fail(errors, "single-file commit discipline for low-risk bulk is not reinforced")
+    if combined.count("incremento vertical") < 4:
+        fail(errors, "vertical functional decomposition for high-impact work is not reinforced")
+    if combined.count("checkpoint") < 10 or "nunca como objetivo planificado" not in combined:
+        fail(errors, "checkpoint contingency policy is incomplete")
+    if combined.count("código de relleno") < 4:
+        fail(errors, "implementation quality safeguards are not reinforced")
+    if "segunda ejecución" not in combined and "siguiente ejecución" not in combined:
+        fail(errors, "PARTIAL continuity is not enforced")
 
     if errors:
         for error in errors:
