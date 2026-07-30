@@ -19,12 +19,13 @@ En cada ejecución:
    9. `prompts/focal/09-skills-maintenance.md`
    10. `prompts/focal/10-coordinator-repair.md`
    11. `prompts/focal/12-autonomous-error-recovery.md`
-   12. `prompts/focal/11-process-flowchart.md`
+   12. `prompts/focal/13-autonomy-control-plane-v4.md`
+   13. `prompts/focal/11-process-flowchart.md`
 3. Verificá que todas las rutas existan y sean legibles hasta la última línea.
 4. No uses memoria, conversaciones anteriores, copias locales persistentes, caches ni snapshots históricos como fuente de instrucciones.
 5. Si el SHA de `krestosa/skills` cambia durante la carga, reiniciá la carga una sola vez desde el nuevo SHA. Si vuelve a cambiar, terminá `BLOCKED` por instrucciones inestables.
 
-No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10` y `12`.
+No cargues versiones históricas de este entrypoint ni módulos retirados. El historial Git es trazabilidad, no una capa ejecutable. `11-process-flowchart.md` es una vista derivada y no puede contradecir a los módulos normativos `01` a `10`, `12` y `13`.
 
 ## Safeguard de fallos transitorios del conector
 
@@ -50,12 +51,12 @@ Los commits de transporte vacíos, no-op o producidos únicamente por una ejecuc
    - `GARBAGE_ARTIFACT_COMMIT`: commit cuyo cambio se limita a archivos basura probados, incluidos placeholders mínimos, salidas de herramientas, volcados de error, contenido truncado o paths accidentales;
    - `GARBAGE_ARTIFACT_MIXED_COMMIT`: commit con trabajo válido y basura; se reconstruye conservando el diff funcional y retirando solo los paths probados.
 2. El mensaje del commit, su autor o el resultado de un run nunca bastan por sí solos para eliminarlo. No sanees commits funcionales, firmados, publicados en release, alcanzables desde tags o protegidos por otra rama o PR.
-3. El saneamiento se ejecuta exclusivamente mediante GitHub Actions. No hagas force push desde un clon local ni mediante una mutación directa del conector.
+3. El saneamiento histórico excepcional se ejecuta mediante una capacidad permanente revisada o una GitHub Action temporal estrictamente marcada conforme a `13-autonomy-control-plane-v4.md`. No hagas force push desde un clon local ni mediante una mutación directa del conector.
 4. Reconstruí la cadena desde el último parent limpio: omití candidatos y reaplicá el diff de cada commit posterior conservado contra su nuevo parent. Para cada commit posterior preservá exactamente nombre y correo de autor, `authorDate`, nombre y correo de committer, `committerDate`, timezone, mensaje y topología soportada; nunca uses la hora del saneamiento.
 5. Por defecto solo se reescriben tramos lineales de commits de un parent. Un merge exige mapear todos sus parents y demostrar topología y árbol equivalentes; si no puede probarse, abortá sin mover refs.
 6. Validá el árbol final y los diffs semánticos antes de actualizar la rama. Mové la ref únicamente con `--force-with-lease` contra el head remoto exacto observado.
-7. El workflow y cualquier script temporal deben estar ausentes del árbol final. Eliminá las ramas y tags temporales creados para el saneamiento y verificá que los candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*`.
-8. El resultado final no puede contener un commit o merge de limpieza. Si la Action falla antes del cambio de ref, la rama protegida permanece intacta y la rama temporal debe eliminarse en un paso `if: always()`; la evidencia queda en el run, no en una ref persistente.
+7. Cualquier workflow o script temporal debe incluir `# focal-temporary-workflow: true`, estar ausente del árbol final y quedar bajo la limpieza permanente. Eliminá las ramas y tags temporales creados para el saneamiento y verificá que los candidatos no sean alcanzables desde `refs/heads/*` ni `refs/tags/*`.
+8. El resultado final no puede contener un commit o merge de limpieza. Si la Action falla antes del cambio de ref, la rama protegida permanece intacta; la evidencia queda en el run y la limpieza posterior corresponde al workflow permanente de mantenimiento.
 9. La auditoría y retención interna de la plataforma pueden conservar eventos u objetos no alcanzables. El contrato garantiza ausencia en el árbol y en las refs visibles controladas por el repositorio, no borrado físico de infraestructura externa.
 
 ## Recuperación autónoma universal
@@ -67,8 +68,8 @@ Toda excepción o condición inesperada se procesa mediante `AUTONOMOUS_RECOVERY
 Después de cargar íntegramente estas instrucciones, aplicá este gate antes de cualquier análisis del proyecto:
 
 1. La **PRIMERA lectura remota de `krestosa/Focal`** debe ser el cuerpo completo del issue `#7`, `[automation-state] Focal execution state`.
-2. Antes de leer roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows o releases, generá el `runId`, resolvé únicamente el SHA de `main` necesario para el comando y ejecutá `inspect` seguido de `acquire` o `recover` según `03-coordination.md`.
-3. La primera mutación remota del ciclo debe afectar exclusivamente el bloque `focal-command:v3` del issue `#7`; el bloque `focal-state:v3` solo lo modifica GitHub Actions.
+2. Antes de leer roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows o releases, generá el `runId`, resolvé únicamente el SHA de `main` necesario para el comando y ejecutá `inspect` seguido de `acquire` o `recover` según `03-coordination.md` y `13-autonomy-control-plane-v4.md`.
+3. La primera mutación remota del ciclo debe afectar exclusivamente el bloque `focal-command:v3` del issue `#7`; el bloque `focal-state:v3` solo lo modifica GitHub Actions desde el estado transaccional.
 4. Los comandos y el estado operativo usan únicamente `commandId` y `runId` opacos. No escribas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación en el issue, logs, ramas, commits, PRs, notas, reportes ni artefactos del proyecto. Los campos legacy `owner`, `executionSource` y equivalentes deben omitirse y depurarse. No implementes esta prohibición mediante listas de nombres explícitos, fragmentados, concatenados, ofuscados, codificados o reconstruidos en tiempo de ejecución: esos nombres tampoco pueden formar parte del árbol, los tests, los validadores ni los workflows del repositorio.
 5. No existe ejecución activa por el hecho de que un proceso esté razonando, ejecutando herramientas, creando código local o anunciando que comenzó. La ejecución existe únicamente cuando el issue confirma simultáneamente:
    - `status == working`;
@@ -77,12 +78,12 @@ Después de cargar íntegramente estas instrucciones, aplicá este gate antes de
    - `lastCommandReason == LEASE_ACQUIRED` o `LEASE_RECOVERED`;
    - `leaseExpiresAt` futuro.
 6. Si aparece otro `runId` con lease futura, terminá `NO-OP`. Si el issue permanece `idle`, completá primero el polling de 45 segundos reales, el reenvío acotado con `commandId` nuevo y el fallback programado del coordinador definidos en `03-coordination.md`. No declares fallo ni termines por una demora mientras alguno de esos mecanismos siga disponible dentro del presupuesto.
-7. Si una adquisición se correlaciona después de que el llamador ya finalizó, tratala como lease huérfana: no inicies trabajo retrospectivo; liberala con el mismo `runId` y una nota neutral antes de cualquier mantenimiento.
+7. Si una adquisición se correlaciona después de que el llamador ya finalizó, tratala como lease huérfana: no inicies trabajo retrospectivo; liberala con el mismo `runId`, verificá `assert_terminal` y usá una nota neutral antes de cualquier mantenimiento.
 8. Antes de cada mutación posterior en `krestosa/Focal`, releé el issue y confirmá propiedad y vigencia. Si faltan menos de cinco minutos para expirar, enviá `heartbeat` y esperá `HEARTBEAT_ACCEPTED` antes de mutar.
-9. La **ÚLTIMA mutación remota del ciclo** debe ser el comando `release` en el issue `#7`, después de completar todas las mutaciones de archivos, ramas, PRs, merges, documentación y checkpoints.
-10. Después de enviar `release` no realices ninguna otra mutación en `krestosa/Focal`. Solo releé el issue hasta confirmar `idle`, `runId == null` y `lastRunId` propio, y luego emití el reporte terminal.
+9. El comando `release` debe ser la **última mutación de código, archivos, ramas, PRs, merges, documentación, labels, releases y checkpoints**, después de completar todas esas operaciones.
+10. Después de observar `LEASE_RELEASED`, la única mutación permitida es un comando `assert_terminal` para el mismo `runId`. Después de observar `TERMINAL_STATE_CONFIRMED`, solo releé el issue y emití el reporte terminal.
 
-`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. `cleanup_branches` no forma parte de un ciclo de desarrollo. Solo puede ejecutarse como mantenimiento administrativo independiente mientras el issue ya está `idle` y no existe ninguna ejecución autorizada trabajando sobre Focal.
+`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. El mantenimiento de ramas y archivos basura no forma parte de un ciclo de desarrollo. Solo puede ejecutarse mediante el workflow permanente mientras el issue ya está `idle` y no existe ninguna ejecución autorizada trabajando sobre Focal.
 
 ## Modo de ejecución
 
@@ -104,7 +105,7 @@ No dividas trabajo por burocracia, archivos preparatorios o documentación de in
 
 Antes de concluir que no hay una unidad ejecutable, completá `WORK_SELECTION_PROOF`: evaluá al menos tres candidatos del roadmap —o todos cuando queden menos—, registrá para cada uno dependencias, resultado observable mínimo, validación, riesgo, presupuesto y código factual de descarte, y descomponé cualquier feature demasiado grande en un incremento vertical utilizable. `NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, la complejidad y la incertidumbre temporal son fallos internos de granularidad, no causas terminales.
 
-La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; y los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`.
+La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`; y el cierre transaccional en `13-autonomy-control-plane-v4.md`.
 
 ## Documentos canónicos
 
@@ -113,15 +114,16 @@ La clasificación detallada está en `01-operating-cycle.md`; la disciplina de G
 | Entrada y orden de carga | este archivo |
 | Protocolo de ciclo | `01-operating-cycle.md` |
 | Autonomía y alcance | `02-autonomy-and-scope.md` |
-| Estado y exclusión mutua | `03-coordination.md` |
+| Estado y exclusión mutua | `03-coordination.md` y `13-autonomy-control-plane-v4.md` |
 | Roadmap | `krestosa/Focal:docs/ROADMAP.md` |
 | Capacidades de Iris | `krestosa/Focal:docs/IRIS-CAPABILITY-MATRIX.md` |
 | Requisitos técnicos y gráficos | `06-technical-requirements.md` |
 | Pruebas y aceptación | `07-validation-and-acceptance.md` |
-| Reporte terminal | `08-terminal-report.md` |
+| Reporte terminal | `08-terminal-report.md` y el gate de `13-autonomy-control-plane-v4.md` |
 | Mantenimiento de prompts | `09-skills-maintenance.md` |
 | Reparación bootstrap del coordinador | `10-coordinator-repair.md` |
 | Catálogo y motor de recuperación autónoma | `12-autonomous-error-recovery.md` |
+| Control plane transaccional y cierre terminal | `13-autonomy-control-plane-v4.md` |
 | Flowchart integral derivado | `11-process-flowchart.md` |
 
 ## Orden global del ciclo `FOCAL_CYCLE`
@@ -134,9 +136,9 @@ La clasificación detallada está en `01-operating-cycle.md`; la disciplina de G
 6. Clasificación de riesgo y selección de una unidad o lote coherente conforme a la política adaptativa.
 7. Implementación, heartbeats y checkpoints remotos.
 8. Validación, publicación, pull request y merge cuando corresponda.
-9. `ROADMAP_RECONCILIATION`.
+9. `ROADMAP_RECONCILIATION` o handoff remoto recuperable.
 10. Finalización de todas las mutaciones del proyecto.
-11. `release` como última mutación, confirmación read-only y reporte terminal único.
+11. `release`, confirmación `LEASE_RELEASED`, `assert_terminal`, confirmación `TERMINAL_STATE_CONFIRMED` y reporte terminal único.
 
 No selecciones, inspecciones en profundidad ni implementes trabajo funcional antes de completar la adquisición confirmada y la fase 5. La única lectura y mutación anterior adicional es la reparación estrictamente limitada definida en `10-coordinator-repair.md` después de satisfacer su protocolo de observación y fallback.
 
@@ -146,7 +148,7 @@ Cuando exista una incompatibilidad real, aplicá:
 
 1. Seguridad, legalidad, secretos y límites explícitos del usuario.
 2. Modo de ejecución y alcance autorizado.
-3. Exclusión mutua y propiedad de la lease, incluida la excepción bootstrap explícita de `10-coordinator-repair.md` cuando todavía no existe lease.
+3. Control plane transaccional, exclusión mutua, propiedad de la lease y cierre terminal de `13-autonomy-control-plane-v4.md`, incluida la excepción bootstrap explícita de `10-coordinator-repair.md` cuando todavía no existe lease.
 4. Condiciones de parada y preservación remota.
 5. Validación y criterios de aceptación.
 6. Roadmap y evidencia de Iris.
@@ -154,7 +156,7 @@ Cuando exista una incompatibilidad real, aplicá:
 8. Decisiones tácticas del ciclo.
 9. Flowchart derivado.
 
-La precedencia no debe usarse para conservar contradicciones evitables. Si dos módulos activos se contradicen, corregí el sistema de prompts en una ejecución `SKILLS_MAINTENANCE`; no inventes una conciliación permanente.
+La precedencia no debe usarse para conservar contradicciones evitables. Si dos módulos activos se contradicen fuera de la adaptación expresa del módulo `13`, corregí el sistema de prompts en una ejecución `SKILLS_MAINTENANCE`; no inventes una conciliación permanente.
 
 ## Condiciones globales de parada
 
@@ -170,7 +172,7 @@ Detenete sin iniciar nuevo trabajo cuando:
 - el estado remoto necesario es ambiguo después de agotar el safeguard de reintentos y los fallbacks permitidos;
 - falta una autorización indispensable;
 - una operación requeriría secretos o alcance no autorizado;
-- el tiempo restante no permite implementar, validar, publicar, reconciliar el roadmap y liberar la lease;
+- el tiempo restante no permite implementar, validar, publicar, preservar un handoff, ejecutar `release` y confirmar `assert_terminal`;
 - el objetivo ya está completamente satisfecho en `main` y no existe trabajo pendiente, en progreso o para revalidar (`PROJECT_ALREADY_COMPLETE`);
 - la instrucción actual no autoriza ninguna mutación ni mantenimiento aplicable (`NO_AUTHORIZED_WORK`);
 - todos los ítems restantes dependen de una capacidad externa comprobada y sin fallback autorizado (`ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`);
