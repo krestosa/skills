@@ -60,20 +60,22 @@ jobs:
       - name: Run unit tests under required root runtime
         run: sudo --preserve-env=PATH python -m unittest discover -s tests -v
 
-      - name: Verify integrity metadata is current
+      - name: Generate refreshed integrity metadata
         run: |
-          python scripts/tooling.py --json refresh-integrity --dry-run > /tmp/focal-integrity-check.json
-          cat /tmp/focal-integrity-check.json
-          python - <<'PY_CHECK'
-          import json
-          from pathlib import Path
+          python scripts/tooling.py --json refresh-integrity > /tmp/focal-integrity-refresh.json
+          cat /tmp/focal-integrity-refresh.json
 
-          payload = json.loads(Path("/tmp/focal-integrity-check.json").read_text(encoding="utf-8"))
-          if payload.get("status") != "PASS":
-              raise SystemExit("integrity dry-run failed")
-          if payload.get("changed"):
-              raise SystemExit("shared/manifests/integrity.json is stale")
-          PY_CHECK
+      - name: Upload generated integrity manifest
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: focal-integrity-manifest-${{ github.sha }}
+          path: shared/manifests/integrity.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify integrity metadata is current
+        run: git diff --exit-code -- shared/manifests/integrity.json
 
       - name: Run repository validation
         run: python scripts/tooling.py validate
