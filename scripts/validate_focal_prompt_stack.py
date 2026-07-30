@@ -136,6 +136,11 @@ REQUIRED_TEXT = (
     "Nunca insertes URLs ni sintaxis Markdown en JSON",
     "Run de Actions",
     "Workflow:",
+    "MERGE_TITLE_POLICY",
+    "MERGE_PR_REFERENCE_MISSING",
+    "commit_title",
+    "(#<n>)",
+    "referencia visible al PR",
 )
 FORBIDDEN_ACTIVE_PATTERNS = (
     r"Ref:\s*[0-9a-f]{40}",
@@ -201,6 +206,11 @@ FLOWCHART_NODES = (
     "DECOMPOSE_VERTICAL",
     "NOOP_CAUSE",
     "ROADMAP_GRANULARITY_FAILURE",
+    "MERGE_TITLE_POLICY",
+    "MERGE_PR_REFERENCE",
+    "MERGE_PR_REFERENCE_MISSING",
+    "SM_MERGE_TITLE",
+    "SM_MERGE_REFERENCE",
 )
 
 
@@ -351,6 +361,7 @@ def main() -> int:
         "NOOP_REASON_INVALID",
         "NOOP_REASON_REPEATED",
         "COORDINATOR_STATUS_STALE_REPORT",
+        "MERGE_PR_REFERENCE_MISSING",
     )
     for code in required_readme_codes:
         if not re.search(rf"^\| `{re.escape(code)}` \|", readme, flags=re.MULTILINE):
@@ -422,6 +433,16 @@ def main() -> int:
         fail(errors, "PARTIAL continuity is not enforced")
     if combined.count("WORK_SELECTION_PROOF") < 6:
         fail(errors, "mandatory work-selection proof is not reinforced across the prompt stack")
+    if combined.count("MERGE_TITLE_POLICY") < 4:
+        fail(errors, "merge title policy is not reinforced across the prompt stack")
+    if combined.count("MERGE_PR_REFERENCE_MISSING") < 6:
+        fail(errors, "missing PR reference recovery is not reinforced across the prompt stack")
+    if "Preferí el título automático de GitHub" not in autonomy:
+        fail(errors, "Git policy does not prefer GitHub's automatic PR-aware merge title")
+    if "No uses rebase merge" not in autonomy:
+        fail(errors, "Git policy does not reject rebase merges that erase visible PR traceability")
+    if "Referencia visible al PR" not in terminal:
+        fail(errors, "terminal report does not expose visible PR merge traceability")
     if combined.count("ROADMAP_GRANULARITY_FAILURE") < 6:
         fail(errors, "roadmap granularity recovery is not reinforced")
     if "al menos tres candidatos" not in combined:

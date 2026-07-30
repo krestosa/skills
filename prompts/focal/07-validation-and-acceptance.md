@@ -47,6 +47,7 @@ Antes de editar, registrá para la unidad:
 ### Siempre aplicables
 
 - estado remoto, base y head exactos;
+- trazabilidad visible del PR en el subject final de merge o squash;
 - diff y referencias internas;
 - ausencia de rutas o includes inexistentes;
 - coherencia entre roadmap, matriz de Iris y documentación;
@@ -228,6 +229,9 @@ Puede mergearse cuando:
 - la lease sigue siendo propia;
 - el head revisado no cambió;
 - la base sigue siendo válida o fue reconciliada;
+- el número exacto del PR y el subject final del merge están resueltos antes de mutar;
+- el subject automático o personalizado conservará `#<n>` de forma visible; cuando exista `commit_title` personalizado, termina en `(#<n>)` o usa el título nativo `Merge pull request #<n> from <head>`;
+- no se eligió rebase merge si ese método elimina la referencia visible al PR;
 - todos los criterios aplicables están satisfechos;
 - pruebas obligatorias y checks requeridos están verdes;
 - no existe revisión bloqueante;
@@ -236,6 +240,8 @@ Puede mergearse cuando:
 - el nivel de evidencia alcanzado coincide con la clase de feature.
 
 No mergees para fabricar evidencia.
+
+`MERGE_TITLE_POLICY` es un gate previo, no una corrección posterior. Rechazá un payload personalizado sin el PR exacto. Después del merge verificá la PR, `merge_commit_sha`, la rama predeterminada y el subject del commit. Si el subject no contiene `#<n>`, usá `MERGE_PR_REFERENCE_MISSING`, no reescribas la historia publicada y el ciclo no puede ser `PASS`.
 
 ## Resultados
 

@@ -56,6 +56,12 @@ No ejecutes la misma estrategia fallida indefinidamente. Después de dos intento
 
 `NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, “no se encontró un incremento seguro” y equivalentes quedan retirados como causas terminales: son aliases de `ROADMAP_GRANULARITY_FAILURE`.
 
+## Trazabilidad visible de merges
+
+- `MERGE_PR_REFERENCE_MISSING`: la PR figura mergeada, pero el subject publicado en la rama predeterminada no contiene su número exacto. Antes del merge, corregí `MERGE_TITLE_POLICY` y el payload: preferí el título automático de GitHub o usá un `commit_title` con `<título de la PR> (#<n>)` o `Merge pull request #<n> from <head>`.
+- Si el defecto se detecta después del merge, no reescribas historia publicada ni crees un commit vacío para simular asociación. Conservá PR, SHA y evidencia, repará el procedimiento o tooling de merge mediante `RECOVERY_REPAIR_IN_PLACE`, verificá la regla con una prueba de regresión y no declares `PASS` para ese ciclo.
+- Una asociación interna de GitHub o un `merge_commit_sha` correcto no sustituye la referencia visible `#<n>` exigida en el historial.
+
 ## Clasificación de archivos basura generados por error
 
 La categoría operativa de artefacto no-op o basura incluye archivos creados o modificados accidentalmente, aunque el commit cambie el árbol.
