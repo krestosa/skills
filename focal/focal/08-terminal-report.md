@@ -14,7 +14,7 @@ En la **capa Markdown visible**, todo recurso navegable debe presentarse como en
 - Issue: [`issue #<n>`](https://github.com/<owner>/<repo>/issues/<n>).
 - Archivo: [`<ruta>`](https://github.com/<owner>/<repo>/blob/<SHA-o-rama>/<ruta>).
 
-Usá la URL remota observada; no inventes enlaces para recursos no verificados. Los identificadores opacos, timestamps, estados y códigos no son enlaces. **Nunca insertes URLs ni sintaxis Markdown en JSON, bloques `focal-command:v3`, bloques `focal-state:v3`, payloads machine-readable, evidencias estructuradas o bloques de código.**
+Usá la URL remota observada; no inventes enlaces para recursos no verificados. Los identificadores opacos, timestamps, estados y códigos no son enlaces. Nunca insertes URLs ni sintaxis Markdown en JSON, bloques administrados, payloads machine-readable, evidencias estructuradas o bloques de código. Conservá JSON, payloads estructurados y bloques de código sin Markdown ni URLs añadidas.
 
 ## Jerarquía obligatoria
 
@@ -22,8 +22,8 @@ La primera pantalla debe permitir entender, sin abrir detalles:
 
 1. resultado;
 2. entrega observable;
-3. objetivo;
-4. PR, merge y CI;
+3. objetivo y modo;
+4. PR, merge y CI cuando apliquen;
 5. estado final del coordinador;
 6. siguiente acción.
 
@@ -40,43 +40,64 @@ No uses un emoji distinto para esos cuatro resultados.
 
 # <icono> <RESULTADO> — <resumen concreto>
 
-> **Entrega:** <qué quedó efectivamente disponible, mergeado o preservado>
+> **Entrega:** <qué quedó efectivamente disponible, mergeado, eliminado, preservado o previsualizado>
 
 | Resumen | Estado |
 |---|---|
-| **Objetivo** | <objetivo seleccionado> |
-| **Carril** | `LOW_RISK_BULK`, `HIGH_IMPACT_INCREMENT`, `RECOVERY` o no aplicable |
-| **PR / merge** | <link a PR, link al commit de merge y subject exacto que contiene `#<n>`, o no aplicable> |
-| **CI** | <icono, link al workflow/run exacto y conclusión, o no aplicable> |
+| **Objetivo** | <objetivo solicitado> |
+| **Modo** | `FOCAL_CYCLE`, `REPOSITORY_MAINTENANCE` o `SKILLS_MAINTENANCE` |
+| **Carril / scope** | `LOW_RISK_BULK`, `HIGH_IMPACT_INCREMENT`, `RECOVERY`, `branches`, `garbage`, `temporary_workflows`, `all` o no aplicable |
+| **PR / merge** | <link a PR, merge y subject con `#<n>`, o no aplicable> |
+| **CI / workflow** | <link al workflow y run exactos> |
 | **Coordinador** | <🟢 `IDLE`, 🔵 `WORKING`, 🔴 desconocido o no adquirido> |
-| **Estado observado UTC** | <timestamp exacto de la lectura que sustenta el estado; es una instantánea, no una garantía futura> |
-| **Duración** | <inicio UTC → fin UTC; indicar si quedó dentro del runtime guard> |
+| **Estado observado UTC** | <timestamp exacto de la lectura; instantánea, no garantía futura> |
+| **Duración** | <inicio UTC → fin UTC> |
 
 > [!IMPORTANT]
 > **Siguiente acción:** <una acción concreta, ejecutable y priorizada>
 
 ## Cambios principales
 
-- <cambio o capacidad entregada>
-- <segundo cambio relevante>
-- <documentación, roadmap o matriz reconciliados cuando corresponda>
+Para `FOCAL_CYCLE` o `SKILLS_MAINTENANCE`:
 
-Mencioná archivos solo cuando ayuden a entender el cambio. No conviertas esta sección en un inventario técnico.
+- <capacidad o cambio entregado>;
+- <segundo cambio relevante>;
+- <reconciliación cuando corresponda>.
+
+Para `REPOSITORY_MAINTENANCE`:
+
+- scope ejecutado y `dryRun`;
+- ramas o paths candidatos;
+- ramas o paths efectivamente eliminados;
+- recursos preservados por protección, PR abierta o trabajo no mergeado.
+
+No describas una ejecución administrativa como implementación. Una limpieza que no creó código no tiene “rama final” ni “PR de entrega”.
 
 ## Validación
 
 | Comprobación | Resultado | Evidencia |
 |---|---|---|
-| <test, build o contrato> | ✅ Aprobado / ❌ Falló / ⚪ No ejecutado | <run, comando o motivo> |
-| <CI del head exacto> | <resultado> | <run y SHA> |
+| <test, contrato o invariancia> | ✅ Aprobado / ❌ Falló / ⚪ No ejecutado | <run, comando o motivo> |
+| <CI o workflow del head/comando exacto> | <resultado> | <run, SHA o command ID> |
 
 Después de la tabla, agregá únicamente las aclaraciones necesarias:
 
 - **Pruebas fallidas:** <ninguna o lista concisa>.
 - **Pruebas no ejecutadas:** <ninguna o prueba + motivo factual>.
-- **Nivel de evidencia:** `STATIC`, `GL_COMPILE_LINK`, `GL_RENDER_READBACK`, `IRIS_PATCHED` o `IRIS_CLIENT`, cuando aplique.
+- **Nivel de evidencia:** `STATIC`, `GL_COMPILE_LINK`, `GL_RENDER_READBACK`, `IRIS_PATCHED`, `IRIS_CLIENT` o no aplicable.
+
+En `REPOSITORY_MAINTENANCE` verificá explícitamente:
+
+- `lastRepositoryMaintenanceCommandId` correlacionado;
+- scope exacto;
+- `createdBranches == []`;
+- `branchCountAfter <= branchCountBefore`;
+- para scope `branches`, `defaultBranchHeadAfter == defaultBranchHeadBefore`;
+- ausencia de PR o workflow creados por la operación.
 
 ## Estado del proyecto
+
+En modos funcionales:
 
 - **Roadmap:** <ítems modificados y estados finales>.
 - **Iris:** <capacidades verificadas o actualizadas>.
@@ -84,7 +105,7 @@ Después de la tabla, agregá únicamente las aclaraciones necesarias:
 - **Checkpoint / SHA final:** <link Markdown al commit>.
 - **Bloqueos:** <ninguno o bloqueo comprobado>.
 
-Omití las filas que no apliquen en `SKILLS_MAINTENANCE` o `NO-OP`.
+En `REPOSITORY_MAINTENANCE`, omití roadmap, Iris, rama final, checkpoint funcional y merge. Informá en su lugar el head de `main` antes/después cuando aplique y los conteos de ramas.
 
 ## Riesgos y limitaciones
 
@@ -99,6 +120,8 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 
 ## Trazabilidad
 
+### Trazabilidad funcional
+
 | Recurso | Valor |
 |---|---|
 | **SHA remoto inicial** | <link Markdown al commit> |
@@ -112,6 +135,23 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 | **Roadmap** | <link Markdown a `docs/ROADMAP.md` o no aplicable> |
 | **Matriz de Iris** | <link Markdown a `docs/IRIS-CAPABILITY-MATRIX.md` o no aplicable> |
 
+### Trazabilidad administrativa
+
+Usá esta tabla solo en `REPOSITORY_MAINTENANCE`:
+
+| Recurso | Valor |
+|---|---|
+| **Issue de estado** | [issue #7](https://github.com/krestosa/Focal/issues/7) |
+| **Issue administrativo** | [issue #101](https://github.com/krestosa/Focal/issues/101) |
+| **Command ID** | `<identificador opaco>` |
+| **Scope / dry-run** | <scope y boolean> |
+| **Workflow / run** | <links observados> |
+| **Ramas antes / después** | <conteos> |
+| **Ramas creadas** | `[]` |
+| **Ramas eliminadas** | <lista enlazada o ninguna> |
+| **Paths eliminados** | <lista enlazada o ninguna> |
+| **Head de main antes / después** | <links; iguales para scope branches> |
+
 <details>
 <summary><strong>Detalles operativos y de recuperación</strong></summary>
 
@@ -119,54 +159,44 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 
 | Campo | Valor |
 |---|---|
-| **Modo** | `FOCAL_CYCLE` o `SKILLS_MAINTENANCE` |
+| **Modo** | `FOCAL_CYCLE`, `REPOSITORY_MAINTENANCE` o `SKILLS_MAINTENANCE` |
 | **Ruta excepcional** | no aplicable o `COORDINATOR_REPAIR` |
-| **Runtime guard** | <soft stop, cleanup, hard stop y cumplimiento> |
-| **Run ID** | `<identificador opaco>` |
+| **Runtime guard** | <límites y cumplimiento o no aplicable> |
+| **Run ID funcional** | `<identificador opaco o no adquirido>` |
 | **Command ID de adquisición** | `<identificador opaco o no adquirido>` |
-| **Último heartbeat confirmado** | <timestamp o no aplicable> |
 | **Command ID de liberación** | `<identificador opaco o no aplicable>` |
+| **Command ID administrativo** | `<identificador opaco o no aplicable>` |
 | **Lock liberado** | sí, no o no adquirido |
 | **Estado final observado** | `idle`, `working` o desconocido, con timestamp UTC exacto |
 
 ### Alcance técnico
 
-- **Lote o incremento seleccionado:** <detalle>.
-- **WORK_SELECTION_PROOF:** <al menos tres candidatos o todos los restantes, slices evaluados y códigos de descarte>.
-- **Código de NO-OP:** <`ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`, `LATE_ACQUIRE_ORPHANED` o no aplicable>.
-- **Justificación de riesgo:** <detalle>.
-- **Continuidad de un PARTIAL anterior:** <no o sí + referencia>.
+- **Lote, incremento o scope:** <detalle>.
+- **WORK_SELECTION_PROOF:** <detalle o no aplicable a mantenimiento administrativo>.
+- **Código de NO-OP:** <código cerrado o no aplicable>.
 - **Motivo objetivo de PARTIAL:** <no aplicable o evidencia>.
-- **Revisión de calidad:** <hallazgos concretos sobre intención, simplicidad, deuda, placeholders, código muerto, errores y tests>.
+- **Revisión de calidad:** <hallazgos concretos>.
 - **Archivos creados, modificados, movidos o eliminados:** <lista compacta>.
 
 ### Recuperación e historia
 
 - **Reintentos del conector:** <cantidad>.
 - **Mutaciones con resultado desconocido reconciliadas mediante read-after-write:** <ninguna o detalle>.
-- **Presupuesto de reintentos agotado:** sí o no.
 - **Fallos autónomamente recuperados:** <ninguno o detalle>.
-- **Ruta de recuperación aplicada:** <código o no aplicable>.
-- **Fallos no clasificados convertidos en diagnóstico:** <ninguno o detalle>.
 - **Commits temporales de reparación:** <ninguno o SHAs>.
 - **Historia final de Focal:** <limpia, pendiente o no aplicable>.
 - **Candidatos saneados:** <ninguno o clasificación>.
 - **Paths basura retirados y clasificación:** <ninguno o detalle>.
-- **SHAs excluidos y evidencia:** <ninguno o detalle>.
-- **Commits posteriores reconstruidos:** <no aplicable o lista>.
-- **Timestamps posteriores preservados:** <no aplicable, verificado o no verificado>.
 - **Refs temporales eliminadas:** <no aplicable o lista>.
-- **Candidatos alcanzables desde refs/heads o refs/tags:** <ninguno o detalle>.
 - **Commit o merge de limpieza presente:** no, sí o no aplicable.
 - **Árbol final verificado:** <sí/no + evidencia>.
-- **Parent y metadata preservados:** <no aplicable o detalle>.
 - **Workflow temporal ausente:** sí, no o no aplicable.
 
 ### Rutas y limitaciones completas
 
 - **Flowchart:** `prompts/focal/11-process-flowchart.md` o no aplicable.
 - **Limitaciones reales:** <lista factual completa>.
-- **Resultado observable entregado:** <detalle técnico si requiere mayor precisión>.
+- **Resultado observable entregado:** <detalle técnico>.
 
 </details>
 
@@ -174,20 +204,18 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 
 - Priorizá conclusiones y estado; relegá identificadores y mecánica al bloque desplegable.
 - Usá tablas únicamente para datos comparables y listas breves para cambios o riesgos.
-- Omití campos vacíos o irrelevantes; no escribas veinte veces `no aplicable`.
-- Usá SHA, PR, runs y rutas verificables.
-- En el Markdown visible, convertí todo recurso navegable verificado en enlace; no dejes PR, rama, commit, workflow, run, issue o archivo como texto plano.
-- Conservá JSON, payloads estructurados y bloques de código sin Markdown ni URLs añadidas.
-- No declares que un archivo, prueba o merge existe si no fue observado remotamente.
-- No declares `PASS` si el subject del commit de merge o squash no contiene el número exacto del PR; mostrale al usuario `MERGE_PR_REFERENCE_MISSING` sin sugerir una reescritura retrospectiva de `main`.
-- No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
-- `runId` y `commandId` son opacos; no derives ni expliques su origen.
+- Omití campos vacíos o irrelevantes.
+- Usá SHA, PR, runs, issues y rutas verificables.
+- En el Markdown visible, convertí todo recurso navegable verificado en enlace.
+- No declares que un archivo, prueba, cleanup o merge existe si no fue observado remotamente.
+- No declares `PASS` funcional si el subject de merge no contiene el número exacto del PR.
+- No incluyas procedencia del cliente de ejecución.
+- `runId` y `commandId` son opacos.
 - Un error transitorio aislado no justifica un resultado terminal.
-- `PASS` requiere publicación, aceptación, reconciliación y liberación completas. En `LOW_RISK_BULK`, todos los archivos e ítems del lote deben estar cerrados; en `HIGH_IMPACT_INCREMENT`, debe estar cerrado el incremento vertical seleccionado.
-- `PARTIAL` requiere una causa objetiva verificable y continuidad explícita de la misma unidad; un checkpoint planificado o trabajo preparatorio no alcanza.
-- Toda afirmación `IDLE` o `WORKING` debe incluir `Estado observado UTC`; presentala como una instantánea que puede cambiar después de la lectura.
-- En `NO-OP` por lease activa, usá `ACTIVE_RUN` y mostrale al usuario únicamente estado, fase, expiración, timestamp observado y motivo; omití secciones sin contenido.
-- Todo `NO-OP` debe declarar uno de los cinco códigos cerrados; una razón abierta como “no se encontró una unidad acotada” es inválida.
+- `PASS` funcional requiere publicación, aceptación, reconciliación y cierre terminal completos.
+- `PASS` administrativo requiere comando correlacionado, workflow exitoso, scope exacto e invariantes aprobadas.
+- Toda afirmación `IDLE` o `WORKING` debe incluir `Estado observado UTC`.
+- En `NO-OP` por lease activa, usá `ACTIVE_RUN` y omití secciones sin contenido.
 - En `SKILLS_MAINTENANCE`, roadmap y matriz de Iris son no aplicables salvo autorización adicional.
-- En `COORDINATOR_REPAIR`, distinguí artefactos temporales observados de artefactos alcanzables al final.
+- En `REPOSITORY_MAINTENANCE`, no inventes una rama, PR, commit o merge de entrega.
 - La imposibilidad de borrar auditoría interna de la plataforma no equivale a contenido controlado por el repositorio.
