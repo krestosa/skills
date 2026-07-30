@@ -75,6 +75,7 @@ Aplicá íntegramente `12-autonomous-error-recovery.md`. Un validador roto, mani
 - Calidad explícita: sin código de relleno, placeholders, deuda oculta, abstracciones especulativas ni tests superficiales.
 - Reporte terminal orientado a lectura humana: resultado, entrega, PR/merge, CI y siguiente acción arriba; identificadores y mecánica dentro de detalles desplegables.
 - El reporte terminal usa Markdown renderizado y queda prohibido volver a una lista plana o a un bloque `text` de campos consecutivos.
+- Todo recurso navegable del Markdown visible se enlaza: PR, rama, commit, merge, checkpoint, issue, workflow, run y archivo. JSON, payloads machine-readable y bloques de código permanecen planos, sin URLs ni sintaxis Markdown añadidas.
 - Sin snapshots históricos incorporados como instrucciones.
 - Sin dependencias circulares.
 - Sin negaciones superpuestas para reemplazar reglas legacy.
@@ -119,6 +120,7 @@ Antes de finalizar, verificá:
 - flowchart Mermaid completo y consistente;
 - sección de bloqueos y recuperación en `README.md`;
 - reporte terminal único, renderizado como Markdown legible y con la información prioritaria antes de la trazabilidad técnica;
+- enlaces Markdown obligatorios para todo recurso navegable visible y prohibición de insertar links en JSON o bloques machine-readable;
 - estado del coordinador acompañado por `Estado observado UTC`;
 - causas cerradas de `NO-OP`, prueba de selección y rechazo de `NO_VALID_UNIT` como motivo terminal;
 - regresión `NOOP_REASON_REPEATED` y recuperación `ROADMAP_GRANULARITY_FAILURE`;
