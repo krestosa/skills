@@ -90,7 +90,13 @@ Solo `EXTERNAL_BLOCKER` permite solicitar intervención, y únicamente después 
 - No uses la regla de un archivo por commit para fragmentar una feature importante en estados intermedios rotos.
 - No hagas commits operativos para lock, heartbeat o reporte.
 - No uses squash como requisito universal; elegí un método de merge compatible con la política del repositorio y la trazabilidad necesaria.
+- La historia visible de la rama predeterminada debe conservar la referencia al pull request que produjo cada merge.
+- Preferí el título automático de GitHub. Si la operación envía `commit_title` o cualquier título personalizado, el subject debe contener el número exacto del PR: usá `<título de la PR> (#<n>)` para squash o `Merge pull request #<n> from <head>` para merge commit.
+- No uses rebase merge cuando elimine la referencia visible `#<n>` del historial de la rama predeterminada.
+- Un título personalizado sin el número exacto del PR es inválido aunque GitHub conserve una asociación interna entre la PR y el commit.
 - Verificá el head exacto antes de mergear.
+- Después del merge, verificá conjuntamente `merged == true`, `merge_commit_sha`, el SHA observado en la rama predeterminada y que el subject del commit contenga `#<n>`.
+- Si falta la referencia visible, clasificá `MERGE_PR_REFERENCE_MISSING`; no reescribas historia publicada para maquillarlo ni declares `PASS`.
 - La limpieza de commits temporales de `COORDINATOR_REPAIR` es una excepción administrativa explícita y no altera esta política para trabajo funcional.
 
 ## Calidad de implementación
