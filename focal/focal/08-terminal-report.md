@@ -2,6 +2,20 @@
 
 Emití **un único reporte Markdown renderizado**. No uses un bloque de código, no vuelques una secuencia plana de `Campo: valor` y no repitas la misma información en varias secciones.
 
+## Enlaces Markdown obligatorios
+
+En la **capa Markdown visible**, todo recurso navegable debe presentarse como enlace Markdown. Esto incluye pull requests, ramas, commits, merges, checkpoints, issues, workflows, runs de GitHub Actions, archivos y documentación externa.
+
+- Pull request: `[PR #<n>](https://github.com/<owner>/<repo>/pull/<n>)`.
+- Rama: [`<rama>`](https://github.com/<owner>/<repo>/tree/<rama>).
+- Commit, merge o checkpoint: [`<SHA corto>`](https://github.com/<owner>/<repo>/commit/<SHA completo>).
+- Workflow: [`<nombre>`](https://github.com/<owner>/<repo>/actions/workflows/<archivo-workflow>).
+- Run de Actions: [`run <id>`](https://github.com/<owner>/<repo>/actions/runs/<id>).
+- Issue: [`issue #<n>`](https://github.com/<owner>/<repo>/issues/<n>).
+- Archivo: [`<ruta>`](https://github.com/<owner>/<repo>/blob/<SHA-o-rama>/<ruta>).
+
+Usá la URL remota observada; no inventes enlaces para recursos no verificados. Los identificadores opacos, timestamps, estados y códigos no son enlaces. **Nunca insertes URLs ni sintaxis Markdown en JSON, bloques `focal-command:v3`, bloques `focal-state:v3`, payloads machine-readable, evidencias estructuradas o bloques de código.**
+
 ## Jerarquía obligatoria
 
 La primera pantalla debe permitir entender, sin abrir detalles:
@@ -32,8 +46,8 @@ No uses un emoji distinto para esos cuatro resultados.
 |---|---|
 | **Objetivo** | <objetivo seleccionado> |
 | **Carril** | `LOW_RISK_BULK`, `HIGH_IMPACT_INCREMENT`, `RECOVERY` o no aplicable |
-| **PR / merge** | <PR y estado del merge, o no aplicable> |
-| **CI** | <icono y run exacto: aprobado, fallido, pendiente o no aplicable> |
+| **PR / merge** | <link a PR y link al commit de merge, o no aplicable> |
+| **CI** | <icono, link al workflow/run exacto y conclusión, o no aplicable> |
 | **Coordinador** | <🟢 `IDLE`, 🔵 `WORKING`, 🔴 desconocido o no adquirido> |
 | **Estado observado UTC** | <timestamp exacto de la lectura que sustenta el estado; es una instantánea, no una garantía futura> |
 | **Duración** | <inicio UTC → fin UTC; indicar si quedó dentro del runtime guard> |
@@ -66,8 +80,8 @@ Después de la tabla, agregá únicamente las aclaraciones necesarias:
 
 - **Roadmap:** <ítems modificados y estados finales>.
 - **Iris:** <capacidades verificadas o actualizadas>.
-- **Rama final:** `<rama>`.
-- **Checkpoint / SHA final:** `<SHA>`.
+- **Rama final:** <link Markdown a la rama>.
+- **Checkpoint / SHA final:** <link Markdown al commit>.
 - **Bloqueos:** <ninguno o bloqueo comprobado>.
 
 Omití las filas que no apliquen en `SKILLS_MAINTENANCE` o `NO-OP`.
@@ -87,14 +101,14 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 
 | Recurso | Valor |
 |---|---|
-| **SHA remoto inicial** | `<SHA>` |
-| **SHA remoto final** | `<SHA>` |
-| **Commit(s)** | `<SHAs funcionales>` |
-| **Pull request** | `<número o no aplicable>` |
-| **Estado del merge** | `<estado y SHA>` |
-| **Estado de CI** | `<run y conclusión>` |
-| **Roadmap** | `docs/ROADMAP.md` o no aplicable |
-| **Matriz de Iris** | `docs/IRIS-CAPABILITY-MATRIX.md` o no aplicable |
+| **SHA remoto inicial** | <link Markdown al commit> |
+| **SHA remoto final** | <link Markdown al commit> |
+| **Commit(s)** | <links Markdown a los commits funcionales> |
+| **Pull request** | <link Markdown a la PR o no aplicable> |
+| **Estado del merge** | <estado y link Markdown al commit de merge> |
+| **Estado de CI** | <link Markdown al workflow/run y conclusión> |
+| **Roadmap** | <link Markdown a `docs/ROADMAP.md` o no aplicable> |
+| **Matriz de Iris** | <link Markdown a `docs/IRIS-CAPABILITY-MATRIX.md` o no aplicable> |
 
 <details>
 <summary><strong>Detalles operativos y de recuperación</strong></summary>
@@ -160,6 +174,8 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 - Usá tablas únicamente para datos comparables y listas breves para cambios o riesgos.
 - Omití campos vacíos o irrelevantes; no escribas veinte veces `no aplicable`.
 - Usá SHA, PR, runs y rutas verificables.
+- En el Markdown visible, convertí todo recurso navegable verificado en enlace; no dejes PR, rama, commit, workflow, run, issue o archivo como texto plano.
+- Conservá JSON, payloads estructurados y bloques de código sin Markdown ni URLs añadidas.
 - No declares que un archivo, prueba o merge existe si no fue observado remotamente.
 - No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
 - `runId` y `commandId` son opacos; no derives ni expliques su origen.
