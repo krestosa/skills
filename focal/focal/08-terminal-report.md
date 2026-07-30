@@ -46,7 +46,7 @@ No uses un emoji distinto para esos cuatro resultados.
 |---|---|
 | **Objetivo** | <objetivo seleccionado> |
 | **Carril** | `LOW_RISK_BULK`, `HIGH_IMPACT_INCREMENT`, `RECOVERY` o no aplicable |
-| **PR / merge** | <link a PR y link al commit de merge, o no aplicable> |
+| **PR / merge** | <link a PR, link al commit de merge y subject exacto que contiene `#<n>`, o no aplicable> |
 | **CI** | <icono, link al workflow/run exacto y conclusión, o no aplicable> |
 | **Coordinador** | <🟢 `IDLE`, 🔵 `WORKING`, 🔴 desconocido o no adquirido> |
 | **Estado observado UTC** | <timestamp exacto de la lectura que sustenta el estado; es una instantánea, no una garantía futura> |
@@ -106,6 +106,8 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 | **Commit(s)** | <links Markdown a los commits funcionales> |
 | **Pull request** | <link Markdown a la PR o no aplicable> |
 | **Estado del merge** | <estado y link Markdown al commit de merge> |
+| **Título del merge** | <subject exacto observado> |
+| **Referencia visible al PR** | <verificada: `#<n>` o defecto `MERGE_PR_REFERENCE_MISSING`> |
 | **Estado de CI** | <link Markdown al workflow/run y conclusión> |
 | **Roadmap** | <link Markdown a `docs/ROADMAP.md` o no aplicable> |
 | **Matriz de Iris** | <link Markdown a `docs/IRIS-CAPABILITY-MATRIX.md` o no aplicable> |
@@ -177,6 +179,7 @@ Cuando no exista ninguno, escribí: `- Ninguno conocido dentro del alcance valid
 - En el Markdown visible, convertí todo recurso navegable verificado en enlace; no dejes PR, rama, commit, workflow, run, issue o archivo como texto plano.
 - Conservá JSON, payloads estructurados y bloques de código sin Markdown ni URLs añadidas.
 - No declares que un archivo, prueba o merge existe si no fue observado remotamente.
+- No declares `PASS` si el subject del commit de merge o squash no contiene el número exacto del PR; mostrale al usuario `MERGE_PR_REFERENCE_MISSING` sin sugerir una reescritura retrospectiva de `main`.
 - No incluyas nombres de proveedor, modelo, aplicación, cliente, conector, actor, producto o plataforma de conversación. No reproduzcas campos legacy `owner`, `executionSource` ni logins del emisor.
 - `runId` y `commandId` son opacos; no derives ni expliques su origen.
 - Un error transitorio aislado no justifica un resultado terminal.

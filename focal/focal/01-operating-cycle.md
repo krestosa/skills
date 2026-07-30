@@ -191,8 +191,14 @@ Un chat que sigue trabajando mientras el issue está `idle` está fuera del prot
 3. Abrí o actualizá una pull request con alcance, motivación, pruebas, riesgos y estado del roadmap.
 4. Inspeccioná checks del head exacto.
 5. Corregí fallos causados por el cambio cuando el tiempo lo permita.
-6. Mergeá autónomamente solo si todos los gates aplicables están aprobados, el head no cambió y no existe bloqueo de revisión.
-7. Si CI continúa o una prueba obligatoria falta, dejá la PR y el checkpoint remotos; no marques el trabajo como completado.
+6. Antes del merge, resolvé el número exacto de la PR, el método de merge y el subject final esperado.
+7. Aplicá `MERGE_TITLE_POLICY`: preferí el título automático de GitHub; si la operación envía `commit_title` o un título personalizado, debe contener el PR exacto mediante `<título de la PR> (#<n>)` para squash o `Merge pull request #<n> from <head>` para merge commit.
+8. No uses rebase merge cuando el resultado no conserve `#<n>` de forma visible en el historial de la rama predeterminada.
+9. Rechazá antes de ejecutar cualquier payload de merge cuyo título personalizado no contenga el número exacto del PR.
+10. Mergeá autónomamente solo si todos los gates aplicables están aprobados, el head no cambió y no existe bloqueo de revisión.
+11. Después del merge, releé la PR, el commit y la rama predeterminada; confirmá `merged == true`, `merge_commit_sha`, el SHA incorporado y que el subject visible contenga `#<n>`.
+12. Si falla esa verificación, clasificá `MERGE_PR_REFERENCE_MISSING`, no reescribas historia publicada y no declares `PASS`; repará el procedimiento de merge para las operaciones siguientes y reportá el defecto factual.
+13. Si CI continúa o una prueba obligatoria falta, dejá la PR y el checkpoint remotos; no marques el trabajo como completado.
 
 ## 10. Fase final obligatoria
 
