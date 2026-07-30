@@ -63,9 +63,27 @@ Los commits de transporte vacíos, no-op o producidos únicamente por una ejecuc
 
 Toda excepción o condición inesperada se procesa mediante `AUTONOMOUS_RECOVERY_LOOP` de `12-autonomous-error-recovery.md`. Un fallo interno no se convierte directamente en `BLOCKED` ni en una consulta al usuario. Se clasifica, diagnostica, repara, valida y reanuda desde el primer gate invalidado. Los fallos no enumerados usan `UNCLASSIFIED_INTERNAL_FAILURE` y generan una unidad diagnóstica autónoma.
 
+## Router de intención obligatorio
+
+Determiná el modo a partir de la acción solicitada **antes de aplicar el gate de `FOCAL_CYCLE`**. No uses la palabra genérica “mantenimiento” como sinónimo de desarrollo.
+
+1. `REPOSITORY_MAINTENANCE`: ejecutar una capacidad administrativa ya existente para eliminar o previsualizar ramas absorbidas por `main`, archivos basura allowlisted o workflows temporales marcados.
+2. `FOCAL_CYCLE`: desarrollar o modificar producto, código, tests, documentación funcional, coordinación o la implementación de un workflow. También aplica cuando el usuario pide explícitamente crear, ampliar, reparar o cambiar la capacidad de mantenimiento.
+3. `SKILLS_MAINTENANCE`: modificar `krestosa/skills` con autorización expresa.
+
+Ejemplos cerrados:
+
+- “borrá las ramas detrás de main”, “eliminá branches mergeadas” o “hacé un dry-run de ramas” → `REPOSITORY_MAINTENANCE`, scope `branches`;
+- “borrá archivos basura” → `REPOSITORY_MAINTENANCE`, scope `garbage`;
+- “retirá workflows temporales” → `REPOSITORY_MAINTENANCE`, scope `temporary_workflows`;
+- “mejorá”, “implementá”, “repará” o “agregá soporte al workflow de mantenimiento” → `FOCAL_CYCLE`;
+- “modificá el prompt canónico” → `SKILLS_MAINTENANCE`.
+
+Una solicitud de **ejecución** administrativa no se transforma en una solicitud de **implementación**. Si la ruta permanente no está disponible, terminá `MAINTENANCE_EXECUTION_PATH_UNAVAILABLE`; no crees una rama, PR, commit o workflow para sustituirla.
+
 ## Gate cero obligatorio de `FOCAL_CYCLE`
 
-Después de cargar íntegramente estas instrucciones, aplicá este gate antes de cualquier análisis del proyecto:
+Este gate se aplica únicamente después de que el router seleccionó `FOCAL_CYCLE`:
 
 1. La **PRIMERA lectura remota de `krestosa/Focal`** debe ser el cuerpo completo del issue `#7`, `[automation-state] Focal execution state`.
 2. Antes de leer roadmap, matriz, árbol, ramas, PRs, commits, checks, workflows o releases, generá el `runId`, resolvé únicamente el SHA de `main` necesario para el comando y ejecutá `inspect` seguido de `acquire` o `recover` según `03-coordination.md` y `13-autonomy-control-plane-v4.md`.
@@ -83,20 +101,21 @@ Después de cargar íntegramente estas instrucciones, aplicá este gate antes de
 9. El comando `release` debe ser la **última mutación de código, archivos, ramas, PRs, merges, documentación, labels, releases y checkpoints**, después de completar todas esas operaciones.
 10. Después de observar `LEASE_RELEASED`, la única mutación permitida es un comando `assert_terminal` para el mismo `runId`. Después de observar `TERMINAL_STATE_CONFIRMED`, solo releé el issue y emití el reporte terminal.
 
-`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un tercer modo de desarrollo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`. El mantenimiento de ramas y archivos basura no forma parte de un ciclo de desarrollo. Solo puede ejecutarse mediante el workflow permanente mientras el issue ya está `idle` y no existe ninguna ejecución autorizada trabajando sobre Focal.
+`COORDINATOR_REPAIR` es una excepción bootstrap acotada, no una lease ni un modo administrativo. La cantidad de lecturas o tool calls no sustituye el tiempo real exigido antes de activarla. Sus mutaciones deben usar exclusivamente el conector de GitHub o GitHub Actions y no pueden dejar commits, merges, workflows ni refs temporales de reparación alcanzables desde `main`.
 
-## Modo de ejecución
+## Modos de ejecución
 
-Determiná un único modo antes de mutar:
+Determiná exactamente uno antes de cualquier mutación:
 
-- `FOCAL_CYCLE`: modo predeterminado cuando la ejecución solicita desarrollar o mantener `krestosa/Focal`.
-- `SKILLS_MAINTENANCE`: únicamente cuando la instrucción actual autoriza expresamente modificar `krestosa/skills`.
+- `REPOSITORY_MAINTENANCE`: ejecución administrativa acotada conforme a `13-autonomy-control-plane-v4.md`; no adquiere lease funcional, no lee roadmap y no crea rama ni PR.
+- `FOCAL_CYCLE`: desarrollo o modificación de `krestosa/Focal`, incluida la reparación o ampliación explícita de capacidades permanentes.
+- `SKILLS_MAINTENANCE`: modificación expresamente autorizada de `krestosa/skills`.
 
-La autorización de un modo no se extiende al otro repositorio ni a terceros. Las reglas específicas están en `02-autonomy-and-scope.md` y `09-skills-maintenance.md`.
+La autorización de un modo no se extiende al otro repositorio ni a terceros. Las reglas específicas están en `02-autonomy-and-scope.md`, `09-skills-maintenance.md` y `13-autonomy-control-plane-v4.md`.
 
 ## Política adaptativa de unidad, granularidad y calidad
 
-El workflow operativo existente se conserva. Antes de seleccionar trabajo, clasificá el paquete de ejecución por riesgo e impacto:
+Esta sección aplica solo a `FOCAL_CYCLE`. Antes de seleccionar trabajo, clasificá el paquete de ejecución por riesgo e impacto:
 
 - `LOW_RISK_BULK`: varias correcciones pequeñas, independientes, reversibles y de bajo riesgo pueden resolverse juntas dentro del mismo ciclo. Cada archivo modificado debe quedar en un commit dedicado de un solo archivo, con validación individual y validación agregada del lote.
 - `HIGH_IMPACT_INCREMENT`: arquitectura, shaders, runtime, compatibilidad, seguridad, datos, CI crítica, migraciones o cambios con intención funcional importante se dividen en incrementos verticales observables, aceptables y mergeables. Sus commits pueden abarcar varios archivos relacionados cuando la atomicidad técnica lo requiera.
@@ -105,16 +124,17 @@ No dividas trabajo por burocracia, archivos preparatorios o documentación de in
 
 Antes de concluir que no hay una unidad ejecutable, completá `WORK_SELECTION_PROOF`: evaluá al menos tres candidatos del roadmap —o todos cuando queden menos—, registrá para cada uno dependencias, resultado observable mínimo, validación, riesgo, presupuesto y código factual de descarte, y descomponé cualquier feature demasiado grande en un incremento vertical utilizable. `NO_VALID_UNIT`, `NO_BOUNDED_INCREMENT`, la complejidad y la incertidumbre temporal son fallos internos de granularidad, no causas terminales.
 
-La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`; y el cierre transaccional en `13-autonomy-control-plane-v4.md`.
+La clasificación detallada está en `01-operating-cycle.md`; la disciplina de Git y calidad en `02-autonomy-and-scope.md`; la representación del roadmap en `04-roadmap.md`; los gates de aceptación y `PARTIAL` en `07-validation-and-acceptance.md`; y el control plane en `13-autonomy-control-plane-v4.md`.
 
 ## Documentos canónicos
 
 | Concepto | Fuente canónica |
 |---|---|
-| Entrada y orden de carga | este archivo |
-| Protocolo de ciclo | `01-operating-cycle.md` |
+| Entrada, carga y router de intención | este archivo |
+| Protocolo de ciclo funcional | `01-operating-cycle.md` |
 | Autonomía y alcance | `02-autonomy-and-scope.md` |
 | Estado y exclusión mutua | `03-coordination.md` y `13-autonomy-control-plane-v4.md` |
+| Mantenimiento administrativo | `13-autonomy-control-plane-v4.md` |
 | Roadmap | `krestosa/Focal:docs/ROADMAP.md` |
 | Capacidades de Iris | `krestosa/Focal:docs/IRIS-CAPABILITY-MATRIX.md` |
 | Requisitos técnicos y gráficos | `06-technical-requirements.md` |
@@ -126,9 +146,19 @@ La clasificación detallada está en `01-operating-cycle.md`; la disciplina de G
 | Control plane transaccional y cierre terminal | `13-autonomy-control-plane-v4.md` |
 | Flowchart integral derivado | `11-process-flowchart.md` |
 
+## Orden global de `REPOSITORY_MAINTENANCE`
+
+1. Clasificar la intención y el scope exacto.
+2. Leer primero el issue `#7` y confirmar `status == idle` y `runId == null`.
+3. Leer el issue administrativo `#101` y verificar el bloque `focal-repository-maintenance:v1`.
+4. Escribir un comando nuevo con `operation: repository_maintenance`, scope y `dryRun` factual.
+5. Esperar el workflow permanente y correlacionar por `lastRepositoryMaintenanceCommandId`.
+6. Verificar que no se crearon ramas, PRs ni workflows y que se respetaron las invariantes del scope.
+7. Emitir el reporte administrativo; no ejecutar roadmap, lease, implementación ni reconciliación funcional.
+
 ## Orden global del ciclo `FOCAL_CYCLE`
 
-1. Carga de instrucciones.
+1. Carga de instrucciones y clasificación del modo.
 2. Primera lectura obligatoria del issue `#7`.
 3. Reloj, identidad opaca, SHA mínimo de `main`, `inspect`, polling real, reenvío acotado, fallback programado y adquisición confirmada; solo ante fallo comprobado, excepción acotada `COORDINATOR_REPAIR`.
 4. Resolución del resto del estado remoto, despacho de errores por `AUTONOMOUS_RECOVERY_LOOP` y reconstrucción desde GitHub.
@@ -147,7 +177,7 @@ No selecciones, inspecciones en profundidad ni implementes trabajo funcional ant
 Cuando exista una incompatibilidad real, aplicá:
 
 1. Seguridad, legalidad, secretos y límites explícitos del usuario.
-2. Modo de ejecución y alcance autorizado.
+2. Router de intención, modo de ejecución y alcance autorizado.
 3. Control plane transaccional, exclusión mutua, propiedad de la lease y cierre terminal de `13-autonomy-control-plane-v4.md`, incluida la excepción bootstrap explícita de `10-coordinator-repair.md` cuando todavía no existe lease.
 4. Condiciones de parada y preservación remota.
 5. Validación y criterios de aceptación.
@@ -160,7 +190,7 @@ La precedencia no debe usarse para conservar contradicciones evitables. Si dos m
 
 ## Condiciones globales de parada
 
-`NO-OP` es una clasificación cerrada. Solo admite `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`. Cualquier otra imposibilidad de seleccionar trabajo entra en `AUTONOMOUS_RECOVERY_LOOP`.
+`NO-OP` de `FOCAL_CYCLE` es una clasificación cerrada. Solo admite `ACTIVE_RUN`, `PROJECT_ALREADY_COMPLETE`, `NO_AUTHORIZED_WORK`, `ALL_REMAINING_WORK_EXTERNALLY_BLOCKED` o `LATE_ACQUIRE_ORPHANED`. Cualquier otra imposibilidad de seleccionar trabajo entra en `AUTONOMOUS_RECOVERY_LOOP`.
 
 Detenete sin iniciar nuevo trabajo cuando:
 
@@ -178,6 +208,6 @@ Detenete sin iniciar nuevo trabajo cuando:
 - todos los ítems restantes dependen de una capacidad externa comprobada y sin fallback autorizado (`ALL_REMAINING_WORK_EXTERNALLY_BLOCKED`);
 - una adquisición tardía debe sanearse sin retomar trabajo retrospectivo (`LATE_ACQUIRE_ORPHANED`).
 
-Una carencia interna implementable en el repositorio autorizado es trabajo, no un bloqueo externo.
+En `REPOSITORY_MAINTENANCE`, una ruta permanente ausente o no invocable produce `MAINTENANCE_EXECUTION_PATH_UNAVAILABLE` y detiene la operación sin crear infraestructura sustituta. Una carencia interna implementable solo se convierte en trabajo cuando el usuario pidió explícitamente implementar o reparar esa capacidad.
 
 Razonamiento: High
