@@ -67,4 +67,4 @@ jobs:
         run: |
           cd ../rewritten
           git remote add export "$EXPORT_URL"
-          git push --force export HEAD:focal-history-export
+          git push --force export HEAD:refs/heads/focal-history-export
