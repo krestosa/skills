@@ -132,8 +132,8 @@
       },
       {
         "path": "prompts/focal/12-autonomous-error-recovery.md",
-        "sha256": "add852f3e639ab974dfc3a4a52094b666cd8f13aa81b03a46a575c33f6fcf9e6",
-        "bytes": 12761
+        "sha256": "9da4e63e67dd79ab8404a29351254b55b5a58c7ceee89b768c224237c1d71d5c",
+        "bytes": 19084
       },
       {
         "path": "prompts/focal/13-autonomy-control-plane-v4.md",
