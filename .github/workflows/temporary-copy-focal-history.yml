@@ -1,5 +1,5 @@
 # focal-temporary-workflow: true
-name: Temporary copy Focal history
+name: Temporary export Focal history
 
 on:
   pull_request:
@@ -8,23 +8,13 @@ on:
       - .github/workflows/temporary-copy-focal-history.yml
 
 permissions:
-  contents: read
-
-env:
-  DEST_TOKEN: ${{ secrets.PROMPTS_REPO_TOKEN || secrets.PROMPTS_TOKEN || secrets.CROSS_REPO_TOKEN || secrets.GITHUB_PAT || secrets.GH_PAT || secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN_PAT || secrets.ADMIN_TOKEN || secrets.REPO_PAT || secrets.GH_TOKEN || secrets.PAT || secrets.REPO_TOKEN }}
+  contents: write
 
 jobs:
-  copy:
+  export:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Require destination token
-        run: |
-          test -n "$DEST_TOKEN" || {
-            echo "No destination token is configured" >&2
-            exit 1
-          }
-
       - name: Checkout source history
         uses: actions/checkout@v4
         with:
@@ -71,10 +61,10 @@ jobs:
           print(f'validated {len(rewritten_rows)} historical commits')
           PY
 
-      - name: Replace private destination history
+      - name: Publish filtered history branch in source repository
         env:
-          DEST_URL: https://x-access-token:${{ env.DEST_TOKEN }}@github.com/krestosa/prompts.git
+          EXPORT_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
         run: |
           cd ../rewritten
-          git remote add destination "$DEST_URL"
-          git push --force destination HEAD:main
+          git remote add export "$EXPORT_URL"
+          git push --force export HEAD:focal-history-export
