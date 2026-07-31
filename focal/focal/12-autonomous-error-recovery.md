@@ -47,6 +47,100 @@ Aplicá en orden y detente en la primera ruta que resuelva con evidencia:
 
 No ejecutes la misma estrategia fallida indefinidamente. Después de dos intentos de reparación con la misma hipótesis causal, reuní evidencia nueva y cambiá de hipótesis o ruta.
 
+## Lectura remota íntegra y paginada
+
+Una respuesta truncada por el límite de salida del conector no demuestra que el archivo remoto sea ilegible y nunca es, por sí sola, causa de `BLOCKED`.
+
+1. Fijá el SHA remoto antes de leer el entrypoint y sus módulos.
+2. Cuando una respuesta resulte truncada, repetí la lectura del mismo archivo mediante rangos explícitos y no superpuestos.
+3. Conservá en memoria efímera de la ejecución cada fragmento junto con su rango, SHA y blob SHA cuando esté disponible.
+4. Continuá hasta verificar la última línea mediante un rango final completo, un rango posterior vacío o metadata autoritativa equivalente.
+5. Antes de interpretar el archivo, comprobá que no existan huecos, solapamientos incompatibles, cambios de SHA ni fragmentos pertenecientes a otra revisión.
+6. Si el SHA cambia durante la carga, descartá todos los fragmentos y reiniciá una sola vez desde el nuevo SHA, conforme al entrypoint.
+7. Solo clasificá `PROMPT_READ_INCOMPLETE` después de agotar paginación, reintentos y rutas de lectura autorizadas, indicando el rango exacto que no pudo obtenerse.
+
+No uses una copia local persistente ni una versión histórica para completar fragmentos faltantes. La paginación debe ejecutarse contra la fuente remota canónica dentro del ciclo actual.
+
+## Mutación determinista de bloques administrados
+
+Que una operación de issue reemplace el cuerpo completo no impide actualizar un bloque administrado cuando el cuerpo puede leerse y verificarse íntegramente.
+
+Para escribir `focal-command:v3`:
+
+1. Leé el cuerpo completo del issue y verificá que exista exactamente un bloque de comando y exactamente un bloque de estado.
+2. Registrá el cuerpo observado, su hash SHA-256 lógico y la versión, timestamp o identificador autoritativo disponible.
+3. Construí el cuerpo candidato sustituyendo únicamente los bytes interiores del bloque `focal-command:v3`; el prefijo y el sufijo deben permanecer idénticos.
+4. Verificá antes de escribir que `focal-state:v3` y todo contenido fuera del bloque de comando sean byte a byte iguales al cuerpo observado.
+5. Releé inmediatamente el issue. Si el cuerpo o su hash cambió, descartá el candidato, reclasificá `COORDINATOR_BODY_RACE` y reiniciá desde la lectura; no escribas sobre una revisión obsoleta.
+6. Si permanece idéntico, enviá el cuerpo completo candidato mediante la operación disponible.
+7. Ejecutá `read-after-write` y confirmá el `commandId`, el contenido exacto fuera del bloque y la correlación posterior del coordinador.
+8. Si el resultado de la mutación es desconocido, no generes otro comando lógico hasta verificar si el comando original quedó publicado.
+
+La ausencia de compare-and-swap nativo se mitiga con este compare-and-swap lógico. Solo es `BLOCKED` cuando la plataforma impide leer o escribir el cuerpo después de agotar fallbacks, no cuando exige enviar el documento completo.
+
+## Taxonomía de continuidad operativa
+
+No uses `BLOCKED` para fallos transitorios o estados recuperables:
+
+- `RETRY`: timeout, truncado, rate limit, respuesta parcial, carrera de hash, polling pendiente o run todavía en curso.
+- `ACTIVE_RUN`: otro `runId` conserva una lease válida o un workflow propietario continúa activo.
+- `PARTIAL`: existe un checkpoint remoto útil, rama o PR recuperable y la tarea puede continuar en el próximo ciclo.
+- `BLOCKED`: falta una capacidad externa indispensable, hay permisos insuficientes persistentes, el prompt es realmente inexistente, vacío o inválido, o la coordinación es irrecuperable después de agotar todas las rutas.
+
+`RETRY` es una transición interna, no un resultado terminal. Debe reanudar la máquina de estados desde el primer gate invalidado mientras exista presupuesto seguro.
+
+## Máquina de estados obligatoria
+
+Cada ciclo funcional sigue esta secuencia y no omite estados por inferencia:
+
+`LOAD_PROMPT → VALIDATE_PROMPT → READ_COORDINATOR → INSPECT → WAIT_INSPECT → ACQUIRE_OR_RECOVER → CONFIRM_OWNERSHIP → LOAD_REMOTE_STATE → SELECT_SCOPE → IMPLEMENT → CHECKPOINT → VALIDATE → PUBLISH_PR → CI → MERGE_OR_PRESERVE → RECONCILE → RELEASE → ASSERT_TERMINAL → REPORT`
+
+Cada estado debe conservar:
+
+- precondición observada;
+- acción autorizada;
+- salida esperada;
+- cantidad de intentos;
+- deadline local;
+- transición de recuperación;
+- evidencia remota producida.
+
+Un estado fallido vuelve al primer gate invalidado mediante `AUTONOMOUS_RECOVERY_LOOP`; no salta directamente a `BLOCKED`.
+
+## Guardas temporales y checkpoints
+
+Al inicio del ciclo calculá y conservá deadlines absolutos:
+
+- `softStop = start + 50 minutos`;
+- `cleanupStart = start + 55 minutos`;
+- `hardStop = start + 58 minutos 30 segundos`.
+
+Después del soft stop no inicies una unidad nueva. Durante cleanup solo se permiten validación final acotada, push, actualización de PR, handoff, reconciliación, `release`, `assert_terminal` y reporte. El hard stop no se extiende por espera de CI, reintentos, sleep o razonamiento.
+
+Todo avance material debe preservarse remotamente en cuanto sea coherente. Si llega cleanup, publicá el checkpoint existente y cerrá `PARTIAL`; no mantengas trabajo relevante únicamente en un workspace efímero.
+
+## Prohibición total de mutar automatizaciones
+
+Una ejecución autónoma no puede crear, duplicar, reprogramar, habilitar, deshabilitar, pausar, reanudar, eliminar ni modificar de ninguna forma tareas programadas o automatizaciones del entorno de conversación.
+
+Esta prohibición aplica incluso cuando la ejecución cree que una automatización repetirá un fallo. La programación solo puede alterarse mediante una solicitud administrativa explícita y separada del usuario, fuera del ciclo autónomo.
+
+## Informe terminal estructurado
+
+Antes de redactar Markdown, construí un registro factual con al menos:
+
+- `result`;
+- `runId`;
+- `leaseOwned`;
+- `initialMainSha` y `finalMainSha`;
+- rama, commits, PRs, runs y merge commit;
+- checkpoint remoto;
+- `lockReleased`;
+- `terminalConfirmed`;
+- código y evidencia de bloqueo cuando aplique.
+
+No afirmes una mutación, validación, merge, release o confirmación que no haya sido observada remotamente. El Markdown terminal es una representación de ese registro, no una reconstrucción narrativa basada en intención.
+
 ## Fallos de selección y granularidad
 
 - `ROADMAP_GRANULARITY_FAILURE`: existen ítems `PENDIENTE`, `EN PROGRESO` o `REVALIDAR`, pero la ejecución no produjo un incremento vertical utilizable. Repará el roadmap, completá `WORK_SELECTION_PROOF` y ejecutá el primer slice.
