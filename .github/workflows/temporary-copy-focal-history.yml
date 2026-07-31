@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  DEST_TOKEN: ${{ secrets.PROMPTS_REPO_TOKEN || secrets.GH_TOKEN || secrets.PAT || secrets.REPO_TOKEN }}
+  DEST_TOKEN: ${{ secrets.PROMPTS_REPO_TOKEN || secrets.PROMPTS_TOKEN || secrets.CROSS_REPO_TOKEN || secrets.GITHUB_PAT || secrets.GH_PAT || secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN_PAT || secrets.ADMIN_TOKEN || secrets.REPO_PAT || secrets.GH_TOKEN || secrets.PAT || secrets.REPO_TOKEN }}
 
 jobs:
   copy:
