@@ -1,0 +1,112 @@
+# focal-temporary-workflow: true
+name: Temporary migrate Focal prompts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/temporary-migrate-focal-prompts.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  DEST_TOKEN: ${{ secrets.PROMPTS_REPO_TOKEN || secrets.GH_TOKEN || secrets.PAT || secrets.REPO_TOKEN }}
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Require destination token
+        run: |
+          test -n "$DEST_TOKEN" || {
+            echo "No cross-repository token found in PROMPTS_REPO_TOKEN, GH_TOKEN, PAT, or REPO_TOKEN" >&2
+            exit 1
+          }
+
+      - name: Clone exact source repository
+        run: |
+          git clone --no-local https://github.com/krestosa/skills.git source
+          cd source
+          git fetch --tags --force
+
+      - name: Validate source prompt stack locally
+        run: |
+          cd source
+          python3 scripts/validate_focal_prompt_stack.py
+
+      - name: Install history filter
+        run: python3 -m pip install --disable-pip-version-check git-filter-repo
+
+      - name: Rewrite complete prompts history under focal
+        run: |
+          cp -a source rewritten
+          cd rewritten
+          git filter-repo --force --path prompts/ --path-rename prompts/:focal/
+          test -f focal/focal-autonomous-development.md
+          test -f focal/focal/01-operating-cycle.md
+          test -z "$(git ls-files | grep -v '^focal/' || true)"
+
+      - name: Validate rewritten content with source repository script
+        run: |
+          cp -a source validation
+          rm -rf validation/prompts
+          mkdir -p validation/prompts
+          cp -a rewritten/focal/. validation/prompts/
+          cd validation
+          python3 scripts/validate_focal_prompt_stack.py
+
+      - name: Verify historical metadata preservation
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+
+          def rows(repo: Path, path: str):
+              out = subprocess.check_output([
+                  'git', '-C', str(repo), 'log', '--reverse',
+                  '--format=%an%x09%ae%x09%aI%x09%cn%x09%ce%x09%cI%x09%s',
+                  '--', path,
+              ], text=True)
+              return out.splitlines()
+
+          source_rows = rows(Path('source'), 'prompts')
+          rewritten_rows = rows(Path('rewritten'), 'focal')
+          if not source_rows or source_rows != rewritten_rows:
+              raise SystemExit('historical author, committer, timestamp, or message mismatch')
+          print(f'validated {len(rewritten_rows)} historical commits')
+          PY
+
+      - name: Force-push rewritten history to private destination
+        env:
+          DEST_URL: https://x-access-token:${{ env.DEST_TOKEN }}@github.com/krestosa/prompts.git
+        run: |
+          cd rewritten
+          git remote add destination "$DEST_URL"
+          git push --force destination HEAD:main
+
+      - name: Verify destination tree and history
+        env:
+          DEST_URL: https://x-access-token:${{ env.DEST_TOKEN }}@github.com/krestosa/prompts.git
+        run: |
+          git clone "$DEST_URL" destination
+          test -f destination/focal/focal-autonomous-development.md
+          test -f destination/focal/focal/13-autonomy-control-plane-v4.md
+          test -z "$(git -C destination ls-files | grep -v '^focal/' || true)"
+          test "$(git -C rewritten rev-list --count HEAD)" = "$(git -C destination rev-list --count HEAD)"
+          test "$(git -C rewritten rev-parse HEAD^{tree})" = "$(git -C destination rev-parse HEAD^{tree})"
+
+      - name: Remove source prompts and temporary workflow
+        run: |
+          cd source
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git rm -r prompts
+          git rm .github/workflows/temporary-migrate-focal-prompts.yml
+          git commit -m "Move Focal prompts to private prompts repository"
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
